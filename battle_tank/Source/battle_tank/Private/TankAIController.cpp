@@ -7,43 +7,25 @@ void ATankAIController::BeginPlay()
 
     Super::BeginPlay();
 
-    //get_controlled_tank must return a Tank pointer.
-    ATank *controlled_tank = get_controlled_tank();
-    if (controlled_tank)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("AIController is possessing a Tank : %s"), *(controlled_tank->GetName()));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("AIController not possess any Tank"));
-    }
-
-    ATank *player_tank = get_player_tank();
-    if (player_tank)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("AIController finds a player's Tank : %s"), *(player_tank->GetName()));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("AIController finds no Tank"));
-    }
-
-
+    //GET TANK
+    tank_controlled = _get_controlled_tank();
+    tank_of_player = _get_player_tank();
 }
 
-void ATankAIController::Tick(float DeltaTime) {
+void ATankAIController::Tick(float DeltaTime)
+{
     Super::Tick(DeltaTime);
     // UE_LOG(LogTemp, Warning, TEXT("Ticking"));
+    _aiming();
 }
 
-
 //return a Tank pointer
-ATank *ATankAIController::get_controlled_tank() const
+ATank *ATankAIController::_get_controlled_tank() const
 {
     return Cast<ATank>(GetPawn());
 }
 
-ATank *ATankAIController::get_player_tank() const
+ATank *ATankAIController::_get_player_tank() const
 {
 
     return Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn());
@@ -60,4 +42,18 @@ ATank *ATankAIController::get_player_tank() const
     // {
     //     return nullptr;
     // }
+}
+
+void ATankAIController::_aiming() const
+{
+    if (tank_controlled != nullptr && tank_of_player != nullptr)
+    {
+        //aiming at player's tank
+        tank_controlled->_aiming_at(tank_of_player->GetActorLocation());
+        return;
+    }
+    else
+    {
+        return;
+    }
 }

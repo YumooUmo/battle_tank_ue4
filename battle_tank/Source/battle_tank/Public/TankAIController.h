@@ -19,12 +19,13 @@ class BATTLE_TANK_API ATankAIController : public AAIController
 private:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
+	
+	ATank *tank_controlled = nullptr;
+	ATank *tank_of_player = nullptr;
 
+	virtual ATank *_get_controlled_tank() const;
 
-	virtual ATank *get_controlled_tank() const;
+	virtual ATank *_get_player_tank() const;
 
-
-
-	virtual ATank* get_player_tank() const;
-
+	void _aiming() const;
 };

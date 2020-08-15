@@ -19,8 +19,13 @@ private:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 
+	virtual ATank *_get_controlled_tank() const;
+	void _aiming() const;
+	bool _get_screen_aiming_vector(FVector &vector_screen_aiming) const;
 
-	virtual ATank *get_controlled_tank() const;
-	void _aimming_at();
+	UPROPERTY(VisibleAnywhere)
+	float aiming_range = 500000.f;
 
+	ATank *tank_controlled = nullptr;
+	
 };
