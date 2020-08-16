@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "AimingComponent.h"
 #include "Tank.generated.h"
 
 UCLASS()
@@ -15,13 +16,18 @@ public:
 	// Sets default values for this pawn's properties
 	ATank();
 
-	virtual void _aiming_at(FVector aiming_vector);
+	virtual void _aiming_at(FVector aiming_vector) const;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UAimingComponent *aiming_component = nullptr;
+
 private:
+	UFUNCTION(BlueprintCallable, Category = setup)
+	virtual void _set_barrel_reference(UStaticMeshComponent *barrel_to_set);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
