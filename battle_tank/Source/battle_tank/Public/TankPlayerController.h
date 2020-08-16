@@ -21,7 +21,9 @@ private:
 
 	virtual ATank *_get_controlled_tank() const;
 	void _aiming() const;
-	bool _get_screen_aiming_vector(FVector &vector_screen_aiming) const;
+	bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
+
+	void _draw_projectile_path();											//---------------####   Projectile Path
 
 	UPROPERTY(VisibleAnywhere)
 	float aiming_range = 500000.f;

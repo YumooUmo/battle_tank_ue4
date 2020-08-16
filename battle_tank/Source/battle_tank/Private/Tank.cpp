@@ -29,11 +29,19 @@ void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ATank::_aiming_at(FVector aiming_vector) const
+//set barrel reference
+void ATank::_set_barrel_reference(UStaticMeshComponent *barrel_to_set)
 {
-	aiming_component->_aiming_at(aiming_vector);
+	aiming_component->_set_barrel_reference(barrel_to_set);
+};
+
+
+
+void ATank::_aiming_at(FVector aiming_location) const
+{
+	aiming_component->_aiming_at(aiming_location);
 }
 
-void ATank::_set_barrel_reference(UStaticMeshComponent *barrel_to_set){
-	aiming_component->_set_barrel_reference(barrel_to_set);
+void ATank::_draw_projectile_path() const{
+	aiming_component->_draw_projectile_path(launch_speed);
 }

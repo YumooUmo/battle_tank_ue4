@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AimingComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UAimingComponent::UAimingComponent()
@@ -28,14 +30,72 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-//set barrel reference
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//Set Barrel Reference
 void UAimingComponent::_set_barrel_reference(UStaticMeshComponent *barrel_to_set)
 {
 	barrel = barrel_to_set;
 };
 
-//aiming at
-void UAimingComponent::_aiming_at(FVector aiming_vector)
+//Normal aiming_vector : aiming_location - barrel launch point
+void UAimingComponent::_aiming_at(FVector aiming_location)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s Is Aiming At : %s"), *(GetOwner()->GetName()), *(aiming_vector.ToString()));
+	aiming_normal = (aiming_location - barrel->GetSocketLocation(FName(TEXT("launch_socket")))).GetSafeNormal();
+
+	//--------------------------------------------------------------------------------Debug
+	UE_LOG(LogTemp, Warning, TEXT("Aiming location is : %s"), *(aiming_location.ToString()));
 };
+
+void UAimingComponent::_draw_projectile_path(float launch_speed)
+{
+	//Initiallize Parameters to _predict path method()
+	FPredictProjectilePathParams PredictParams{
+		10.f,													 //CollisionRadius
+		barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
+		aiming_normal * launch_speed,							 //-----------------#### get barrel aiming velocity : launch_velocity
+		3.0f,													 //MaxSimTime
+		ECollisionChannel::ECC_Visibility,
+		nullptr};
+
+	//Initiallize Result Struct to _predict path method()
+	FPredictProjectilePathResult PredictResult;
+
+	if (UGameplayStatics::PredictProjectilePath(
+			this,
+			PredictParams,
+			PredictResult))
+	{
+		//----####有效射程	in MaxSimTime
+		//获得第一个击中点
+		//---------------------------------------------------------Debug
+		DrawDebugLine(
+			GetWorld(),
+			barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
+			PredictResult.HitResult.Location,
+			FColor::Blue,
+			false,
+			0.0f,
+			0.0f,
+			100.0f);
+	}else{
+		//-----####有效射程外 out of MaxSimTime
+		DrawDebugLine(
+			GetWorld(),
+			barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
+			PredictResult.LastTraceDestination.Location,
+			FColor::Blue,
+			false,
+			0.0f,
+			0.0f,
+			100.0f);
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Hit Result is : %s"), *(PredictResult.HitResult.Location.ToString()));
+	UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
+	UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
+}
+
+void UAimingComponent::_launch()
+{
+}
