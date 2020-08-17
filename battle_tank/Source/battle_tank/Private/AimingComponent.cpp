@@ -5,13 +5,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Tank.h"
 #include "TankBarrel.h"
+#include "TankTurrent.h"
 
 // Sets default values for this component's properties
 UAimingComponent::UAimingComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 	// ...
 }
 
@@ -29,14 +30,6 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-	if (aiming_normal != owner->barrel->_get_launch_normal())
-	{
-		_move_turrent_barrel();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Elevation stop"));
-	}
 }
 
 //-----------------------------------------------------------private-------------------------------------------------------------------------------
@@ -51,8 +44,15 @@ void UAimingComponent::_aiming_at(FVector aiming_location)
 {
 	aiming_normal = (aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal();
 	//Elevate Barrel
-
 	//Rotate Turrent
+	if (aiming_normal != owner->barrel->_get_launch_normal())
+	{
+		_move_turrent_barrel();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Elevation stop"));
+	}
 };
 
 void UAimingComponent::_draw_projectile_path()
@@ -103,17 +103,42 @@ void UAimingComponent::_draw_projectile_path()
 			0.0f,
 			100.0f);
 	}
-	//------------------------------------Debug
-	UE_LOG(LogTemp, Error, TEXT("Hit Result is : %s"), *(PredictResult.HitResult.Location.ToString()));
-	UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
-	UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
+	// //------------------------------------Debug
+	// UE_LOG(LogTemp, Error, TEXT("Hit Result is : %s"), *(PredictResult.HitResult.Location.ToString()));
+	// UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
+	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
 void UAimingComponent::_move_turrent_barrel()
 {
 	//Caculate rotation speed : by using ----   aiming_normal & launch velocity
 	FRotator delta_rotator = aiming_normal.Rotation() - owner->barrel->_get_launch_normal().Rotation();
+	UE_LOG(LogTemp, Warning, TEXT("------------------------------------------------------------------------------"));
+	UE_LOG(LogTemp, Warning, TEXT("Aiming is : %f"), aiming_normal.Rotation().Yaw);
+	// // UE_LOG(LogTemp, Error, TEXT("------------------------------------------------------------------------------"));
+	UE_LOG(LogTemp, Warning, TEXT("Launch is : %f"), owner->barrel->_get_launch_normal().Rotation().Yaw);
+	UE_LOG(LogTemp, Warning, TEXT("Delta_Rotator is : %s"), *(delta_rotator.ToString()));
+	// UE_LOG(LogTemp, Error, TEXT("------------------------------------------------------------------------------"));
 
-	//call _elevate_barrel   and   _rotate_turrent
-	owner->barrel->_elevate_barrel(delta_rotator.Pitch);
+	//call _elevate_barrel
+	if (delta_rotator.Pitch > 0.01f || delta_rotator.Pitch < -0.01f)
+	{
+		owner->barrel->_elevate_barrel(delta_rotator.Pitch);
+	}
+
+	//####-------------------------Format Yaw change direction, from -170 -> 170, move direction and amount is +340 , but ACTUALLY should be -20.------------------------------------
+	if (delta_rotator.Yaw > 180.f)
+	{
+		delta_rotator.Yaw = delta_rotator.Yaw - 360.f;
+	}
+	if (delta_rotator.Yaw < -180.f)
+	{
+		delta_rotator.Yaw = delta_rotator.Yaw + 360.f;
+	}
+	//call   _rotate_turrent
+	if (delta_rotator.Yaw > 0.01f || delta_rotator.Yaw < -0.01f)
+	{
+
+		owner->turrent->_rotate_turrent(delta_rotator.Yaw);
+	}
 };

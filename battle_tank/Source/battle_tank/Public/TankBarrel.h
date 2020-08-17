@@ -25,15 +25,15 @@ public:
 	virtual FVector _get_launch_normal() const;
 
 	//Elevate to Aiming velocity
-	virtual bool _elevate_barrel(float relative_speed);
+	virtual void _elevate_barrel(float relative_speed);
 
 private:
 	UPROPERTY(EditAnywhere, Category = Setup)
-	float _max_elevate_speed = 20.f;
+	float _max_elevate_speed = 40.f;
 
 	UPROPERTY(EditAnywhere, Category = Setup)
 	float _max_elevate_angle = 40.f;
 
 	UPROPERTY(EditAnywhere, Category = Setup)
-	float _min_elevate_angle = -10.f;
+	float _min_elevate_angle = -20.f;
 };

@@ -3,6 +3,7 @@
 #include "Tank.h"
 #include "AimingComponent.h"
 #include "TankBarrel.h"
+#include "TankTurrent.h"
 
 // Sets default values
 ATank::ATank()
@@ -12,6 +13,7 @@ ATank::ATank()
 
 	aiming_component = CreateDefaultSubobject<UAimingComponent>(FName(TEXT("aiming_component")));
 	aiming_component->_set_owner(this);
+
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +38,12 @@ void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 void ATank::_set_barrel_reference(UTankBarrel *barrel_to_set)
 {
 	barrel = barrel_to_set;
+};
+
+//Set Turrent Reference
+void ATank::_set_turrent_reference(UTankTurrent *turrent_to_set)
+{
+	turrent = turrent_to_set;
 };
 //------------------------------------------------------public----------------------------------------------------------
 //Get Launch Speed

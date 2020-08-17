@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+//last generate
 #include "Tank.generated.h"
 
 class UTankBarrel;
+class UTankTurrent;
 class UAimingComponent;
 
 UCLASS()
@@ -19,6 +21,7 @@ public:
 	ATank();
 
 	UTankBarrel *barrel = nullptr;
+	UTankTurrent *turrent = nullptr;
 	UAimingComponent *aiming_component = nullptr;
 
 	virtual float _get_launch_speed() const;
@@ -41,4 +44,8 @@ private:
 	//set barrel
 	UFUNCTION(BlueprintCallable, Category = setup)
 	virtual void _set_barrel_reference(UTankBarrel *barrel_to_set);
+
+	//set turrent
+	UFUNCTION(BlueprintCallable, Category = setup)
+	virtual void _set_turrent_reference(UTankTurrent *turrent_to_set);
 };
