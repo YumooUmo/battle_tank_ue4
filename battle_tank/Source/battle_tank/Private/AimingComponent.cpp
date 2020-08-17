@@ -3,6 +3,7 @@
 #include "AimingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tank.h"
 
 // Sets default values for this component's properties
 UAimingComponent::UAimingComponent()
@@ -31,17 +32,15 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//Set Barrel Reference
-void UAimingComponent::_set_barrel_reference(UStaticMeshComponent *barrel_to_set)
-{
-	barrel = barrel_to_set;
+void UAimingComponent::_set_owner(ATank *owenr_tank){
+	owner = owenr_tank;
 };
+
 
 //Normal aiming_vector : aiming_location - barrel launch point
 void UAimingComponent::_aiming_at(FVector aiming_location)
 {
-	aiming_normal = (aiming_location - barrel->GetSocketLocation(FName(TEXT("launch_socket")))).GetSafeNormal();
+	aiming_normal = (aiming_location - owner->barrel->GetSocketLocation(FName(TEXT("launch_socket")))).GetSafeNormal();
 
 	//--------------------------------------------------------------------------------Debug
 	UE_LOG(LogTemp, Warning, TEXT("Aiming location is : %s"), *(aiming_location.ToString()));
@@ -52,12 +51,14 @@ void UAimingComponent::_draw_projectile_path(float launch_speed)
 	//Initiallize Parameters to _predict path method()
 	FPredictProjectilePathParams PredictParams{
 		10.f,													 //CollisionRadius
-		barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
-		aiming_normal * launch_speed,							 //-----------------#### get barrel aiming velocity : launch_velocity
+		owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
+		aiming_normal * launch_speed,							 //-----------------#### get owner->barrel aiming velocity : launch_velocity
 		3.0f,													 //MaxSimTime
 		ECollisionChannel::ECC_Visibility,
 		nullptr};
-
+	PredictParams.ActorsToIgnore.Add(owner);
+	PredictParams.OverrideGravityZ = -5000.f;
+	
 	//Initiallize Result Struct to _predict path method()
 	FPredictProjectilePathResult PredictResult;
 
@@ -71,7 +72,7 @@ void UAimingComponent::_draw_projectile_path(float launch_speed)
 		//---------------------------------------------------------Debug
 		DrawDebugLine(
 			GetWorld(),
-			barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
+			owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
 			PredictResult.HitResult.Location,
 			FColor::Blue,
 			false,
@@ -82,7 +83,7 @@ void UAimingComponent::_draw_projectile_path(float launch_speed)
 		//-----####有效射程外 out of MaxSimTime
 		DrawDebugLine(
 			GetWorld(),
-			barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
+			owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))), //start location
 			PredictResult.LastTraceDestination.Location,
 			FColor::Blue,
 			false,
@@ -93,7 +94,7 @@ void UAimingComponent::_draw_projectile_path(float launch_speed)
 
 	UE_LOG(LogTemp, Error, TEXT("Hit Result is : %s"), *(PredictResult.HitResult.Location.ToString()));
 	UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
-	UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
+	UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
 void UAimingComponent::_launch()

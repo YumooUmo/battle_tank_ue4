@@ -16,6 +16,8 @@ public:
 	// Sets default values for this pawn's properties
 	ATank();
 
+	UStaticMeshComponent *barrel = nullptr;
+
 	virtual void _aiming_at(FVector aiming_location) const;
 	virtual void _draw_projectile_path() const;
 
