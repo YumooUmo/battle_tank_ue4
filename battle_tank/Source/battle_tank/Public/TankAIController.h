@@ -5,8 +5,10 @@
 // #include "battle_tank.h"
 #include "AIController.h"
 #include "CoreMinimal.h"
-#include "Tank.h"
+//last generate
 #include "TankAIController.generated.h"
+
+class ATank;
 
 /**
  * 

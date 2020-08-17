@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankAIController.h"
+#include "Tank.h"
+#include "AimingComponent.h"
 
 void ATankAIController::BeginPlay()
 {
@@ -49,7 +51,7 @@ void ATankAIController::_aiming() const
     if (tank_controlled != nullptr && tank_of_player != nullptr)
     {
         //aiming at player's tank
-        tank_controlled->_aiming_at(tank_of_player->GetActorLocation());
+        tank_controlled->aiming_component->_aiming_at(tank_of_player->GetActorLocation());
         return;
     }
     else

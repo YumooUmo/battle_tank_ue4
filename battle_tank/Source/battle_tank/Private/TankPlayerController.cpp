@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
-#include "DrawDebugHelpers.h"
+#include "Tank.h"
+#include "AimingComponent.h"
 
 void ATankPlayerController::BeginPlay()
 {
-
     Super::BeginPlay();
     //get possessed tank
     tank_controlled = _get_controlled_tank();
@@ -32,7 +32,7 @@ void ATankPlayerController::_aiming() const
         //Get where we aimming at
         FVector aiming_location{0.f, 0.f, 0.f};
         _get_screen_aiming_location(aiming_location);
-        tank_controlled->_aiming_at(aiming_location);
+        tank_controlled->aiming_component-> _aiming_at(aiming_location);
         return;
     }
     else
@@ -56,12 +56,6 @@ bool ATankPlayerController::_get_screen_aiming_location(FVector &aiming_location
         aiming_direction);
     aiming_direction = aiming_direction * aiming_range;
 
-    // //----------------------------------------------------------Debug
-    // UE_LOG(LogTemp, Warning, TEXT("Camera Location is : %s"), *(camera_location.ToString()));
-    // UE_LOG(LogTemp, Warning, TEXT("Out Location is : %s"), *(out_location.ToString()));
-    // //----------------------------------------------------------------
-
-    //Get Hit Point : Line trace single by channel, in hit_result.
     if (GetWorld()->LineTraceSingleByChannel(
             hit_result,
             camera_location,
@@ -69,20 +63,7 @@ bool ATankPlayerController::_get_screen_aiming_location(FVector &aiming_location
             ECollisionChannel::ECC_Visibility))
     {
 
-        aiming_location = hit_result.Location; // should be barrel launch piont-----Not here
-
-        // //---------------------------------------------Debug
-        // UE_LOG(LogTemp, Error, TEXT("Tank Location is : %s"), *(tank_controlled->GetActorLocation().ToString()));
-        // DrawDebugLine(
-        //     GetWorld(),
-        //     tank_controlled->GetActorLocation(), // should be barrel launch piont-----Not here
-        //     aiming_location,
-        //     FColor::Blue,
-        //     false,
-        //     0.0f,
-        //     0.0f,
-        //     20.0f);
-        // //----------------------------------------------------
+        aiming_location = hit_result.Location; 
 
         return true;
     }
@@ -95,5 +76,5 @@ bool ATankPlayerController::_get_screen_aiming_location(FVector &aiming_location
 
 void ATankPlayerController::_draw_projectile_path()
 {
-    tank_controlled->_draw_projectile_path();
+    tank_controlled->aiming_component->_draw_projectile_path();
 }

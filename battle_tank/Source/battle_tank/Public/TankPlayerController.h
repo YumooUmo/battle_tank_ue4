@@ -4,8 +4,10 @@
 // #include "battle_tank.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Tank.h"
+//last generate
 #include "TankPlayerController.generated.h"
+
+class ATank;
 
 /**
  * 

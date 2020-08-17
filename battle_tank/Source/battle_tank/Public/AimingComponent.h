@@ -4,6 +4,7 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+//last generate
 #include "AimingComponent.generated.h"
 
 class ATank;
@@ -18,20 +19,19 @@ public:
 	UAimingComponent();
 	virtual void BeginPlay() override;
 	virtual void _set_owner(ATank *owenr_tank);
-	virtual void _aiming_at(FVector aiming_location);
 
-	virtual void _draw_projectile_path(float launch_speed);
-	virtual void _launch();
+	virtual void _aiming_at(FVector aiming_location);
+	virtual void _draw_projectile_path();
 
 protected:
 	// Called when the game starts
 
 private:
 	ATank *owner;
-
-	FVector launch_velocity{0}; //####get from barrel aiming
 	FVector aiming_normal{0};
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+
+	virtual void _move_turrent_barrel();
 };
