@@ -28,13 +28,6 @@ void ATankProjectile::Tick(float DeltaTime)
 }
 
 //------------------------------------------------------public-----------------------------------------------------------------
-//Get Launch Speed
-float ATankProjectile::_get_launch_speed() const
-{
-
-	return launch_speed;
-}
-
 //Launch
 void ATankProjectile::_launch()
 {

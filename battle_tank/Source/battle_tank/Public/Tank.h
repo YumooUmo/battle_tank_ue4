@@ -56,10 +56,9 @@ private:
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
 	//---------------------------------------SETUP--------------------------------------------------------
-	// #### Reload Property ####
+	// ####  Reload Property ---- start with RELOADING  ####
 	bool reloaded = true ; 
-	float start_reload_time = -60.f;
-	float reload_time = 3.f;
+	float start_reload_time = 0.f;
 
 	//SET barrel
 	UFUNCTION(BlueprintCallable, Category = setup)
@@ -70,6 +69,9 @@ private:
 	virtual void _set_turrent_reference(UTankTurrent *turrent_to_set);
 
 	//----------------#### Add Projectile Type
+	//Current Projectile
+	virtual TSubclassOf<ATankProjectile> _get_current_projectile();
+
 	//SET projectile_1
 	UPROPERTY(EditAnywhere, Category = setup)
 	TSubclassOf<ATankProjectile> tank_projectile_0 = nullptr;

@@ -22,7 +22,7 @@ private:
 	void Tick(float DeltaTime) override;
 	//-------------------------------Property-------------------------
 	UPROPERTY(VisibleAnywhere)
-	float aiming_range = 500000.f;
+	float aiming_range = 100000.f;
 	ATank *tank_controlled = nullptr;
 
 	//-------------------------------TICK--------------------------------

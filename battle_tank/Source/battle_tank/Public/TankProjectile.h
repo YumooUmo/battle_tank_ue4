@@ -24,9 +24,14 @@ public:
 
 	//SET MovementComponent
 	UProjectileMovementComponent *projectile_movement_component = nullptr;
-	
-	//Get launch_speed
-	virtual float _get_launch_speed() const;
+
+	//Reload time
+	UPROPERTY(EditAnywhere, Category = Setup)
+	float reload_time = 2.f;
+
+	//launch_speed
+	UPROPERTY(EditAnywhere, Category = Setup)
+	float launch_speed = 100000.f;
 
 	//Launch
 	virtual void _launch();
@@ -36,6 +41,4 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditAnywhere)
-	float launch_speed = 100000.f;
 };

@@ -47,94 +47,109 @@ void ATank::_set_turrent_reference(UTankTurrent *turrent_to_set)
 	turrent = turrent_to_set;
 };
 
-//------------------------------------------------------public----------------------------------------------------------
-//SET projectile number
-void ATank::_set_projectile_number(int number)
+//GET Current Projectile
+TSubclassOf<ATankProjectile> ATank::_get_current_projectile()
 {
-	//Add check : if projectile exists (is set already) ? 	------------------TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-	switch (number)
+	switch (projectile_number % 10)
 	{
 	case 0:
 		if (tank_projectile_0)
 		{
-			projectile_number = (projectile_number % 10) * 10 + number;
+			return tank_projectile_0;
+		}
+		else
+		{
+			return nullptr;
 		}
 		break;
 	case 1:
 		if (tank_projectile_1)
 		{
-			projectile_number = (projectile_number % 10) * 10 + number;
+			return tank_projectile_1;
+		}
+		else
+		{
+			return nullptr;
 		}
 		break;
 	default:
+		return nullptr;
 		break;
+	}
+};
+
+//------------------------------------------------------public----------------------------------------------------------  TODO : Refactor switch to Template
+//SET projectile number---------------------------------------------####   TODO : Refactor switch to Template
+//Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+void ATank::_set_projectile_number(int number)
+{
+	if (projectile_number % 10 != number)
+	{
+		//Add check : if projectile exists (is set already) ? 	------------------TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+		switch (number)
+		{
+		case 0:
+			if (tank_projectile_0)
+			{
+				projectile_number = (projectile_number % 10) * 10 + number;
+				reloaded = false;
+				_reload();
+			}
+
+			break;
+		case 1:
+			if (tank_projectile_1)
+			{
+				projectile_number = (projectile_number % 10) * 10 + number;
+				reloaded = false;
+				_reload();
+			}
+			break;
+		default:
+			break;
+		}
 	}
 };
 
 //SET exchange weapon
 void ATank::_exchange_projectile()
 {
-	projectile_number = (((projectile_number % 10) * 10) + (projectile_number / 10));
+	if (projectile_number != 0)
+	{
+		projectile_number = (((projectile_number % 10) * 10) + (projectile_number / 10));
+		reloaded = false;
+		_reload();
+	}
 };
 
-//Get Launch Speed
-float ATank::_get_launch_speed() //---------	TODO ------------Refact : using Template to get differen projectile speed
+//Get Current Projectile's Launch Speed
+float ATank::_get_launch_speed()
 {
-	switch (projectile_number % 10)
-	{
-	case 0:
-		/* code */
-		return tank_projectile_0.GetDefaultObject()->_get_launch_speed(); // Here is the point
-		break;
-	case 1:
-		/* code */
-		return tank_projectile_1.GetDefaultObject()->_get_launch_speed(); // Here is the point
-		break;
-
-	default:
-		return 0.f;
-		break;
-	}
+	return _get_current_projectile().GetDefaultObject()->launch_speed; // Here is the point
 }
 
 //Launch()
 void ATank::_fire()
 {
-	if (barrel && (FPlatformTime::Seconds() - start_reload_time) > reload_time && reloaded == true)
+	if (barrel && (FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == true)
 	{
 		reloaded = false;
-		switch (projectile_number % 10)
-		{
-		case 0:
-			GetWorld()->SpawnActor<ATankProjectile>(
-						  tank_projectile_0,
-						  barrel->_get_launch_location(),
-						  barrel->_get_launch_normal().Rotation())
-				->_launch();
-			break;
-		case 1:
-			GetWorld()->SpawnActor<ATankProjectile>(
-						  tank_projectile_1,
-						  barrel->_get_launch_location(),
-						  barrel->_get_launch_normal().Rotation())
-				->_launch();
-			break;
-		default:
-			break;
-		}
+		GetWorld()->SpawnActor<ATankProjectile>(
+					  _get_current_projectile(),
+					  barrel->_get_launch_location(),
+					  barrel->_get_launch_normal().Rotation())
+			->_launch();
 	}
-
 };
 
 //Reload
 void ATank::_reload()
 {
-	if ((FPlatformTime::Seconds() - start_reload_time) > reload_time && reloaded == false)
+	if ((FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == false)
 	{
 		start_reload_time = FPlatformTime::Seconds();
 		reloaded = true;
-	UE_LOG(LogTemp, Warning, TEXT("Reloading ~!"));
-
+		UE_LOG(LogTemp, Warning, TEXT("Reloading ~!"));
 	}
 	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
 };
