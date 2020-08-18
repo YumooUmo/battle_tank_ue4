@@ -2,8 +2,8 @@
 
 #include "TankPlayerController.h"
 //FIRST include
-#include "Tank.h"
 #include "AimingComponent.h"
+#include "Tank.h"
 
 void ATankPlayerController::BeginPlay()
 {
@@ -20,12 +20,7 @@ void ATankPlayerController::Tick(float DeltaTime)
     _draw_projectile_path();
 }
 
-//return a Tank pointer
-ATank *ATankPlayerController::_get_controlled_tank() const
-{
-    return Cast<ATank>(GetPawn());
-}
-
+//-----------------------------Tick----------------------------------------------
 void ATankPlayerController::_aiming() const
 {
     if (tank_controlled != nullptr)
@@ -33,7 +28,7 @@ void ATankPlayerController::_aiming() const
         //Get where we aimming at
         FVector aiming_location{0.f, 0.f, 0.f};
         _get_screen_aiming_location(aiming_location);
-        tank_controlled->aiming_component-> _aiming_at(aiming_location);
+        tank_controlled->aiming_component->_aiming_at(aiming_location);
         return;
     }
     else
@@ -42,6 +37,8 @@ void ATankPlayerController::_aiming() const
     }
 };
 
+//-----------------------------GET------------------------------------------------
+//Aiming Location
 bool ATankPlayerController::_get_screen_aiming_location(FVector &aiming_location) const
 {
     //-----
@@ -64,7 +61,7 @@ bool ATankPlayerController::_get_screen_aiming_location(FVector &aiming_location
             ECollisionChannel::ECC_Visibility))
     {
 
-        aiming_location = hit_result.Location; 
+        aiming_location = hit_result.Location;
 
         return true;
     }
@@ -74,8 +71,39 @@ bool ATankPlayerController::_get_screen_aiming_location(FVector &aiming_location
         return false;
     }
 }
+//return a Tank pointer
+ATank *ATankPlayerController::_get_controlled_tank() const
+{
+    return Cast<ATank>(GetPawn());
+}
 
+//-----------------------------PLAY------------------------------------------
+//Draw Projectile Path
 void ATankPlayerController::_draw_projectile_path()
 {
     tank_controlled->aiming_component->_draw_projectile_path();
 }
+
+//SET weapon number : Change Weapon , projectile number
+void ATankPlayerController::_set_projectile_number(int projectile_number)
+{
+    tank_controlled->_set_projectile_number(projectile_number);
+};
+
+//SET exchange weapon
+void ATankPlayerController::_exchange_projectile()
+{
+    tank_controlled->_exchange_projectile();
+};
+
+//Fire()
+void ATankPlayerController::_fire() //---------	TODO ------------Refact : using Template to Fire with differen projectile number
+{
+    tank_controlled->_fire();
+};
+
+//Reload
+void ATankPlayerController::_reload()
+{
+    tank_controlled->_reload();
+};

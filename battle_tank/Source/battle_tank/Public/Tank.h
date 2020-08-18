@@ -30,25 +30,23 @@ public:
 	int projectile_number = 0;					
 	
 	//GET Launch speed
-	virtual float _get_launch_speed();			//----------- TODO ----------- using template get a projectile class, and return launch_speed of the certain projectile.
+	virtual float _get_launch_speed();
 	
 	//SET weapon number
-	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _set_projectile_number(int projectile_number);
 
 	//SET exchange projectile
-	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _exchange_projectile();
 
 	//Fire
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _fire();								//---------- TODO --------------fire a certain projectile
+	virtual void _fire();
+
+	//Reload
+	virtual void _reload();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-
 
 private:
 	// Called every frame
@@ -56,6 +54,12 @@ private:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
+
+	//---------------------------------------SETUP--------------------------------------------------------
+	// #### Reload Property ####
+	bool reloaded = true ; 
+	float start_reload_time = -60.f;
+	float reload_time = 3.f;
 
 	//SET barrel
 	UFUNCTION(BlueprintCallable, Category = setup)
@@ -65,7 +69,7 @@ private:
 	UFUNCTION(BlueprintCallable, Category = setup)
 	virtual void _set_turrent_reference(UTankTurrent *turrent_to_set);
 
-	//-------------------------------------------------Add Projectile Type-------------------------------------------------------
+	//----------------#### Add Projectile Type
 	//SET projectile_1
 	UPROPERTY(EditAnywhere, Category = setup)
 	TSubclassOf<ATankProjectile> tank_projectile_0 = nullptr;

@@ -74,8 +74,6 @@ void ATank::_set_projectile_number(int number)
 //SET exchange weapon
 void ATank::_exchange_projectile()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Projectile is : %i"), projectile_number);
-
 	projectile_number = (((projectile_number % 10) * 10) + (projectile_number / 10));
 };
 
@@ -100,30 +98,43 @@ float ATank::_get_launch_speed() //---------	TODO ------------Refact : using Tem
 }
 
 //Launch()
-void ATank::_fire() //---------	TODO ------------Refact : using Template to Fire with differen projectile number
+void ATank::_fire()
 {
-	if (!barrel)
+	if (barrel && (FPlatformTime::Seconds() - start_reload_time) > reload_time && reloaded == true)
 	{
-		return;
+		reloaded = false;
+		switch (projectile_number % 10)
+		{
+		case 0:
+			GetWorld()->SpawnActor<ATankProjectile>(
+						  tank_projectile_0,
+						  barrel->_get_launch_location(),
+						  barrel->_get_launch_normal().Rotation())
+				->_launch();
+			break;
+		case 1:
+			GetWorld()->SpawnActor<ATankProjectile>(
+						  tank_projectile_1,
+						  barrel->_get_launch_location(),
+						  barrel->_get_launch_normal().Rotation())
+				->_launch();
+			break;
+		default:
+			break;
+		}
 	}
 
-	switch (projectile_number % 10)
+};
+
+//Reload
+void ATank::_reload()
+{
+	if ((FPlatformTime::Seconds() - start_reload_time) > reload_time && reloaded == false)
 	{
-	case 0:
-		GetWorld()->SpawnActor<ATankProjectile>(
-					  tank_projectile_0,
-					  barrel->_get_launch_location(),
-					  barrel->_get_launch_normal().Rotation())
-			->_launch();
-		break;
-	case 1:
-		GetWorld()->SpawnActor<ATankProjectile>(
-					  tank_projectile_1,
-					  barrel->_get_launch_location(),
-					  barrel->_get_launch_normal().Rotation())
-			->_launch();
-		break;
-	default:
-		break;
+		start_reload_time = FPlatformTime::Seconds();
+		reloaded = true;
+	UE_LOG(LogTemp, Warning, TEXT("Reloading ~!"));
+
 	}
+	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
 };

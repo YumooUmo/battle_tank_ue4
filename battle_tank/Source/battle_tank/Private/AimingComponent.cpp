@@ -67,7 +67,7 @@ void UAimingComponent::_draw_projectile_path()
 		ECollisionChannel::ECC_Visibility,
 		nullptr};
 	PredictParams.ActorsToIgnore.Add(owner);
-	PredictParams.OverrideGravityZ = -5000.f;
+	// PredictParams.OverrideGravityZ = -5000.f;
 
 	//Initiallize Result Struct to _predict path method()
 	FPredictProjectilePathResult PredictResult;

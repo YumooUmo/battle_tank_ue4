@@ -20,6 +20,8 @@ void ATankAIController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
     // UE_LOG(LogTemp, Warning, TEXT("Ticking"));
     _aiming();
+    _fire();
+    _reload();
 }
 
 //return a Tank pointer
@@ -30,21 +32,7 @@ ATank *ATankAIController::_get_controlled_tank() const
 
 ATank *ATankAIController::_get_player_tank() const
 {
-
     return Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn());
-
-    //--------------
-    // Not necessary
-    //--------------
-    // auto *player_pawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-    // if (player_pawn)
-    // {
-    //     return Cast<ATank>(player_pawn);
-    // }
-    // else
-    // {
-    //     return nullptr;
-    // }
 }
 
 void ATankAIController::_aiming() const
@@ -60,3 +48,27 @@ void ATankAIController::_aiming() const
         return;
     }
 }
+
+//SET weapon number : Change Weapon , projectile number
+void ATankAIController::_set_projectile_number(int projectile_number)
+{
+	tank_controlled->_set_projectile_number(projectile_number);
+};
+
+//SET exchange weapon
+void ATankAIController::_exchange_projectile()
+{
+	tank_controlled->_exchange_projectile();
+};
+
+//Fire()
+void ATankAIController::_fire() //---------	TODO ------------Refact : using Template to Fire with differen projectile number
+{
+    tank_controlled->_fire();
+};
+
+//Reload
+void ATankAIController::_reload()
+{
+    tank_controlled->_reload();
+};
