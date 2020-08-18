@@ -10,6 +10,7 @@
 class UTankBarrel;
 class UTankTurrent;
 class UAimingComponent;
+class ATankProjectile;
 
 UCLASS()
 class BATTLE_TANK_API ATank : public APawn
@@ -23,16 +24,31 @@ public:
 	UTankBarrel *barrel = nullptr;
 	UTankTurrent *turrent = nullptr;
 	UAimingComponent *aiming_component = nullptr;
+	
+	//#### Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW; 
+	//#### Ten digit: 0-9 represents projectile LAST USED.
+	int projectile_number = 0;					
+	
+	//GET Launch speed
+	virtual float _get_launch_speed();			//----------- TODO ----------- using template get a projectile class, and return launch_speed of the certain projectile.
+	
+	//SET weapon number
+	UFUNCTION(BlueprintCallable, Category = play)
+	virtual void _set_projectile_number(int projectile_number);
 
-	virtual float _get_launch_speed() const;
-	virtual void _launch() const;
+	//SET exchange projectile
+	UFUNCTION(BlueprintCallable, Category = play)
+	virtual void _exchange_projectile();
+
+	//Fire
+	UFUNCTION(BlueprintCallable, Category = play)
+	virtual void _fire();								//---------- TODO --------------fire a certain projectile
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-	float launch_speed = 100000.f;
+
 
 private:
 	// Called every frame
@@ -41,11 +57,20 @@ private:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
-	//set barrel
+	//SET barrel
 	UFUNCTION(BlueprintCallable, Category = setup)
 	virtual void _set_barrel_reference(UTankBarrel *barrel_to_set);
 
-	//set turrent
+	//SET turrent
 	UFUNCTION(BlueprintCallable, Category = setup)
 	virtual void _set_turrent_reference(UTankTurrent *turrent_to_set);
+
+	//-------------------------------------------------Add Projectile Type-------------------------------------------------------
+	//SET projectile_1
+	UPROPERTY(EditAnywhere, Category = setup)
+	TSubclassOf<ATankProjectile> tank_projectile_0 = nullptr;
+
+	//SET projectile_2
+	UPROPERTY(EditAnywhere, Category = setup)
+	TSubclassOf<ATankProjectile> tank_projectile_1 = nullptr;
 };

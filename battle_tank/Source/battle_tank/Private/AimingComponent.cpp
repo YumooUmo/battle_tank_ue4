@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AimingComponent.h"
+//FIRST include
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tank.h"
@@ -113,12 +114,6 @@ void UAimingComponent::_move_turrent_barrel()
 {
 	//Caculate rotation speed : by using ----   aiming_normal & launch velocity
 	FRotator delta_rotator = aiming_normal.Rotation() - owner->barrel->_get_launch_normal().Rotation();
-	UE_LOG(LogTemp, Warning, TEXT("------------------------------------------------------------------------------"));
-	UE_LOG(LogTemp, Warning, TEXT("Aiming is : %f"), aiming_normal.Rotation().Yaw);
-	// // UE_LOG(LogTemp, Error, TEXT("------------------------------------------------------------------------------"));
-	UE_LOG(LogTemp, Warning, TEXT("Launch is : %f"), owner->barrel->_get_launch_normal().Rotation().Yaw);
-	UE_LOG(LogTemp, Warning, TEXT("Delta_Rotator is : %s"), *(delta_rotator.ToString()));
-	// UE_LOG(LogTemp, Error, TEXT("------------------------------------------------------------------------------"));
 
 	//call _elevate_barrel
 	if (delta_rotator.Pitch > 0.01f || delta_rotator.Pitch < -0.01f)
