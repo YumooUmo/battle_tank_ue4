@@ -4,7 +4,7 @@
 //FIRST include
 #include "AimingComponent.h"
 #include "Tank.h"
-// #include "TankTrack.h"
+#include "TankTrack.h"
 
 void ATankPlayerController::BeginPlay()
 {
@@ -118,12 +118,12 @@ void ATankPlayerController::_reload()
     tank_controlled->_reload();
 };
 
-// //Move
-// void ATankPlayerController::_set_left_throttle(float throttle)
-// {
-//     tank_controlled->left_track->_set_throttle(throttle);
-// };
-// void ATankPlayerController::_set_right_throttle(float throttle)
-// {
-//     tank_controlled->right_track->_set_throttle(throttle);
-// };
+//Move
+void ATankPlayerController::_set_left_throttle(float throttle)
+{
+    tank_controlled->left_track->_set_throttle(throttle);
+};
+void ATankPlayerController::_set_right_throttle(float throttle)
+{
+    tank_controlled->right_track->_set_throttle(throttle);
+};

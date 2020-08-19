@@ -60,10 +60,10 @@ private:
 	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _reload();
 
-	// //SET throttle
-	// UFUNCTION(BlueprintCallable, Category = play)
-	// virtual void _set_left_throttle(float throttle);
+	//SET throttle
+	UFUNCTION(BlueprintCallable, Category = play)
+	virtual void _set_left_throttle(float throttle);
 
-	// UFUNCTION(BlueprintCallable, Category = play)
-	// virtual void _set_right_throttle(float throttle);
+	UFUNCTION(BlueprintCallable, Category = play)
+	virtual void _set_right_throttle(float throttle);
 };

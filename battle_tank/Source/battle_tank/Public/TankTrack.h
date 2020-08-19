@@ -21,5 +21,4 @@ public:
 	UFUNCTION(BlueprintCallable, Category = play)
 	void _set_throttle(float throttle);
 
-private:
 };

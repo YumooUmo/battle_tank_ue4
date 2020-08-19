@@ -124,7 +124,7 @@ void UAimingComponent::_move_turrent_barrel(FVector aiming_normal)
 	FRotator delta_rotator = aiming_normal.Rotation() - owner->barrel->_get_launch_normal().Rotation();
 
 	//call _elevate_barrel
-	if (delta_rotator.Pitch > 0.01f || delta_rotator.Pitch < -0.01f)
+	if (delta_rotator.Pitch > 0.001f || delta_rotator.Pitch < -0.001f)
 	{
 		owner->barrel->_elevate_barrel(delta_rotator.Pitch);
 	}
