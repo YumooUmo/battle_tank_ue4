@@ -6,6 +6,7 @@
 #include "TankBarrel.h"
 #include "TankProjectile.h"
 #include "TankTurrent.h"
+#include "TankTrack.h"
 
 // Sets default values
 ATank::ATank()
@@ -45,6 +46,16 @@ void ATank::_set_barrel_reference(UTankBarrel *barrel_to_set)
 void ATank::_set_turrent_reference(UTankTurrent *turrent_to_set)
 {
 	turrent = turrent_to_set;
+};
+
+//Set Track Reference
+void ATank::_set_left_track_reference(UTankTrack *track_to_set)
+{
+	left_track = track_to_set;
+};
+void ATank::_set_right_track_reference(UTankTrack *track_to_set)
+{
+	right_track = track_to_set;
 };
 
 //GET Current Projectile

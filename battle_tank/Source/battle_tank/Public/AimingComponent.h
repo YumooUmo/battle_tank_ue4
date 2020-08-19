@@ -20,6 +20,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void _set_owner(ATank *owenr_tank);
 
+	virtual void _aiming_by_normal(FVector aiming_normal, FVector camera_location);
 	virtual void _aiming_at(FVector aiming_location);
 	virtual void _draw_projectile_path();
 
@@ -28,10 +29,9 @@ protected:
 
 private:
 	ATank *owner;
-	FVector aiming_normal{0};
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
-	virtual void _move_turrent_barrel();
+	virtual void _move_turrent_barrel(FVector aiming_normal);
 };

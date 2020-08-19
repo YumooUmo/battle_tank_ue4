@@ -23,18 +23,26 @@ private:
 	//-------------------------------Property-------------------------
 	UPROPERTY(VisibleAnywhere)
 	float aiming_range = 100000.f;
+
+	FVector aiming_normal{0};
+	FVector camera_location{0};
 	ATank *tank_controlled = nullptr;
 
 	//-------------------------------TICK--------------------------------
-	void _aiming() const;	
+	void _aiming_by_normal();
+
+	//-------By Location
+	void _aiming() const;
 
 	//-------------------------------GET----------------------------------
+
+	//-------By Location
 	virtual ATank *_get_controlled_tank() const;
 	bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
 
 	//-------------------------------PLAY---------------------------------
 	//Draw Projectile Path
-	void _draw_projectile_path();											//---------------####   Projectile Path
+	void _draw_projectile_path(); //---------------####   Projectile Path
 
 	//SET weapon number : Change Weapon
 	UFUNCTION(BlueprintCallable, Category = play)
@@ -51,4 +59,11 @@ private:
 	//Reload
 	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _reload();
+
+	// //SET throttle
+	// UFUNCTION(BlueprintCallable, Category = play)
+	// virtual void _set_left_throttle(float throttle);
+
+	// UFUNCTION(BlueprintCallable, Category = play)
+	// virtual void _set_right_throttle(float throttle);
 };

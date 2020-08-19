@@ -10,6 +10,8 @@
 class UTankBarrel;
 class UTankTurrent;
 class UAimingComponent;
+class UTankTrack;
+
 class ATankProjectile;
 
 UCLASS()
@@ -23,6 +25,9 @@ public:
 
 	UTankBarrel *barrel = nullptr;
 	UTankTurrent *turrent = nullptr;
+	UTankTrack *left_track = nullptr;
+	UTankTrack *right_track = nullptr;
+
 	UAimingComponent *aiming_component = nullptr;
 	
 	//#### Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW; 
@@ -67,6 +72,13 @@ private:
 	//SET turrent
 	UFUNCTION(BlueprintCallable, Category = setup)
 	virtual void _set_turrent_reference(UTankTurrent *turrent_to_set);
+
+	//SET Track
+	UFUNCTION(BlueprintCallable, Category = setup)
+	virtual void _set_left_track_reference(UTankTrack *turrent_to_set);
+
+	UFUNCTION(BlueprintCallable, Category = setup)
+	virtual void _set_right_track_reference(UTankTrack *turrent_to_set);
 
 	//----------------#### Add Projectile Type
 	//Current Projectile

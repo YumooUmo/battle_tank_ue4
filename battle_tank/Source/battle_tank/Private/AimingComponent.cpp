@@ -40,22 +40,30 @@ void UAimingComponent::_set_owner(ATank *owenr_tank)
 };
 
 //------------------------------------------------------public----------------------------------------------------------
-//Normal aiming_vector : aiming_location - barrel launch point
-void UAimingComponent::_aiming_at(FVector aiming_location)
+//															------------Aiming by Normal
+void UAimingComponent::_aiming_by_normal(FVector aiming_normal, FVector camera_location)
 {
-	aiming_normal = (aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal();
 	//Elevate Barrel
 	//Rotate Turrent
-	if (aiming_normal != owner->barrel->_get_launch_normal())
-	{
-		_move_turrent_barrel();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Elevation stop"));
+	if (aiming_normal != owner->barrel->_get_launch_normal()){
+		_move_turrent_barrel(aiming_normal);
 	}
 };
+//															------------Aiming by Normal
 
+//								----------------------------------Aiming by Location
+void UAimingComponent::_aiming_at(FVector aiming_location)
+{
+	//Elevate Barrel
+	//Rotate Turrent
+	if ((aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal() != owner->barrel->_get_launch_normal())
+	{
+		_move_turrent_barrel((aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal());
+	}
+};
+//								----------------------------------Aiming by Location
+
+//--------------------------------------------------Move_and_Draw-----------------------------------------------------------
 void UAimingComponent::_draw_projectile_path()
 {
 	//Initiallize Parameters to _predict path method()
@@ -110,7 +118,7 @@ void UAimingComponent::_draw_projectile_path()
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
-void UAimingComponent::_move_turrent_barrel()
+void UAimingComponent::_move_turrent_barrel(FVector aiming_normal)
 {
 	//Caculate rotation speed : by using ----   aiming_normal & launch velocity
 	FRotator delta_rotator = aiming_normal.Rotation() - owner->barrel->_get_launch_normal().Rotation();
