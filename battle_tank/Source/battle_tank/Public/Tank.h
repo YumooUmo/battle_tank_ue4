@@ -22,21 +22,27 @@ class BATTLE_TANK_API ATank : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ATank();
-
+	//--------------------------------public : Properties
 	UTankBarrel *barrel = nullptr;
 	UTankTurrent *turrent = nullptr;
 	UTankTrack *left_track = nullptr;
 	UTankTrack *right_track = nullptr;
 
+
 	UAimingComponent *aiming_component = nullptr;
 	
 	//#### Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW; 
 	//#### Ten digit: 0-9 represents projectile LAST USED.
-	int projectile_number = 0;					
-	
+	int projectile_number = 0;		
+
+	//--------------------------------public : SELF action
 	//GET Launch speed
 	virtual float _get_launch_speed();
+
+	//_aiming_at to aiming_direction
+	virtual void _aiming_at(FVector aiming_normal);
 	
+	//--------------------------------public : PLAY action
 	//SET weapon number
 	virtual void _set_projectile_number(int projectile_number);
 
@@ -65,22 +71,11 @@ private:
 	bool reloaded = true ; 
 	float start_reload_time = 0.f;
 
-	//SET barrel
+	//  ####	Set UP
 	UFUNCTION(BlueprintCallable, Category = setup)
-	virtual void _set_barrel_reference(UTankBarrel *barrel_to_set);
+	virtual void _set_up(UTankBarrel *barrel_to_set,UTankTurrent *turrent_to_set,UTankTrack *left_track_to_set,UTankTrack *right_track_to_set);
 
-	//SET turrent
-	UFUNCTION(BlueprintCallable, Category = setup)
-	virtual void _set_turrent_reference(UTankTurrent *turrent_to_set);
-
-	//SET Track
-	UFUNCTION(BlueprintCallable, Category = setup)
-	virtual void _set_left_track_reference(UTankTrack *turrent_to_set);
-
-	UFUNCTION(BlueprintCallable, Category = setup)
-	virtual void _set_right_track_reference(UTankTrack *turrent_to_set);
-
-	//----------------#### Add Projectile Type
+	//	####	Add Projectile Type
 	//Current Projectile
 	virtual TSubclassOf<ATankProjectile> _get_current_projectile();
 

@@ -41,25 +41,20 @@ void UAimingComponent::_set_owner(ATank *owenr_tank)
 
 //------------------------------------------------------public----------------------------------------------------------
 //															------------Aiming by Normal
-void UAimingComponent::_aiming_by_normal(FVector aiming_normal, FVector camera_location)
+void UAimingComponent::_aiming_by_viewport(FVector aiming_normal)
 {
 	//Elevate Barrel
 	//Rotate Turrent
-	if (aiming_normal != owner->barrel->_get_launch_normal()){
-		_move_turrent_barrel(aiming_normal);
-	}
+		owner->_aiming_at(aiming_normal);
 };
 //															------------Aiming by Normal
 
 //								----------------------------------Aiming by Location
-void UAimingComponent::_aiming_at(FVector aiming_location)
+void UAimingComponent::_aiming_by_location(FVector aiming_location)
 {
 	//Elevate Barrel
 	//Rotate Turrent
-	if ((aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal() != owner->barrel->_get_launch_normal())
-	{
-		_move_turrent_barrel((aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal());
-	}
+		owner->_aiming_at((aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal());
 };
 //								----------------------------------Aiming by Location
 
@@ -70,11 +65,11 @@ void UAimingComponent::_draw_projectile_path()
 	FPredictProjectilePathParams PredictParams{
 		10.f,															  //CollisionRadius
 		owner->barrel->_get_launch_location(),							  //start location
-		owner->barrel->_get_launch_normal() * owner->_get_launch_speed(), //-----------------#### get owner->barrel aiming velocity : launch_velocity
+		owner->barrel->_get_launch_normal() * owner->_get_launch_speed(), //----------------- get owner->barrel aiming velocity : launch_velocity
 		3.0f,															  //MaxSimTime
 		ECollisionChannel::ECC_Visibility,
-		nullptr};
-	PredictParams.ActorsToIgnore.Add(owner);
+		owner};
+	// PredictParams.ActorsToIgnore.Add(owner);
 	// PredictParams.OverrideGravityZ = -5000.f;
 
 	//Initiallize Result Struct to _predict path method()
@@ -117,31 +112,3 @@ void UAimingComponent::_draw_projectile_path()
 	// UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
-
-void UAimingComponent::_move_turrent_barrel(FVector aiming_normal)
-{
-	//Caculate rotation speed : by using ----   aiming_normal & launch velocity
-	FRotator delta_rotator = aiming_normal.Rotation() - owner->barrel->_get_launch_normal().Rotation();
-
-	//call _elevate_barrel
-	if (delta_rotator.Pitch > 0.001f || delta_rotator.Pitch < -0.001f)
-	{
-		owner->barrel->_elevate_barrel(delta_rotator.Pitch);
-	}
-
-	//####-------------------------Format Yaw change direction, from -170 -> 170, move direction and amount is +340 , but ACTUALLY should be -20.------------------------------------
-	if (delta_rotator.Yaw > 180.f)
-	{
-		delta_rotator.Yaw = delta_rotator.Yaw - 360.f;
-	}
-	if (delta_rotator.Yaw < -180.f)
-	{
-		delta_rotator.Yaw = delta_rotator.Yaw + 360.f;
-	}
-	//call   _rotate_turrent
-	if (delta_rotator.Yaw > 0.01f || delta_rotator.Yaw < -0.01f)
-	{
-
-		owner->turrent->_rotate_turrent(delta_rotator.Yaw);
-	}
-};

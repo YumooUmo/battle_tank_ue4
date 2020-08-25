@@ -23,27 +23,31 @@ private:
 	//-------------------------------Property-------------------------
 	UPROPERTY(VisibleAnywhere)
 	float aiming_range = 100000.f;
+	UPROPERTY(EditDefaultsOnly,Category = "Aiming")
+	float crosshair_x = 0.5;
+	UPROPERTY(EditDefaultsOnly,Category = "Aiming")
+	float crosshair_y = 0.35;
 
 	FVector aiming_normal{0};
-	FVector camera_location{0};
+	
 	ATank *tank_controlled = nullptr;
 
 	//-------------------------------TICK--------------------------------
-	void _aiming_by_normal();
+	void _aiming_by_viewport();
 
 	//-------By Location
-	void _aiming() const;
+	// void _aiming() const;
 
 	//-------------------------------GET----------------------------------
-
-	//-------By Location
 	virtual ATank *_get_controlled_tank() const;
-	bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
+
+	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
 
 	//-------------------------------PLAY---------------------------------
 	//Draw Projectile Path
 	void _draw_projectile_path(); //---------------####   Projectile Path
 
+	//----				private : WEAPON system				----
 	//SET weapon number : Change Weapon
 	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _set_projectile_number(int projectile_number);
@@ -59,7 +63,8 @@ private:
 	//Reload
 	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _reload();
-
+	
+	//----				private : MOVE system				----
 	//SET throttle
 	UFUNCTION(BlueprintCallable, Category = play)
 	virtual void _set_left_throttle(float throttle);

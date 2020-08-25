@@ -33,7 +33,7 @@ private:
 
 	//-----------------------------------------------ACTION-------------------------------------------------------
 	//Aiming
-	void _aiming() const;
+	void _aiming_by_location() const;
 
 	//SET weapon number : Change Weapon
 	virtual void _set_projectile_number(int projectile_number);

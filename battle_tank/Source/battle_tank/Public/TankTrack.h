@@ -15,10 +15,10 @@ class BATTLE_TANK_API UTankTrack : public UStaticMeshComponent
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = Setup)
+	UPROPERTY(EditAnywhere, Category = "Setup")
 	float _max_force = 4000000.f;
 
-	UFUNCTION(BlueprintCallable, Category = play)
+	UFUNCTION(BlueprintCallable, Category = "play")
 	void _set_throttle(float throttle);
 
 };

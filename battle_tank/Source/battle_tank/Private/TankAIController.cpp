@@ -19,7 +19,7 @@ void ATankAIController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     // UE_LOG(LogTemp, Warning, TEXT("Ticking"));
-    _aiming();
+    _aiming_by_location();
     _fire();
     _reload();
 }
@@ -35,12 +35,12 @@ ATank *ATankAIController::_get_player_tank() const
     return Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
-void ATankAIController::_aiming() const
+void ATankAIController::_aiming_by_location() const
 {
     if (tank_controlled != nullptr && tank_of_player != nullptr)
     {
         //aiming at player's tank
-        tank_controlled->aiming_component->_aiming_at(tank_of_player->GetActorLocation());
+        tank_controlled->aiming_component->_aiming_by_location(tank_of_player->GetActorLocation());
         return;
     }
     else
