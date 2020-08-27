@@ -7,6 +7,7 @@
 #include "TankProjectile.h"
 #include "TankTrack.h"
 #include "TankTurrent.h"
+#include "WeaponComponent.h"
 
 // Sets default values
 ATank::ATank()
@@ -15,15 +16,15 @@ ATank::ATank()
 	PrimaryActorTick.bCanEverTick = false;
 	//runtime new component : Component* component = NewObject<Comoponent>(FName);
 	//-----------------------component->RegisterComponent();
-	aiming_component = CreateDefaultSubobject<UAimingComponent>(FName(TEXT("aiming_component")));
-	aiming_component->_set_owner(this);
+	aiming_component = CreateDefaultSubobject<UAimingComponent>(FName(TEXT("AimingComponent")));
+	// weapon_component = CreateDefaultSubobject<UWeaponComponent>(FName(TEXT("WeaponComponent")));
 }
 
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
-	PrimaryActorTick.bCanEverTick = true; //------------------------------------------------------------------TODO : start_up
+	// PrimaryActorTick.bCanEverTick =false; //------------------------------------------------------------------TODO : start_up
 }
 
 // Called every frame
@@ -44,133 +45,98 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UT
 	//Set Barrel Reference
 	barrel = barrel_to_set;
 	//Set Turrent Reference
-	turrent = turrent_to_set;	
+	turrent = turrent_to_set;
 	//Set Track Reference
 	left_track = left_track_to_set;
 	right_track = right_track_to_set;
 };
-
-//GET Current Projectile
-TSubclassOf<ATankProjectile> ATank::_get_current_projectile()
+void ATank::set_weapon_component(UWeaponComponent *component)
 {
-	switch (projectile_number % 10)
-	{
-	case 0:
-		if (tank_projectile_0)
-		{
-			return tank_projectile_0;
-		}
-		else
-		{
-			return nullptr;
-		}
-		break;
-	case 1:
-		if (tank_projectile_1)
-		{
-			return tank_projectile_1;
-		}
-		else
-		{
-			return nullptr;
-		}
-		break;
-	default:
-		return nullptr;
-		break;
-	}
+	weapon_component = component;
 };
 
-//------------------------------------------------Public : play action---------------------------	#### TODO : Refactor switch to Template
-//------------------------------------------------SET projectile number
-//Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-void ATank::_set_projectile_number(int number)
+//---------------------------------------------		PUBLIC : GET		-------------------------------------
+//Get Current Launch direction normal
+FVector ATank::_get_launch_normal()
 {
-	if (projectile_number % 10 != number)
-	{
-		//Add check : if projectile exists (is set already) ? 	------------------TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-		switch (number)
-		{
-		case 0:
-			if (tank_projectile_0)
-			{
-				projectile_number = (projectile_number % 10) * 10 + number;
-				reloaded = false;
-				_reload();
-			}
-
-			break;
-		case 1:
-			if (tank_projectile_1)
-			{
-				projectile_number = (projectile_number % 10) * 10 + number;
-				reloaded = false;
-				_reload();
-			}
-			break;
-		default:
-			break;
-		}
-	}
+	return barrel->_get_launch_normal();
 };
-
-//SET exchange weapon
-void ATank::_exchange_projectile()
+//Get Current Launch location
+FVector ATank::_get_launch_location()
 {
-	if (projectile_number != 0)
-	{
-		projectile_number = (((projectile_number % 10) * 10) + (projectile_number / 10));
-		reloaded = false;
-		_reload();
-	}
+	return barrel->_get_launch_location();
 };
-
 //Get Current Projectile's Launch Speed
 float ATank::_get_launch_speed()
 {
-	return _get_current_projectile().GetDefaultObject()->launch_speed; // Here is the point
+	return weapon_component->_get_launch_speed(); // Here is the point
 }
+
+//---------------------------------------------		PUBLIC :PLAY		---------------------------	#### TODO : Refactor switch to Template
+//Exchange projectile by number
+//Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+void ATank::_set_weapon(int number)
+{
+	weapon_component->_exchange_weapon(number);
+};
+
+//Exchange
+void ATank::_exchange_weapon()
+{
+	weapon_component->_exchange_weapon();
+};
 
 //Fire()
 void ATank::_fire()
 {
-	if (barrel && (FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == true)
+	if (barrel)
 	{
-		reloaded = false;
-		GetWorld()->SpawnActor<ATankProjectile>(
-					  _get_current_projectile(),
-					  barrel->_get_launch_location(),
-					  barrel->_get_launch_normal().Rotation())
-			->_launch();
+		weapon_component->_fire(_get_launch_normal(), _get_launch_location());
 	}
 };
 
 //Reload
 void ATank::_reload()
 {
-	if ((FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == false)
-	{
-		start_reload_time = FPlatformTime::Seconds();
-		reloaded = true;
-		UE_LOG(LogTemp, Warning, TEXT("Reloading ~!"));
-	}
+	weapon_component->_reload();
 	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
 };
+
+//DrawProjectilePath
+void ATank::_draw()
+{
+	aiming_component->_set_drawable(true);
+}
+void ATank::_stop_draw()
+{
+	aiming_component->_set_drawable(false);
+}
+
+// //Move
+// void ATankPlayerController::_set_left_throttle(float throttle)
+// {
+//     left_track->_set_throttle(throttle);
+// };
+// void ATankPlayerController::_set_right_throttle(float throttle)
+// {
+//     right_track->_set_throttle(throttle);
+// };
 
 //--------------------------------------------------Public : self action------------------------------------------------------------
 
 void ATank::_aiming_at(FVector aiming_normal)
 {
 	//Caculate rotation speed : by using ----   aiming_normal & launch velocity
-	FRotator delta_rotator = aiming_normal.Rotation() - barrel->_get_launch_normal().Rotation();
+	FRotator delta_rotator = aiming_normal.Rotation() - _get_launch_normal().Rotation();
 
 	//call _elevate_barrel
-	if (delta_rotator.Pitch > 0.001f || delta_rotator.Pitch < -0.001f)
+	if (delta_rotator.Pitch > 0.0001f || delta_rotator.Pitch < -0.0001f)
 	{
 		barrel->_elevate_barrel(delta_rotator.Pitch);
 	}
 
-	//####-------------------------Format Yaw change direction, from -170 -> 170, move direction and amount is +340 , but ACTUALLY should be -20.------------------------------------
+	//		####		Format Yaw change direction,
+	//		####		from -170 -> 170, move direction and amount is +340, but ACTUALLY should be -20.
 	if (delta_rotator.Yaw > 180.f)
 	{
 		delta_rotator.Yaw = delta_rotator.Yaw - 360.f;
@@ -180,9 +146,17 @@ void ATank::_aiming_at(FVector aiming_normal)
 		delta_rotator.Yaw = delta_rotator.Yaw + 360.f;
 	}
 	//call   _rotate_turrent
-	if (delta_rotator.Yaw > 0.01f || delta_rotator.Yaw < -0.01f)
+	if (delta_rotator.Yaw > 0.0001f || delta_rotator.Yaw < -0.0001f)
 	{
-
 		turrent->_rotate_turrent(delta_rotator.Yaw);
+	}
+};
+
+void ATank::_controller_do(float DeltaTime, FVector aiming_normal)
+{
+	_aiming_at(aiming_normal);
+	if (aiming_component->_is_drawable(DeltaTime))
+	{
+		aiming_component->_draw_projectile_path(_get_launch_normal() * _get_launch_speed(), _get_launch_location(), this);
 	}
 };

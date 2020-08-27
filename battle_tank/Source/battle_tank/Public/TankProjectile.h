@@ -23,7 +23,7 @@ public:
 	//------------------------------------------public---------------------------------------------
 
 	//SET MovementComponent
-	UProjectileMovementComponent *projectile_movement_component = nullptr;
+	// UProjectileMovementComponent *projectile_movement_component = nullptr;
 
 	//Reload time
 	UPROPERTY(EditAnywhere, Category = Setup)
@@ -31,7 +31,7 @@ public:
 
 	//launch_speed
 	UPROPERTY(EditAnywhere, Category = Setup)
-	float launch_speed = 100000.f;
+	float launch_force = 50000.f;
 
 	//Launch
 	virtual void _launch();

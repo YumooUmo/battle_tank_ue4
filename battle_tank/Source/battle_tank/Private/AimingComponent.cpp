@@ -5,8 +5,6 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tank.h"
-#include "TankBarrel.h"
-#include "TankTurrent.h"
 
 // Sets default values for this component's properties
 UAimingComponent::UAimingComponent()
@@ -33,43 +31,22 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-//-----------------------------------------------------------private-------------------------------------------------------------------------------
-void UAimingComponent::_set_owner(ATank *owenr_tank)
-{
-	owner = owenr_tank;
-};
+//-----------------------------------		private		---------------------------------
 
-//------------------------------------------------------public----------------------------------------------------------
-//															------------Aiming by Normal
-void UAimingComponent::_aiming_by_viewport(FVector aiming_normal)
-{
-	//Elevate Barrel
-	//Rotate Turrent
-		owner->_aiming_at(aiming_normal);
-};
-//															------------Aiming by Normal
+//-----------------------------------		public		---------------------------------
 
-//								----------------------------------Aiming by Location
-void UAimingComponent::_aiming_by_location(FVector aiming_location)
-{
-	//Elevate Barrel
-	//Rotate Turrent
-		owner->_aiming_at((aiming_location - owner->barrel->_get_launch_location()).GetSafeNormal());
-};
-//								----------------------------------Aiming by Location
-
-//--------------------------------------------------Move_and_Draw-----------------------------------------------------------
-void UAimingComponent::_draw_projectile_path()
+//-----------------------------------		Draw		---------------------------------
+void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore)
 {
 	//Initiallize Parameters to _predict path method()
 	FPredictProjectilePathParams PredictParams{
-		10.f,															  //CollisionRadius
-		owner->barrel->_get_launch_location(),							  //start location
-		owner->barrel->_get_launch_normal() * owner->_get_launch_speed(), //----------------- get owner->barrel aiming velocity : launch_velocity
-		3.0f,															  //MaxSimTime
+		10.f,			 //CollisionRadius
+		launch_location, //start location
+		launch_velocity, //----------------- get owner->barrel aiming velocity : launch_velocity
+		3.0f,			 //MaxSimTime
 		ECollisionChannel::ECC_Visibility,
-		owner};
-	// PredictParams.ActorsToIgnore.Add(owner);
+		nullptr}; //													####	TODO : Debug
+	PredictParams.ActorsToIgnore.Add(ignore);
 	// PredictParams.OverrideGravityZ = -5000.f;
 
 	//Initiallize Result Struct to _predict path method()
@@ -85,7 +62,7 @@ void UAimingComponent::_draw_projectile_path()
 		//---------------------------------------------------------Debug
 		DrawDebugLine(
 			GetWorld(),
-			owner->barrel->_get_launch_location(), //start location
+			launch_location, //start location
 			PredictResult.HitResult.Location,
 			FColor::Blue,
 			false,
@@ -99,7 +76,7 @@ void UAimingComponent::_draw_projectile_path()
 		//---------------------------------------------------------Debug
 		DrawDebugLine(
 			GetWorld(),
-			owner->barrel->_get_launch_location(), //start location
+			launch_location, //start location
 			PredictResult.LastTraceDestination.Location,
 			FColor::Blue,
 			false,
@@ -112,3 +89,33 @@ void UAimingComponent::_draw_projectile_path()
 	// UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
+
+bool UAimingComponent::_is_drawable(float DeltaTime)
+{
+	if (draw)
+	{
+		draw_buffer -= DeltaTime;
+		if (draw_buffer <= 0.f)
+		{
+			draw = false;
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (draw_buffer < max_buffer)
+		{
+			draw_buffer += DeltaTime * 0.8;
+		}
+		return false;
+	}
+};
+
+void UAimingComponent::_set_drawable(bool flag)
+{
+	draw = flag;
+};

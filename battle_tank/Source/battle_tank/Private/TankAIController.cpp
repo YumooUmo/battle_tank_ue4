@@ -3,7 +3,6 @@
 #include "TankAIController.h"
 //FIRST include
 #include "Tank.h"
-#include "AimingComponent.h"
 
 void ATankAIController::BeginPlay()
 {
@@ -19,7 +18,7 @@ void ATankAIController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     // UE_LOG(LogTemp, Warning, TEXT("Ticking"));
-    _aiming_by_location();
+    _aiming_at();
     _fire();
     _reload();
 }
@@ -35,30 +34,26 @@ ATank *ATankAIController::_get_player_tank() const
     return Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
-void ATankAIController::_aiming_by_location() const
+void ATankAIController::_aiming_at() const
 {
     if (tank_controlled != nullptr && tank_of_player != nullptr)
     {
         //aiming at player's tank
-        tank_controlled->aiming_component->_aiming_by_location(tank_of_player->GetActorLocation());
-        return;
-    }
-    else
-    {
-        return;
+        tank_controlled->_aiming_at((tank_of_player->GetActorLocation() - tank_controlled->_get_launch_location()).GetSafeNormal());
     }
 }
 
+
 //SET weapon number : Change Weapon , projectile number
-void ATankAIController::_set_projectile_number(int projectile_number)
+void ATankAIController::_set_weapon(int projectile_number)
 {
-	tank_controlled->_set_projectile_number(projectile_number);
+    tank_controlled->_set_weapon(projectile_number);
 };
 
 //SET exchange weapon
-void ATankAIController::_exchange_projectile()
+void ATankAIController::_exchange_weapon()
 {
-	tank_controlled->_exchange_projectile();
+    tank_controlled->_exchange_weapon();
 };
 
 //Fire()

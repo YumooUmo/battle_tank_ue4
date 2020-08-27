@@ -9,10 +9,12 @@
 
 class UTankBarrel;
 class UTankTurrent;
-class UAimingComponent;
 class UTankTrack;
 
 class ATankProjectile;
+
+class UWeaponComponent;
+class UAimingComponent;
 
 UCLASS()
 class BATTLE_TANK_API ATank : public APawn
@@ -22,38 +24,43 @@ class BATTLE_TANK_API ATank : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ATank();
-	//--------------------------------public : Properties
+	//---------------------	Properties	------------------------
 	UTankBarrel *barrel = nullptr;
 	UTankTurrent *turrent = nullptr;
 	UTankTrack *left_track = nullptr;
 	UTankTrack *right_track = nullptr;
-
-
+	//																#### TODO : Template for Component create
 	UAimingComponent *aiming_component = nullptr;
-	
-	//#### Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW; 
-	//#### Ten digit: 0-9 represents projectile LAST USED.
-	int projectile_number = 0;		
 
-	//--------------------------------public : SELF action
-	//GET Launch speed
-	virtual float _get_launch_speed();
+	// UPROPERTY(EditAnywhere, Category = setup)
+	UWeaponComponent *weapon_component = nullptr;
 
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void set_weapon_component(UWeaponComponent *weapon_component);
+	//-----------------		PUBLIC : SELF action	--------------------
 	//_aiming_at to aiming_direction
 	virtual void _aiming_at(FVector aiming_normal);
-	
-	//--------------------------------public : PLAY action
-	//SET weapon number
-	virtual void _set_projectile_number(int projectile_number);
+	//	GO	(Tick)
+	virtual void _controller_do(float DeltaTime, FVector aiming_normal);
 
-	//SET exchange projectile
-	virtual void _exchange_projectile();
+	//------------------	PUBLIC : GET	----------------------
+	virtual FVector _get_launch_normal();
+	virtual FVector _get_launch_location();
+	virtual float _get_launch_speed();
 
-	//Fire
-	virtual void _fire();
-
-	//Reload
-	virtual void _reload();
+	//--------------------------		PLAY		----------------------------------
+	UFUNCTION(BlueprintCallable,Category = Weapon)
+	void _set_weapon(int number);
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void _exchange_weapon();
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void _fire();
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void _reload();
+	UFUNCTION(BlueprintCallable, Category = Aiming)
+	void _draw();
+	UFUNCTION(BlueprintCallable, Category = Aiming)
+	void _stop_draw();
 
 protected:
 	// Called when the game starts or when spawned
@@ -66,24 +73,8 @@ private:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
-	//---------------------------------------SETUP--------------------------------------------------------
-	// ####  Reload Property ---- start with RELOADING  ####
-	bool reloaded = true ; 
-	float start_reload_time = 0.f;
-
-	//  ####	Set UP
+	//-----------------------------		SETUP		------------------------------
+	//  	Set UP
 	UFUNCTION(BlueprintCallable, Category = setup)
-	virtual void _set_up(UTankBarrel *barrel_to_set,UTankTurrent *turrent_to_set,UTankTrack *left_track_to_set,UTankTrack *right_track_to_set);
-
-	//	####	Add Projectile Type
-	//Current Projectile
-	virtual TSubclassOf<ATankProjectile> _get_current_projectile();
-
-	//SET projectile_1
-	UPROPERTY(EditAnywhere, Category = setup)
-	TSubclassOf<ATankProjectile> tank_projectile_0 = nullptr;
-
-	//SET projectile_2
-	UPROPERTY(EditAnywhere, Category = setup)
-	TSubclassOf<ATankProjectile> tank_projectile_1 = nullptr;
+	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UTankTrack *left_track_to_set, UTankTrack *right_track_to_set);
 };

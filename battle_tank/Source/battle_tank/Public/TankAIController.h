@@ -33,13 +33,13 @@ private:
 
 	//-----------------------------------------------ACTION-------------------------------------------------------
 	//Aiming
-	void _aiming_by_location() const;
+	void _aiming_at() const;
 
 	//SET weapon number : Change Weapon
-	virtual void _set_projectile_number(int projectile_number);
+	virtual void _set_weapon(int projectile_number);
 
 	//SET exchange projectile : Exchange Weapon with last time used
-	virtual void _exchange_projectile();
+	virtual void _exchange_weapon();
 
 	//Fire
 	virtual void _fire();

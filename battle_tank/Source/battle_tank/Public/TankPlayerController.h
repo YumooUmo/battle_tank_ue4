@@ -23,17 +23,17 @@ private:
 	//-------------------------------Property-------------------------
 	UPROPERTY(VisibleAnywhere)
 	float aiming_range = 100000.f;
-	UPROPERTY(EditDefaultsOnly,Category = "Aiming")
+	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float crosshair_x = 0.5;
-	UPROPERTY(EditDefaultsOnly,Category = "Aiming")
+	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float crosshair_y = 0.35;
 
 	FVector aiming_normal{0};
-	
+
 	ATank *tank_controlled = nullptr;
 
 	//-------------------------------TICK--------------------------------
-	void _aiming_by_viewport();
+	void _get_aiming_normal();
 
 	//-------By Location
 	// void _aiming() const;
@@ -45,30 +45,4 @@ private:
 
 	//-------------------------------PLAY---------------------------------
 	//Draw Projectile Path
-	void _draw_projectile_path(); //---------------####   Projectile Path
-
-	//----				private : WEAPON system				----
-	//SET weapon number : Change Weapon
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _set_projectile_number(int projectile_number);
-
-	//SET exchange projectile : Exchange Weapon with last time used
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _exchange_projectile();
-
-	//Fire
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _fire();
-
-	//Reload
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _reload();
-	
-	//----				private : MOVE system				----
-	//SET throttle
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _set_left_throttle(float throttle);
-
-	UFUNCTION(BlueprintCallable, Category = play)
-	virtual void _set_right_throttle(float throttle);
 };
