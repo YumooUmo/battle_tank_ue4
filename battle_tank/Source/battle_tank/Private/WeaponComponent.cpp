@@ -115,8 +115,6 @@ void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 	{
 		if ((FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == true)
 		{
-		UE_LOG(LogTemp,Error,TEXT("ForwardVector Component of %s is "),*(launch_normal.ToString()));
-
 			reloaded = false;
 			GetWorld()->SpawnActor<ATankProjectile>(
 						  _get_current_projectile(),

@@ -7,18 +7,25 @@
 #include "TankTrack.generated.h"
 
 /**
- * 
+ *
  */
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UTankTrack : public UStaticMeshComponent
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Setup")
-	float _max_force = 4000000.f;
+	FVector **_get_track_sockets();
+	void _free_track_sockets();
 
-	UFUNCTION(BlueprintCallable, Category = "play")
-	void _set_throttle(float throttle);
+	void _refresh_force_sockets();
 
+private:
+	FVector **sockets = nullptr;
+	// FVector sockets[][];
+	// TArray<FVector> b[3][2];
+
+	// FVector front_socket[2], track_socket[2], back_socket[2];
+	bool track_on = false;
 };

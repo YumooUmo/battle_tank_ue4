@@ -21,7 +21,7 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void _draw_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore);
-	virtual bool _is_drawable(float DeltaTime);
+	virtual bool _is_drawing(float DeltaTime);
 	virtual void _set_drawable(bool flag);
 
 

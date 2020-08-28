@@ -15,6 +15,7 @@ class ATankProjectile;
 
 class UWeaponComponent;
 class UAimingComponent;
+class UMoveByForceComponent;
 
 UCLASS()
 class BATTLE_TANK_API ATank : public APawn
@@ -29,27 +30,28 @@ public:
 	UTankTurrent *turrent = nullptr;
 	UTankTrack *left_track = nullptr;
 	UTankTrack *right_track = nullptr;
-	//																#### TODO : Template for Component create
+	//													#### TODO : Template for Component create
 	UAimingComponent *aiming_component = nullptr;
-
-	// UPROPERTY(EditAnywhere, Category = setup)
 	UWeaponComponent *weapon_component = nullptr;
+	UMoveByForceComponent *move_component = nullptr;
 
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void set_weapon_component(UWeaponComponent *weapon_component);
+	//-----------------------------		GET		------------------------------
+	FVector _get_launch_normal();
+
+	//Get Current Launch location
+	FVector _get_launch_location();
+
+	//Get Current Projectile's Launch Speed
+	float _get_launch_speed();
+
 	//-----------------		PUBLIC : SELF action	--------------------
 	//_aiming_at to aiming_direction
 	virtual void _aiming_at(FVector aiming_normal);
 	//	GO	(Tick)
 	virtual void _controller_do(float DeltaTime, FVector aiming_normal);
 
-	//------------------	PUBLIC : GET	----------------------
-	virtual FVector _get_launch_normal();
-	virtual FVector _get_launch_location();
-	virtual float _get_launch_speed();
-
 	//--------------------------		PLAY		----------------------------------
-	UFUNCTION(BlueprintCallable,Category = Weapon)
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _set_weapon(int number);
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _exchange_weapon();
@@ -58,9 +60,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _reload();
 	UFUNCTION(BlueprintCallable, Category = Aiming)
-	void _draw();
-	UFUNCTION(BlueprintCallable, Category = Aiming)
-	void _stop_draw();
+	void _draw(bool if_draw);
+	UFUNCTION(BlueprintCallable, Category = Move)
+	void _move_forward(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Move)
+	void _move_backward(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Move)
+	void _move_left(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Move)
+	void _move_right(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Move)
+	void _burst(bool if_burst);
 
 protected:
 	// Called when the game starts or when spawned
@@ -75,6 +85,16 @@ private:
 
 	//-----------------------------		SETUP		------------------------------
 	//  	Set UP
+	//STATIC MESH
 	UFUNCTION(BlueprintCallable, Category = setup)
 	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UTankTrack *left_track_to_set, UTankTrack *right_track_to_set);
+	//WEAPON
+	UFUNCTION(BlueprintCallable, Category = setup)
+	void _set_weapon_component(UWeaponComponent *weapon_component);
+
+	//MOVE
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void _set_move_component(UMoveByForceComponent *move_component);
+
+	void _set_force_sockets_pointer();
 };

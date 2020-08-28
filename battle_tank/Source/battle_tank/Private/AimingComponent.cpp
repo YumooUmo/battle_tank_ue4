@@ -39,6 +39,7 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore)
 {
 	//Initiallize Parameters to _predict path method()
+
 	FPredictProjectilePathParams PredictParams{
 		10.f,			 //CollisionRadius
 		launch_location, //start location
@@ -90,7 +91,7 @@ void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector la
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
-bool UAimingComponent::_is_drawable(float DeltaTime)
+bool UAimingComponent::_is_drawing(float DeltaTime)
 {
 	if (draw)
 	{

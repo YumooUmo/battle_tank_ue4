@@ -3,6 +3,7 @@
 #include "Tank.h"
 //FIRST include
 #include "AimingComponent.h"
+#include "MoveByForceComponent.h"
 #include "TankBarrel.h"
 #include "TankProjectile.h"
 #include "TankTrack.h"
@@ -49,27 +50,40 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UT
 	//Set Track Reference
 	left_track = left_track_to_set;
 	right_track = right_track_to_set;
+	_set_force_sockets_pointer();
 };
-void ATank::set_weapon_component(UWeaponComponent *component)
+
+void ATank::_set_weapon_component(UWeaponComponent *component)
 {
 	weapon_component = component;
 };
 
-//---------------------------------------------		PUBLIC : GET		-------------------------------------
+void ATank::_set_move_component(UMoveByForceComponent *component)
+{
+	move_component = component;
+	_set_force_sockets_pointer();
+};
+
+void ATank::_set_force_sockets_pointer()
+{
+	if (left_track && right_track)
+	{
+		move_component->_set_force_sockets_pointer(left_track->_get_track_sockets(), right_track->_get_track_sockets());
+	}
+}
+//---------------------------------------------        PUBLIC : GET        -------------------------------------
 //Get Current Launch direction normal
 FVector ATank::_get_launch_normal()
 {
-	return barrel->_get_launch_normal();
+    return barrel->_get_launch_normal();
 };
 //Get Current Launch location
-FVector ATank::_get_launch_location()
-{
-	return barrel->_get_launch_location();
-};
+FVector ATank::_get_launch_location(){
+    return barrel->_get_launch_location();
+}
 //Get Current Projectile's Launch Speed
-float ATank::_get_launch_speed()
-{
-	return weapon_component->_get_launch_speed(); // Here is the point
+float ATank::_get_launch_speed(){
+    return weapon_component->_get_launch_speed();
 }
 
 //---------------------------------------------		PUBLIC :PLAY		---------------------------	#### TODO : Refactor switch to Template
@@ -103,24 +117,32 @@ void ATank::_reload()
 };
 
 //DrawProjectilePath
-void ATank::_draw()
+void ATank::_draw(bool if_draw)
 {
-	aiming_component->_set_drawable(true);
-}
-void ATank::_stop_draw()
-{
-	aiming_component->_set_drawable(false);
+	aiming_component->_set_drawable(if_draw);
 }
 
-// //Move
-// void ATankPlayerController::_set_left_throttle(float throttle)
-// {
-//     left_track->_set_throttle(throttle);
-// };
-// void ATankPlayerController::_set_right_throttle(float throttle)
-// {
-//     right_track->_set_throttle(throttle);
-// };
+//Move
+void ATank::_move_forward(bool if_move)
+{
+	move_component->_move_forward(if_move);
+};
+void ATank::_move_backward(bool if_move)
+{
+	move_component->_move_backward(if_move);
+};
+void ATank::_move_left(bool if_move)
+{
+	move_component->_move_left(if_move);
+};
+void ATank::_move_right(bool if_move)
+{
+	move_component->_move_right(if_move);
+};
+void ATank::_burst(bool if_burst)
+{
+	move_component->_burst(if_burst);
+};
 
 //--------------------------------------------------Public : self action------------------------------------------------------------
 
@@ -155,8 +177,19 @@ void ATank::_aiming_at(FVector aiming_normal)
 void ATank::_controller_do(float DeltaTime, FVector aiming_normal)
 {
 	_aiming_at(aiming_normal);
-	if (aiming_component->_is_drawable(DeltaTime))
+
+	if (aiming_component->_is_drawing(DeltaTime))
 	{
-		aiming_component->_draw_projectile_path(_get_launch_normal() * _get_launch_speed(), _get_launch_location(), this);
+		aiming_component->_draw_projectile_path(_get_launch_normal() * weapon_component->_get_launch_speed(), _get_launch_location(), this);
+	}
+
+	if (move_component)
+	{
+		if (move_component->_should_tick())
+		{
+			left_track->_refresh_force_sockets();
+			right_track->_refresh_force_sockets();
+			move_component->_do_move();
+		}
 	}
 };

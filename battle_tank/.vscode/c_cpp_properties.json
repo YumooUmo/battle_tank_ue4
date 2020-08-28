@@ -234,7 +234,9 @@
                 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\um",
                 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt",
                 "E:\\Project\\Game\\BattleTank\\battle_tank\\Source\\battle_tank\\Public",
-                "E:\\Project\\Game\\BattleTank\\battle_tank\\Source\\battle_tank"
+                "E:\\Project\\Game\\BattleTank\\battle_tank\\Source\\battle_tank",
+                "${workspaceFolder}/Intermediate/Build/Win64/UE4Editor/Inc/battle_tank",
+                "${workspaceFolder}/Intermediate/Build/Win64/UE4Editor/Inc/battle_tank"
             ],
             "intelliSenseMode": "msvc-x64",
             "defines": [
