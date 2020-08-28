@@ -16,16 +16,14 @@ class BATTLE_TANK_API UTankTrack : public UStaticMeshComponent
 	GENERATED_BODY()
 
 public:
-	FVector **_get_track_sockets();
-	void _free_track_sockets();
+	unsigned short socket_amount = 3;
+
+	FVector *sockets = new FVector[socket_amount*2];
 
 	void _refresh_force_sockets();
 
 private:
-	FVector **sockets = nullptr;
 	// FVector sockets[][];
 	// TArray<FVector> b[3][2];
-
-	// FVector front_socket[2], track_socket[2], back_socket[2];
-	bool track_on = false;
+	void _reset_sockets();
 };

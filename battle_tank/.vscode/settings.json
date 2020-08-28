@@ -2,6 +2,7 @@
 	"files.exclude": {
 		"E:/Project/Game/BattleTank/battle_tank/.vscode": true,
 		"E:/Project/Game/BattleTank/battle_tank/Content": true,
+		"E:/Project/Game/BattleTank/battle_tank/DerivedDataCache": true,
 		"E:/Project/Game/BattleTank/battle_tank/Intermediate": true,
 		"E:/Project/Game/BattleTank/battle_tank/Saved": true
 	},

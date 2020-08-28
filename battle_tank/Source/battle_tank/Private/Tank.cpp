@@ -68,22 +68,25 @@ void ATank::_set_force_sockets_pointer()
 {
 	if (left_track && right_track)
 	{
-		move_component->_set_force_sockets_pointer(left_track->_get_track_sockets(), right_track->_get_track_sockets());
+		move_component->_set_force_sockets_pointer(left_track->sockets, left_track->socket_amount,
+												   right_track->sockets, right_track->socket_amount);
 	}
 }
 //---------------------------------------------        PUBLIC : GET        -------------------------------------
 //Get Current Launch direction normal
 FVector ATank::_get_launch_normal()
 {
-    return barrel->_get_launch_normal();
+	return barrel->_get_launch_normal();
 };
 //Get Current Launch location
-FVector ATank::_get_launch_location(){
-    return barrel->_get_launch_location();
+FVector ATank::_get_launch_location()
+{
+	return barrel->_get_launch_location();
 }
 //Get Current Projectile's Launch Speed
-float ATank::_get_launch_speed(){
-    return weapon_component->_get_launch_speed();
+float ATank::_get_launch_speed()
+{
+	return weapon_component->_get_launch_speed();
 }
 
 //---------------------------------------------		PUBLIC :PLAY		---------------------------	#### TODO : Refactor switch to Template
@@ -180,7 +183,8 @@ void ATank::_controller_do(float DeltaTime, FVector aiming_normal)
 
 	if (aiming_component->_is_drawing(DeltaTime))
 	{
-		aiming_component->_draw_projectile_path(_get_launch_normal() * weapon_component->_get_launch_speed(), _get_launch_location(), this);
+		aiming_component->_draw_projectile_path(_get_launch_normal() * _get_launch_speed(),
+												_get_launch_location(), this);
 	}
 
 	if (move_component)
