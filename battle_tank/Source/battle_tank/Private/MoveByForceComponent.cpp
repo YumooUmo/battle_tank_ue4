@@ -28,47 +28,8 @@ void UMoveByForceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// ...
 }
 
-//		---		SETUP
-//Set Sockets that Force Applied
-void UMoveByForceComponent::_set_force_sockets_pointer(FVector *left, unsigned short l_amount_toset,
-													   FVector *right, unsigned short r_amount_toset)
-{
-	left_sockets = left;
-	l_amount = l_amount_toset;
-	right_sockets = right;
-	r_amount = r_amount_toset; //	BUG
-};
-
 //		---		PRIVATE : self action
 //Throttle
-void UMoveByForceComponent::_apply_force()
-{
-	if (burst)
-	{
-		left_throttle *= burst_rate;
-		right_throttle *= burst_rate;
-	}
-	UE_LOG(LogTemp, Error, TEXT(" Root is : %s ~!"), *(GetOwner()->GetRootComponent()->GetName()));
-
-	//Applly Force To Left Track
-	for (int i = 0; i < l_amount; i++) //------------TODO
-	{
-		Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent())
-			->AddForceAtLocation(
-				left_throttle * (_max_force / l_amount) * left_sockets[i * 2],
-				left_sockets[i * 2 + 1]);
-		UE_LOG(LogTemp, Warning, TEXT("Left Location is : %s ~!"), *(left_sockets[i * 2 + 1].ToString()));
-	}
-
-	//Applly Force To Right Track
-	for (int i = 0; i < r_amount; i++)
-	{
-		Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent())
-			->AddForceAtLocation(
-				right_throttle * (_max_force / r_amount) * right_sockets[i * 2],
-				right_sockets[i * 2 + 1]);
-	}
-};
 
 //		---		PUBLIC : Move
 bool UMoveByForceComponent::_should_tick()
@@ -79,6 +40,7 @@ bool UMoveByForceComponent::_should_tick()
 	}
 	else
 	{
+		_do_move();
 		return true;
 	}
 };
@@ -202,9 +164,30 @@ void UMoveByForceComponent::_do_move()
 			right_throttle = -throttle_rate;
 		}
 	}
-
-	_apply_force();
 }
+
+float UMoveByForceComponent::_get_left_throttle()
+{
+	if (burst)
+	{
+		return left_throttle * burst_rate;
+	}
+	else
+	{
+		return left_throttle;
+	}
+};
+float UMoveByForceComponent::_get_right_throttle()
+{
+	if (burst)
+	{
+		return right_throttle *= burst_rate;
+	}
+	else
+	{
+		return right_throttle;
+	}
+};
 
 void UMoveByForceComponent::_move_forward(bool if_move)
 {

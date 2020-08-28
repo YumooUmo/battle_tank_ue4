@@ -26,7 +26,7 @@ void UAimingComponent::BeginPlay()
 // Called every frame
 void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(GetWorld()->DeltaTimeSeconds, TickType, ThisTickFunction);
 
 	// ...
 }
@@ -91,11 +91,11 @@ void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector la
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
-bool UAimingComponent::_is_drawing(float DeltaTime)
+bool UAimingComponent::_should_draw() 
 {
 	if (draw)
 	{
-		draw_buffer -= DeltaTime;
+		draw_buffer -= GetWorld()->DeltaTimeSeconds;
 		if (draw_buffer <= 0.f)
 		{
 			draw = false;
@@ -110,7 +110,7 @@ bool UAimingComponent::_is_drawing(float DeltaTime)
 	{
 		if (draw_buffer < max_buffer)
 		{
-			draw_buffer += DeltaTime * 0.8;
+			draw_buffer += GetWorld()->DeltaTimeSeconds * 0.8;
 		}
 		return false;
 	}

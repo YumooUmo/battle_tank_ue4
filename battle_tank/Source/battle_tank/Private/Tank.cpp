@@ -50,7 +50,6 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UT
 	//Set Track Reference
 	left_track = left_track_to_set;
 	right_track = right_track_to_set;
-	_set_force_sockets_pointer();
 };
 
 void ATank::_set_weapon_component(UWeaponComponent *component)
@@ -61,17 +60,8 @@ void ATank::_set_weapon_component(UWeaponComponent *component)
 void ATank::_set_move_component(UMoveByForceComponent *component)
 {
 	move_component = component;
-	_set_force_sockets_pointer();
 };
 
-void ATank::_set_force_sockets_pointer()
-{
-	if (left_track && right_track)
-	{
-		move_component->_set_force_sockets_pointer(left_track->sockets, left_track->socket_amount,
-												   right_track->sockets, right_track->socket_amount);
-	}
-}
 //---------------------------------------------        PUBLIC : GET        -------------------------------------
 //Get Current Launch direction normal
 FVector ATank::_get_launch_normal()
@@ -177,23 +167,19 @@ void ATank::_aiming_at(FVector aiming_normal)
 	}
 };
 
-void ATank::_controller_do(float DeltaTime, FVector aiming_normal)
+void ATank::_controller_do(FVector aiming_normal)
 {
 	_aiming_at(aiming_normal);
 
-	if (aiming_component->_is_drawing(DeltaTime))
+	if (aiming_component->_should_draw())
 	{
 		aiming_component->_draw_projectile_path(_get_launch_normal() * _get_launch_speed(),
 												_get_launch_location(), this);
 	}
-
-	if (move_component)
-	{
-		if (move_component->_should_tick())
-		{
-			left_track->_refresh_force_sockets();
-			right_track->_refresh_force_sockets();
-			move_component->_do_move();
-		}
+	
+	if(move_component->_should_tick()){
+		left_track->_apply_force(move_component->_get_left_throttle());
+		right_track->_apply_force(move_component->_get_right_throttle());
 	}
-};
+}
+

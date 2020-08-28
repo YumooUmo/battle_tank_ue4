@@ -18,7 +18,7 @@ void ATankPlayerController::Tick(float DeltaTime)
     if (tank_controlled != nullptr)
     {
         _get_aiming_normal();
-        tank_controlled->_controller_do(DeltaTime,aiming_normal);
+        tank_controlled->_controller_do(aiming_normal);
     }
 }
 

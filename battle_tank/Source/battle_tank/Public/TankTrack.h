@@ -22,7 +22,12 @@ public:
 
 	void _refresh_force_sockets();
 
+	void _apply_force(float throttle);
+
 private:
+	UPROPERTY(EditAnywhere, Category = "Accelerate")
+	float _max_force = 4000000.f;
+
 	// FVector sockets[][];
 	// TArray<FVector> b[3][2];
 	void _reset_sockets();

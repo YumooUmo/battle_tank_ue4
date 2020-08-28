@@ -5,6 +5,9 @@
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
 #include "MoveByForceComponent.generated.h"
+/**
+ *MoveByForceComonent : For Two Throttle Drive. Transfer W A S D to axis value. Return Left and Right throttle value.
+ */
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UMoveByForceComponent : public UActorComponent
@@ -14,10 +17,6 @@ class BATTLE_TANK_API UMoveByForceComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UMoveByForceComponent();
-	FVector *left_sockets = nullptr;
-	FVector *right_sockets = nullptr;
-	unsigned short l_amount = 3;
-	unsigned short r_amount = 3;
 
 protected:
 	// Called when the game starts
@@ -42,21 +41,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
 	float throttle_rate = 1; //accelerate time
 
-	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float _max_force = 4000000.f;
-
-	void _apply_force();
-
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
-	//SetUp
-	void _set_force_sockets_pointer(FVector *left, unsigned short l_amount_toset, FVector *right, unsigned short r_amount_toset);
-
 	//tick
 	bool _should_tick();
 	void _do_move();
+	//	GET
+	float _get_left_throttle();
+	float _get_right_throttle();
 
 	//Move	---	KeyBoard
 	void _move_forward(bool if_move);

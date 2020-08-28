@@ -48,7 +48,7 @@ public:
 	//_aiming_at to aiming_direction
 	virtual void _aiming_at(FVector aiming_normal);
 	//	GO	(Tick)
-	virtual void _controller_do(float DeltaTime, FVector aiming_normal);
+	virtual void _controller_do(FVector aiming_normal);
 
 	//--------------------------		PLAY		----------------------------------
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -95,6 +95,4 @@ private:
 	//MOVE
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _set_move_component(UMoveByForceComponent *move_component);
-
-	void _set_force_sockets_pointer();
 };
