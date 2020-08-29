@@ -19,6 +19,8 @@ ATank::ATank()
 	//-----------------------component->RegisterComponent();
 	aiming_component = CreateDefaultSubobject<UAimingComponent>(FName(TEXT("AimingComponent")));
 	// weapon_component = CreateDefaultSubobject<UWeaponComponent>(FName(TEXT("WeaponComponent")));
+	weapon_component = CreateDefaultSubobject<UWeaponComponent>(FName(TEXT("WeaponComponentComponent")));
+	move_component =  CreateDefaultSubobject<UForceNavMovementComponent>(FName(TEXT("MoveComponent")));
 }
 
 // Called when the game starts or when spawned
@@ -50,16 +52,6 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UT
 	//Set Track Reference
 	left_track = left_track_to_set;
 	right_track = right_track_to_set;
-};
-
-void ATank::_set_weapon_component(UWeaponComponent *component)
-{
-	weapon_component = component;
-};
-
-void ATank::_set_move_component(UForceNavMovementComponent *component)
-{
-	move_component = component;
 };
 
 //---------------------------------------------        PUBLIC : GET        -------------------------------------

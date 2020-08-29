@@ -90,14 +90,10 @@ float UForceNavMovementComponent::_get_left_throttle()
 {
     if (burst)
     {
-        UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle * burst_rate);
-        UE_LOG(LogTemp, Error, TEXT(" Left Dest is %f ~!"), l_dest * burst_rate);
         return left_throttle * burst_rate;
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle);
-        UE_LOG(LogTemp, Error, TEXT(" Left Dest is %f ~!"), l_dest);
         return left_throttle;
     }
 };
@@ -105,14 +101,10 @@ float UForceNavMovementComponent::_get_right_throttle()
 {
     if (burst)
     {
-        UE_LOG(LogTemp, Error, TEXT(" Right is %f ~!"), right_throttle * burst_rate);
-        UE_LOG(LogTemp, Error, TEXT(" Right Dest is %f ~!"), r_dest * burst_rate);
         return right_throttle * burst_rate;
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT(" Right is %f ~!"), right_throttle);
-        UE_LOG(LogTemp, Error, TEXT(" Right Dest is %f ~!"), r_dest);
         return right_throttle;
     }
 };
@@ -181,8 +173,10 @@ void UForceNavMovementComponent::_ai_direct(FVector intend_normal)
 {
     // GetOwner()
     FVector forward = GetOwner()->GetActorForwardVector();
+
     float dot = FVector::DotProduct(intend_normal, forward);
     float cross = FVector::CrossProduct(intend_normal, forward).Z;
+    _burst(dot > 0.8 ? true : false);
     //when intend on right of forward, cross is +, we should turn right, so left_throttle work, left + cross
     l_dest = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
     r_dest = FMath::Clamp<float>(dot - cross, -1.f, 1.f);

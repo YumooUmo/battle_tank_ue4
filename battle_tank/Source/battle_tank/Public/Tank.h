@@ -26,13 +26,23 @@ public:
 	// Sets default values for this pawn's properties
 	ATank();
 	//---------------------	Properties	------------------------
+	// UPROPERTY(BlueprintReadOnly, Category = "Mesh")
 	UTankBarrel *barrel = nullptr;
+	// UPROPERTY(BlueprintReadOnly, Category = "Mesh")
 	UTankTurrent *turrent = nullptr;
+	// UPROPERTY(BlueprintReadOnly, Category = "Mesh")
 	UTankTrack *left_track = nullptr;
+	// UPROPERTY(BlueprintReadOnly, Category = "Mesh")
 	UTankTrack *right_track = nullptr;
 	//													#### TODO : Template for Component create
+
+	UPROPERTY(EditAnywhere, Category = "Component")
 	UAimingComponent *aiming_component = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Component")
 	UWeaponComponent *weapon_component = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Component")
 	UForceNavMovementComponent *move_component = nullptr;
 
 	//-----------------------------		GET		------------------------------
@@ -88,11 +98,4 @@ private:
 	//STATIC MESH
 	UFUNCTION(BlueprintCallable, Category = Mesh_Setup)
 	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UTankTrack *left_track_to_set, UTankTrack *right_track_to_set);
-	//WEAPON
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _set_weapon_component(UWeaponComponent *weapon_component);
-
-	//MOVE
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _set_move_component(UForceNavMovementComponent *move_component);
 };

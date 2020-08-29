@@ -33,12 +33,14 @@ private:
 	ATank *tank_controlled = nullptr;
 
 	//-------------------------------TICK--------------------------------
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _get_aiming_normal();
 
 	//-------By Location
 	// void _aiming() const;
 
 	//-------------------------------GET----------------------------------
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	virtual ATank *_get_controlled_tank() const;
 
 	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;

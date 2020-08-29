@@ -26,7 +26,7 @@ private:
 	ATank *tank_of_player = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "AI_Trace")
-	float AcceptanceRadius = 2000.f;
+	float AcceptanceRadius = 1000.f;
 	//						#### TODO : Defact below all method
 	//----------------------------------GET : SETUP-----------------------------------------
 	virtual ATank *
@@ -34,6 +34,5 @@ private:
 	virtual ATank *_get_player_tank() const;
 
 	//-----------------------------------------------ACTION-------------------------------------------------------
-	//Aiming
-	void _aiming_at() const;
+
 };
