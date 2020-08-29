@@ -25,25 +25,15 @@ private:
 	ATank *tank_controlled = nullptr;
 	ATank *tank_of_player = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = "AI_Trace")
+	float AcceptanceRadius = 2000.f;
 	//						#### TODO : Defact below all method
 	//----------------------------------GET : SETUP-----------------------------------------
-	virtual ATank *_get_controlled_tank() const;
-
+	virtual ATank *
+	_get_controlled_tank() const;
 	virtual ATank *_get_player_tank() const;
 
 	//-----------------------------------------------ACTION-------------------------------------------------------
 	//Aiming
 	void _aiming_at() const;
-
-	//SET weapon number : Change Weapon
-	virtual void _set_weapon(int projectile_number);
-
-	//SET exchange projectile : Exchange Weapon with last time used
-	virtual void _exchange_weapon();
-
-	//Fire
-	virtual void _fire();
-
-	//Reload
-	virtual void _reload();
 };

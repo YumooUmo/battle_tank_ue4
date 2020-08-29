@@ -15,7 +15,7 @@ class ATankProjectile;
 
 class UWeaponComponent;
 class UAimingComponent;
-class UMoveByForceComponent;
+class UForceNavMovementComponent;
 
 UCLASS()
 class BATTLE_TANK_API ATank : public APawn
@@ -33,7 +33,7 @@ public:
 	//													#### TODO : Template for Component create
 	UAimingComponent *aiming_component = nullptr;
 	UWeaponComponent *weapon_component = nullptr;
-	UMoveByForceComponent *move_component = nullptr;
+	UForceNavMovementComponent *move_component = nullptr;
 
 	//-----------------------------		GET		------------------------------
 	FVector _get_launch_normal();
@@ -94,5 +94,5 @@ private:
 
 	//MOVE
 	UFUNCTION(BlueprintCallable, Category = Move)
-	void _set_move_component(UMoveByForceComponent *move_component);
+	void _set_move_component(UForceNavMovementComponent *move_component);
 };

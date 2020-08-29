@@ -3,7 +3,7 @@
 #include "Tank.h"
 //FIRST include
 #include "AimingComponent.h"
-#include "MoveByForceComponent.h"
+#include "ForceNavMovementComponent.h"
 #include "TankBarrel.h"
 #include "TankProjectile.h"
 #include "TankTrack.h"
@@ -57,7 +57,7 @@ void ATank::_set_weapon_component(UWeaponComponent *component)
 	weapon_component = component;
 };
 
-void ATank::_set_move_component(UMoveByForceComponent *component)
+void ATank::_set_move_component(UForceNavMovementComponent *component)
 {
 	move_component = component;
 };
