@@ -91,26 +91,33 @@ void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector la
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
-bool UAimingComponent::_should_draw() 
+bool UAimingComponent::_should_draw()
 {
-	if (draw)
+	//Draw_Path : Pressed
+	if (aiming_state == AimingState::locking)
 	{
-		draw_buffer -= GetWorld()->DeltaTimeSeconds;
 		if (draw_buffer <= 0.f)
 		{
-			draw = false;
+			draw_buffer = -overheat_lag;
+			aiming_state = AimingState::turning;
 			return false;
 		}
 		else
 		{
+			draw_buffer -= GetWorld()->DeltaTimeSeconds;
 			return true;
 		}
 	}
+	//Draw_Path : Not Pressed
 	else
 	{
 		if (draw_buffer < max_buffer)
 		{
 			draw_buffer += GetWorld()->DeltaTimeSeconds * 0.8;
+			if (draw_buffer > max_buffer)
+			{
+				draw_buffer = max_buffer;
+			}
 		}
 		return false;
 	}
@@ -118,5 +125,14 @@ bool UAimingComponent::_should_draw()
 
 void UAimingComponent::_set_drawable(bool flag)
 {
-	draw = flag;
+	//Draw_Path : Pressed
+	if (flag)
+	{
+		aiming_state = AimingState::locking;
+	}
+	//Draw_Path : Released
+	else
+	{
+		aiming_state = AimingState::aiming;
+	}
 };

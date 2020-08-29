@@ -66,28 +66,28 @@ float UWeaponComponent::_get_launch_speed()
 	return _get_current_projectile().GetDefaultObject()->launch_force; // Here is the point
 }
 //----------------------------		PLAY		----------------------------------
-//Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+//Add check : if projectile exists (is set alreloading) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
 void UWeaponComponent::_exchange_weapon(int number)
 {
 	if (weapon_number % 10 != number)
 	{
-		//Add check : if weapon exists (is set already) ? 	------------------TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+		//Add check : if weapon exists (is set alreloading) ? 	------------------TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
 		switch (number)
 		{
 		case 0:
-			if (tank_projectile_0)
+			if (tank_projectile_0 != nullptr)
 			{
 				weapon_number = (weapon_number % 10) * 10 + number;
-				reloaded = false;
+				reloading = false;
 				_reload();
 			}
 
 			break;
 		case 1:
-			if (tank_projectile_1)
+			if (tank_projectile_1 != nullptr)
 			{
 				weapon_number = (weapon_number % 10) * 10 + number;
-				reloaded = false;
+				reloading = false;
 				_reload();
 			}
 			break;
@@ -103,7 +103,7 @@ void UWeaponComponent::_exchange_weapon()
 	if (weapon_number != 0)
 	{
 		weapon_number = (((weapon_number % 10) * 10) + (weapon_number / 10));
-		reloaded = false;
+		reloading = false;
 		_reload();
 	}
 };
@@ -111,28 +111,43 @@ void UWeaponComponent::_exchange_weapon()
 //Fire()
 void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 {
-	if (_get_current_projectile())
+	if (_get_current_projectile() == nullptr)
 	{
-		if ((FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == true)
-		{
-			reloaded = false;
-			GetWorld()->SpawnActor<ATankProjectile>(
-						  _get_current_projectile(),
-						  launch_location,
-						  launch_normal.Rotation())
-				->_launch();
-		}
+		return;
+	}
+
+	if (_is_time_out() && reloading == true)
+	{
+		reloading = false;
+		GetWorld()->SpawnActor<ATankProjectile>(
+					  _get_current_projectile(),
+					  launch_location,
+					  launch_normal.Rotation())
+			->_launch();
 	}
 };
 
 //Reload
 void UWeaponComponent::_reload()
 {
-	if ((FPlatformTime::Seconds() - start_reload_time) > _get_current_projectile().GetDefaultObject()->reload_time && reloaded == false)
+	if (reloading == false)
 	{
 		start_reload_time = FPlatformTime::Seconds();
-		reloaded = true;
-		UE_LOG(LogTemp, Warning, TEXT("Reloading ~!"));
+		reloading = true;
+		// UE_LOG(LogTemp, Warning, TEXT("Reloading ~!"));
 	}
-	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
+	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , reloading is %i"), FPlatformTime::Seconds() - start_reload_time, reloading);
 };
+
+bool UWeaponComponent::_is_time_out()
+{
+	if ((FPlatformTime::Seconds() - start_reload_time) >
+		_get_current_projectile().GetDefaultObject()->reload_time)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

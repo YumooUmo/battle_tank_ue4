@@ -16,7 +16,9 @@
 			"system_error": "cpp",
 			"typeindex": "cpp",
 			"xlocale": "cpp",
-			"typeinfo": "cpp"
+			"typeinfo": "cpp",
+			"__config": "cpp",
+			"__nullptr": "cpp"
 		}
 	},
 	"extensions": {

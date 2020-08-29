@@ -46,6 +46,8 @@ public:
 	//Reload
 	virtual void _reload();
 
+	bool _is_time_out();
+
 private:
 	//SET projectile_1
 	UPROPERTY(EditAnywhere, Category = setup)
@@ -60,6 +62,7 @@ private:
 	int weapon_number = 0;
 
 	//   Reload Property ---- start with RELOADING
-	bool reloaded = true;
+	bool reloading = true;
 	float start_reload_time = 0.f;
+
 };
