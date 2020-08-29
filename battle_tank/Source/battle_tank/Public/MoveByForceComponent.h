@@ -25,10 +25,8 @@ protected:
 	float left_throttle = 0.f;
 	float right_throttle = 0.f;
 
-	bool move_f = false;
-	bool move_b = false;
-	bool move_l = false;
-	bool move_r = false;
+	float l_dest = 0.f;
+	float r_dest = 0.f;
 
 	bool burst = false;
 
@@ -39,14 +37,14 @@ protected:
 	// float turn_rate = 1.5; //turning speed
 
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float throttle_rate = 1.5; //accelerate time
+	float throttle_rate = 2.f; //accelerate time
 
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
 	//tick
-	bool _should_tick();
+	bool _should_move();
 	void _do_move();
 	//	GET
 	float _get_left_throttle();
@@ -58,4 +56,5 @@ public:
 	void _move_left(bool if_move);
 	void _move_right(bool if_move);
 	void _burst(bool if_burst);
+	void _ai_intend(FVector intend_normal);
 };

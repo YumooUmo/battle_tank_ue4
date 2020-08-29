@@ -177,7 +177,7 @@ void ATank::_controller_do(FVector aiming_normal)
 												_get_launch_location(), this);
 	}
 	
-	if(move_component->_should_tick()){
+	if(move_component->_should_move()){
 		left_track->_apply_force(move_component->_get_left_throttle());
 		right_track->_apply_force(move_component->_get_right_throttle());
 	}

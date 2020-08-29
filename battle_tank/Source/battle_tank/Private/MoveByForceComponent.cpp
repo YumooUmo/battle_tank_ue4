@@ -32,9 +32,9 @@ void UMoveByForceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 //Throttle
 
 //		---		PUBLIC : Move
-bool UMoveByForceComponent::_should_tick()
+bool UMoveByForceComponent::_should_move()
 {
-	if (left_throttle == 0.f && right_throttle == 0.f && !move_f && !move_b && !move_l && !move_r)
+	if (left_throttle == 0.f && right_throttle == 0.f && l_dest == 0.f && r_dest == 0.f)
 	{
 		return false;
 	}
@@ -47,142 +47,56 @@ bool UMoveByForceComponent::_should_tick()
 
 void UMoveByForceComponent::_do_move()
 {
-	if (move_f)
+	float l_clamp = FMath::Clamp<float>(l_dest, -1.f, 1.f);
+	float r_clamp = FMath::Clamp<float>(r_dest, -1.f, 1.f);
+
+	if (left_throttle < l_clamp)
 	{
-		if (left_throttle < 1)
+		left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
+		if (left_throttle > l_clamp)
 		{
-			left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (left_throttle > 1)
-		{
-			left_throttle = 1;
-		}
-		if (right_throttle < 1)
-		{
-			right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (right_throttle > 1)
-		{
-			right_throttle = 1;
+			left_throttle = l_clamp;
 		}
 	}
-	else
+	if (left_throttle > l_clamp)
 	{
-		if (left_throttle > 0)
+		left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
+		if (left_throttle < l_clamp)
 		{
-			left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
-			if (left_throttle < 0)
-			{
-				left_throttle = 0;
-			}
-		}
-		if (right_throttle > 0)
-		{
-			right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
-			if (right_throttle < 0)
-			{
-				right_throttle = 0;
-			}
+			left_throttle = l_clamp;
 		}
 	}
-
-	if (move_b)
+	if (right_throttle < r_clamp)
 	{
-		if (left_throttle > -1)
+		right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
+		if (right_throttle > r_clamp)
 		{
-			left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (left_throttle < -1)
-		{
-			left_throttle = -1;
-		}
-		if (right_throttle > -1)
-		{
-			right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (right_throttle < -1)
-		{
-			right_throttle = -1;
+			right_throttle = r_clamp;
 		}
 	}
-	else
+	if (right_throttle > r_clamp)
 	{
-		if (left_throttle < 0)
+		right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
+		if (right_throttle < r_clamp)
 		{
-			left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
-			if (left_throttle > 0)
-			{
-				left_throttle = 0;
-			}
-		}
-		if (right_throttle < 0)
-		{
-			right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
-			if (right_throttle > 0)
-			{
-				right_throttle = 0;
-			}
-		}
-	}
-
-	if (move_l)
-	{
-
-		//left track move back
-		if (left_throttle > -1)
-		{
-			left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (left_throttle < -1)
-		{
-			left_throttle = -1;
-		}
-		UE_LOG(LogTemp, Error, TEXT("do_move Left_track is %f ~!"), left_throttle);
-
-		//right track move forward
-		if (right_throttle < 1)
-		{
-			right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (right_throttle > 1)
-		{
-			right_throttle = 1;
-		}
-		UE_LOG(LogTemp, Error, TEXT("do_move Right_track is %f ~!"), right_throttle);
-
-	}
-
-	if (move_r)
-	{
-		if (left_throttle < 1)
-		{
-			left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (left_throttle > 1)
-		{
-			left_throttle = 1;
-		}
-		if (right_throttle > -1)
-		{
-			right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
-		}
-		else if (right_throttle < -1)
-		{
-			right_throttle = -1;
+			right_throttle = r_clamp;
 		}
 	}
 }
 
+//Output Throttle
 float UMoveByForceComponent::_get_left_throttle()
 {
 	if (burst)
 	{
-		UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle* burst_rate);
+		UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle * burst_rate);
+		UE_LOG(LogTemp, Error, TEXT(" Left Dest is %f ~!"), l_dest * burst_rate);
 		return left_throttle * burst_rate;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle);
+		UE_LOG(LogTemp, Error, TEXT(" Left Dest is %f ~!"), l_dest);
 		return left_throttle;
 	}
 };
@@ -190,33 +104,84 @@ float UMoveByForceComponent::_get_right_throttle()
 {
 	if (burst)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Right is %f ~!"), right_throttle* burst_rate);
+		UE_LOG(LogTemp, Error, TEXT(" Right is %f ~!"), right_throttle * burst_rate);
+		UE_LOG(LogTemp, Error, TEXT(" Right Dest is %f ~!"), r_dest* burst_rate);
 		return right_throttle * burst_rate;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Right is %f ~!"), right_throttle);
+		UE_LOG(LogTemp, Error, TEXT(" Right is %f ~!"), right_throttle);
+		UE_LOG(LogTemp, Error, TEXT(" Right Dest is %f ~!"), r_dest);
 		return right_throttle;
 	}
 };
 
+//Format Input
 void UMoveByForceComponent::_move_forward(bool if_move)
 {
-	move_f = if_move;
+	if (if_move)
+	{
+		l_dest += 1.f;
+		r_dest += 1.f;
+	}
+	else
+	{
+		l_dest -= 1.f;
+		r_dest -= 1.f;
+	}
 };
 void UMoveByForceComponent::_move_backward(bool if_move)
 {
-	move_b = if_move;
+	if (if_move)
+	{
+		l_dest -= 1.f;
+		r_dest -= 1.f;
+	}
+	else
+	{
+		l_dest += 1.f;
+		r_dest += 1.f;
+	}
 };
 void UMoveByForceComponent::_move_left(bool if_move)
 {
-	move_l = if_move;
+	if (if_move)
+	{
+		l_dest -= 1.f;
+		r_dest += 1.f;
+	}
+	else
+	{
+		l_dest += 1.f;
+		r_dest -= 1.f;
+	}
 };
 void UMoveByForceComponent::_move_right(bool if_move)
 {
-	move_r = if_move;
+	if (if_move)
+	{
+		l_dest += 1.f;
+		r_dest -= 1.f;
+	}
+	else
+	{
+		l_dest -= 1.f;
+		r_dest += 1.f;
+	}
 };
 void UMoveByForceComponent::_burst(bool if_burst)
 {
 	burst = if_burst;
 };
+
+// void _intend	----------------------------------------------	TODO
+void UMoveByForceComponent::_ai_intend(FVector intend_normal)
+{
+	// GetOwner()
+	FVector forward = GetOwner()->GetActorForwardVector().GetSafeNormal();
+	float dot = FVector::DotProduct(intend_normal, forward);
+	float cross = FVector::CrossProduct(intend_normal, forward).Z;
+	//when intend on right of forward, cross is +, we should turn right, so left_throttle work, left + cross
+	l_dest = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
+	r_dest = FMath::Clamp<float>(dot - cross, -1.f, 1.f);
+}
