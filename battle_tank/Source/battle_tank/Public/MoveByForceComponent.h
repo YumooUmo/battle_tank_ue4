@@ -33,13 +33,13 @@ protected:
 	bool burst = false;
 
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float burst_rate = 2; //when press set to 1,or higher
+	float burst_rate = 1.2; //when press set to 1,or higher
 
-	UPROPERTY(EditAnywhere, Category = "Steer")
-	float turn_rate = 1.2; //turning speed
+	// UPROPERTY(EditAnywhere, Category = "Steer")
+	// float turn_rate = 1.5; //turning speed
 
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float throttle_rate = 1; //accelerate time
+	float throttle_rate = 1.5; //accelerate time
 
 public:
 	// Called every frame

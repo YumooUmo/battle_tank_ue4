@@ -86,13 +86,13 @@ private:
 	//-----------------------------		SETUP		------------------------------
 	//  	Set UP
 	//STATIC MESH
-	UFUNCTION(BlueprintCallable, Category = setup)
+	UFUNCTION(BlueprintCallable, Category = Mesh_Setup)
 	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UTankTrack *left_track_to_set, UTankTrack *right_track_to_set);
 	//WEAPON
-	UFUNCTION(BlueprintCallable, Category = setup)
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _set_weapon_component(UWeaponComponent *weapon_component);
 
 	//MOVE
-	UFUNCTION(BlueprintCallable, Category = Weapon)
+	UFUNCTION(BlueprintCallable, Category = Move)
 	void _set_move_component(UMoveByForceComponent *move_component);
 };

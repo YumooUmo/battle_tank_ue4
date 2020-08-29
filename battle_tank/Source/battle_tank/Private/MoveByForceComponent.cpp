@@ -49,28 +49,28 @@ void UMoveByForceComponent::_do_move()
 {
 	if (move_f)
 	{
-		if (left_throttle < throttle_rate)
+		if (left_throttle < 1)
 		{
-			left_throttle += GetWorld()->DeltaTimeSeconds;
+			left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (left_throttle > throttle_rate)
+		else if (left_throttle > 1)
 		{
-			left_throttle = throttle_rate;
+			left_throttle = 1;
 		}
-		if (right_throttle < throttle_rate)
+		if (right_throttle < 1)
 		{
-			right_throttle += GetWorld()->DeltaTimeSeconds;
+			right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (right_throttle > throttle_rate)
+		else if (right_throttle > 1)
 		{
-			right_throttle = throttle_rate;
+			right_throttle = 1;
 		}
 	}
 	else
 	{
 		if (left_throttle > 0)
 		{
-			left_throttle -= GetWorld()->DeltaTimeSeconds;
+			left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
 			if (left_throttle < 0)
 			{
 				left_throttle = 0;
@@ -78,7 +78,7 @@ void UMoveByForceComponent::_do_move()
 		}
 		if (right_throttle > 0)
 		{
-			right_throttle -= GetWorld()->DeltaTimeSeconds;
+			right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
 			if (right_throttle < 0)
 			{
 				right_throttle = 0;
@@ -88,28 +88,28 @@ void UMoveByForceComponent::_do_move()
 
 	if (move_b)
 	{
-		if (left_throttle > -throttle_rate)
+		if (left_throttle > -1)
 		{
-			left_throttle -= GetWorld()->DeltaTimeSeconds;
+			left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (left_throttle < -throttle_rate)
+		else if (left_throttle < -1)
 		{
-			left_throttle = -throttle_rate;
+			left_throttle = -1;
 		}
-		if (right_throttle > -throttle_rate)
+		if (right_throttle > -1)
 		{
-			right_throttle -= GetWorld()->DeltaTimeSeconds;
+			right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (right_throttle < -throttle_rate)
+		else if (right_throttle < -1)
 		{
-			right_throttle = -throttle_rate;
+			right_throttle = -1;
 		}
 	}
 	else
 	{
 		if (left_throttle < 0)
 		{
-			left_throttle += GetWorld()->DeltaTimeSeconds;
+			left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
 			if (left_throttle > 0)
 			{
 				left_throttle = 0;
@@ -117,7 +117,7 @@ void UMoveByForceComponent::_do_move()
 		}
 		if (right_throttle < 0)
 		{
-			right_throttle += GetWorld()->DeltaTimeSeconds;
+			right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
 			if (right_throttle > 0)
 			{
 				right_throttle = 0;
@@ -127,41 +127,48 @@ void UMoveByForceComponent::_do_move()
 
 	if (move_l)
 	{
-		if (left_throttle > -throttle_rate)
+
+		//left track move back
+		if (left_throttle > -1)
 		{
-			left_throttle -= GetWorld()->DeltaTimeSeconds * turn_rate;
+			left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (left_throttle < -throttle_rate)
+		else if (left_throttle < -1)
 		{
-			left_throttle = -throttle_rate;
+			left_throttle = -1;
 		}
-		if (right_throttle < throttle_rate)
+		UE_LOG(LogTemp, Error, TEXT("do_move Left_track is %f ~!"), left_throttle);
+
+		//right track move forward
+		if (right_throttle < 1)
 		{
-			right_throttle += GetWorld()->DeltaTimeSeconds * turn_rate;
+			right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (right_throttle > throttle_rate)
+		else if (right_throttle > 1)
 		{
-			right_throttle = throttle_rate;
+			right_throttle = 1;
 		}
+		UE_LOG(LogTemp, Error, TEXT("do_move Right_track is %f ~!"), right_throttle);
+
 	}
 
 	if (move_r)
 	{
-		if (left_throttle < throttle_rate)
+		if (left_throttle < 1)
 		{
-			left_throttle += GetWorld()->DeltaTimeSeconds * turn_rate;
+			left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (left_throttle > throttle_rate)
+		else if (left_throttle > 1)
 		{
-			left_throttle = throttle_rate;
+			left_throttle = 1;
 		}
-		if (right_throttle > -throttle_rate)
+		if (right_throttle > -1)
 		{
-			right_throttle -= GetWorld()->DeltaTimeSeconds * turn_rate;
+			right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
 		}
-		else if (right_throttle < -throttle_rate)
+		else if (right_throttle < -1)
 		{
-			right_throttle = -throttle_rate;
+			right_throttle = -1;
 		}
 	}
 }
@@ -170,10 +177,12 @@ float UMoveByForceComponent::_get_left_throttle()
 {
 	if (burst)
 	{
+		UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle* burst_rate);
 		return left_throttle * burst_rate;
 	}
 	else
 	{
+		UE_LOG(LogTemp, Error, TEXT(" Left is %f ~!"), left_throttle);
 		return left_throttle;
 	}
 };
@@ -181,10 +190,12 @@ float UMoveByForceComponent::_get_right_throttle()
 {
 	if (burst)
 	{
-		return right_throttle *= burst_rate;
+		UE_LOG(LogTemp, Error, TEXT("Right is %f ~!"), right_throttle* burst_rate);
+		return right_throttle * burst_rate;
 	}
 	else
 	{
+		UE_LOG(LogTemp, Error, TEXT("Right is %f ~!"), right_throttle);
 		return right_throttle;
 	}
 };
