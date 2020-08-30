@@ -36,13 +36,13 @@ public:
 	UTankTrack *right_track = nullptr;
 	//													#### TODO : Template for Component create
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadWrite, Category = "Component")
 	UAimingComponent *aiming_component = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadWrite, Category = "Component")
 	UForceNavMovementComponent *move_component = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadWrite, Category = "Component")
 	UWeaponComponent *weapon_component = nullptr;
 
 	//-----------------------------		GET		------------------------------

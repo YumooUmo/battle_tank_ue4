@@ -3,6 +3,7 @@
 #include "WeaponComponent.h"
 //FIRST include
 #include "TankProjectile.h"
+
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
 {
@@ -36,24 +37,10 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 	switch (weapon_number % 10)
 	{
 	case 0:
-		if (tank_projectile_0)
-		{
 			return tank_projectile_0;
-		}
-		else
-		{
-			return nullptr;
-		}
 		break;
 	case 1:
-		if (tank_projectile_1)
-		{
 			return tank_projectile_1;
-		}
-		else
-		{
-			return nullptr;
-		}
 		break;
 	default:
 		return nullptr;
@@ -63,6 +50,7 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 
 float UWeaponComponent::_get_launch_speed()
 {
+	if (_get_current_projectile() == nullptr){ return 0.f;}
 	return _get_current_projectile().GetDefaultObject()->launch_force; // Here is the point
 }
 //----------------------------		PLAY		----------------------------------
@@ -154,6 +142,8 @@ bool UWeaponComponent::_is_time_out()
 
 WeaponState UWeaponComponent::_get_weapon_state()
 {
+	UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
+
 	return reloaded ? (_is_time_out() ? WeaponState::ready : WeaponState::reloading)
 					: WeaponState::empty;
-};
+}; 

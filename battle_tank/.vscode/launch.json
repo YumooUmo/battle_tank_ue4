@@ -1,13 +1,13 @@
 {
 	"version": "0.2.0",
 	"configurations": [
+
 		{
 			"name": "battle_tank (Debug)",
 			"request": "launch",
 			"preLaunchTask": "battle_tank Win64 Debug Build",
 			"program": "E:\\Project\\Game\\BattleTank\\battle_tank\\Binaries\\Win64\\UE4-Win64-Debug.exe",
-			"args": [
-			],
+			"args": [],
 			"cwd": "E:\\Programs\\Unreal Engine\\UE_4.25",
 			"stopAtEntry": false,
 			"externalConsole": true,
@@ -15,12 +15,18 @@
 			"visualizerFile": "E:\\Programs\\Unreal Engine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
 		},
 		{
+			"name": "battle_tank (Attach)",
+			"type": "cppvsdbg",
+			"request": "attach",
+			"processID": "${command:pickProcess}",
+			"visualizerFile": "E:\\Programs\\Unreal Engine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
 			"name": "battle_tank (DebugGame)",
 			"request": "launch",
 			"preLaunchTask": "battle_tank Win64 DebugGame Build",
 			"program": "E:\\Project\\Game\\BattleTank\\battle_tank\\Binaries\\Win64\\UE4-Win64-DebugGame.exe",
-			"args": [
-			],
+			"args": [],
 			"cwd": "E:\\Programs\\Unreal Engine\\UE_4.25",
 			"stopAtEntry": false,
 			"externalConsole": true,
@@ -32,8 +38,7 @@
 			"request": "launch",
 			"preLaunchTask": "battle_tank Win64 Development Build",
 			"program": "E:\\Project\\Game\\BattleTank\\battle_tank\\Binaries\\Win64\\UE4.exe",
-			"args": [
-			],
+			"args": [],
 			"cwd": "E:\\Programs\\Unreal Engine\\UE_4.25",
 			"stopAtEntry": false,
 			"externalConsole": true,
@@ -45,8 +50,7 @@
 			"request": "launch",
 			"preLaunchTask": "battle_tank Win64 Shipping Build",
 			"program": "E:\\Project\\Game\\BattleTank\\battle_tank\\Binaries\\Win64\\UE4-Win64-Shipping.exe",
-			"args": [
-			],
+			"args": [],
 			"cwd": "E:\\Programs\\Unreal Engine\\UE_4.25",
 			"stopAtEntry": false,
 			"externalConsole": true,
@@ -58,8 +62,7 @@
 			"request": "launch",
 			"preLaunchTask": "battle_tank Win64 Test Build",
 			"program": "E:\\Project\\Game\\BattleTank\\battle_tank\\Binaries\\Win64\\UE4-Win64-Test.exe",
-			"args": [
-			],
+			"args": [],
 			"cwd": "E:\\Programs\\Unreal Engine\\UE_4.25",
 			"stopAtEntry": false,
 			"externalConsole": true,

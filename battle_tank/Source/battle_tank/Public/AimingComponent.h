@@ -13,7 +13,8 @@ enum class AimingState : uint8
 {
 	turning,
 	aiming,
-	locking
+	locking,
+	overheat
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -31,9 +32,10 @@ public:
 	virtual bool _should_draw();
 	virtual void _set_drawable(bool flag);
 
+	UPROPERTY(BlueprintReadOnly, Category = "State")
+	AimingState aiming_state = AimingState::aiming;
+	
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Aiming")
-	AimingState aiming_state = AimingState::turning;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float overheat_lag = 2.f;

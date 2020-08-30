@@ -25,10 +25,18 @@ class BATTLE_TANK_API UWeaponComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UWeaponComponent();
-
+	
+	//   Reload Property ---- start with reloaded	
+	UFUNCTION(BlueprintCallable, Category = "State")
+	WeaponState _get_weapon_state();
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
+	bool reloaded = true;
+
 
 public:
 	// Called every frame
@@ -54,7 +62,7 @@ public:
 	virtual void _reload();
 
 	bool _is_time_out();
-
+;
 private:
 	//SET projectile_1
 	UPROPERTY(EditAnywhere, Category = setup)
@@ -67,11 +75,6 @@ private:
 	//Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW;
 	//Ten digit: 0-9 represents projectile LAST USED.
 	int weapon_number = 0;
-
-	//   Reload Property ---- start with reloaded
-	bool reloaded = true;
 	float start_reload_time = 0.f;
 
-	UFUNCTION(BlueprintCallable, Category = "Aiming")
-	WeaponState _get_weapon_state();
 };

@@ -27,7 +27,6 @@ void UAimingComponent::BeginPlay()
 void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(GetWorld()->DeltaTimeSeconds, TickType, ThisTickFunction);
-
 	// ...
 }
 
@@ -99,7 +98,7 @@ bool UAimingComponent::_should_draw()
 		if (draw_buffer <= 0.f)
 		{
 			draw_buffer = -overheat_lag;
-			aiming_state = AimingState::turning;
+			aiming_state = AimingState::overheat;
 			return false;
 		}
 		else
@@ -119,6 +118,10 @@ bool UAimingComponent::_should_draw()
 				draw_buffer = max_buffer;
 			}
 		}
+		if (aiming_state == AimingState::overheat && draw_buffer > 0)
+		{
+			aiming_state = AimingState::turning;
+		}
 		return false;
 	}
 };
@@ -133,6 +136,6 @@ void UAimingComponent::_set_drawable(bool flag)
 	//Draw_Path : Released
 	else
 	{
-		aiming_state = AimingState::aiming;
+		aiming_state = AimingState::turning;
 	}
 };
