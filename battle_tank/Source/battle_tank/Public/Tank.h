@@ -36,14 +36,14 @@ public:
 	UTankTrack *right_track = nullptr;
 	//													#### TODO : Template for Component create
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
 	UAimingComponent *aiming_component = nullptr;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Component")
-	UWeaponComponent *weapon_component = nullptr;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
 	UForceNavMovementComponent *move_component = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UWeaponComponent *weapon_component = nullptr;
 
 	//-----------------------------		GET		------------------------------
 	FVector _get_launch_normal();
@@ -55,8 +55,8 @@ public:
 	float _get_launch_speed();
 
 	//-----------------		PUBLIC : SELF action	--------------------
-	//_aiming_at to aiming_direction
-	virtual void _aiming_at(FVector aiming_normal);
+	//_turning_to to aiming_direction
+	virtual void _turning_to(FVector aiming_normal);
 	//	GO	(Tick)
 	virtual void _controller_do(FVector aiming_normal);
 
@@ -97,5 +97,9 @@ private:
 	//  	Set UP
 	//STATIC MESH
 	UFUNCTION(BlueprintCallable, Category = Mesh_Setup)
-	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set, UTankTrack *left_track_to_set, UTankTrack *right_track_to_set);
+	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
+						 UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
+						 UAimingComponent *aiming_component_toset,
+						 UWeaponComponent *weapon_component_toset,
+						 UForceNavMovementComponent *move_component_toset);
 };

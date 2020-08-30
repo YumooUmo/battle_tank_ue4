@@ -19,13 +19,16 @@ void ATankAIController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
     // UE_LOG(LogTemp, Warning, TEXT("Ticking"));
 
-    //Tick pass : pass in for aiming ; and self action
-    tank_controlled->_controller_do((tank_of_player->GetActorLocation() - tank_controlled->_get_launch_location()).GetSafeNormal());
-    //weapon
-    tank_controlled->_fire();
-    tank_controlled->_reload();
-    //move
-    MoveToActor(tank_of_player, AcceptanceRadius);
+    if (tank_controlled)
+    {
+        //Tick pass : pass in for aiming ; and self action
+        tank_controlled->_controller_do((tank_of_player->GetActorLocation() - tank_controlled->_get_launch_location()).GetSafeNormal());
+        //weapon
+        tank_controlled->_fire();
+        tank_controlled->_reload();
+        //move
+        MoveToActor(tank_of_player, AcceptanceRadius);
+    }
 }
 
 //return a Tank pointer

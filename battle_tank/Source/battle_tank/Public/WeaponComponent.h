@@ -6,10 +6,17 @@
 #include "CoreMinimal.h"
 //last generate
 #include "WeaponComponent.generated.h"
+// Enum for UI call
 
 // class AWeapon;
 class ATankProjectile;
-
+UENUM()
+enum class WeaponState : uint8
+{
+	empty,
+	reloading,
+	ready
+};
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UWeaponComponent : public UActorComponent
 {
@@ -41,7 +48,7 @@ public:
 	virtual void _exchange_weapon();
 
 	//Fire
-	virtual void _fire(FVector launch_normal,FVector launch_location);
+	virtual void _fire(FVector launch_normal, FVector launch_location);
 
 	//Reload
 	virtual void _reload();
@@ -61,8 +68,10 @@ private:
 	//Ten digit: 0-9 represents projectile LAST USED.
 	int weapon_number = 0;
 
-	//   Reload Property ---- start with RELOADING
-	bool reloading = true;
+	//   Reload Property ---- start with reloaded
+	bool reloaded = true;
 	float start_reload_time = 0.f;
 
+	UFUNCTION(BlueprintCallable, Category = "Aiming")
+	WeaponState _get_weapon_state();
 };
