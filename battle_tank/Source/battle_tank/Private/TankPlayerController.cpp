@@ -2,6 +2,7 @@
 
 #include "TankPlayerController.h"
 //FIRST include
+#include "MenuHUD.h"
 #include "Tank.h"
 
 void ATankPlayerController::BeginPlay()
@@ -9,6 +10,16 @@ void ATankPlayerController::BeginPlay()
     Super::BeginPlay();
     //get possessed tank
     tank_controlled = _get_controlled_tank();
+}
+
+void ATankPlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    if (InputComponent)
+    {
+        InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ATankPlayerController::_open_menu);
+    }
 }
 
 void ATankPlayerController::Tick(float DeltaTime)
@@ -41,4 +52,13 @@ ATank *ATankPlayerController::_get_controlled_tank() const
     return Cast<ATank>(GetPawn());
 }
 
-//-----------------------------PLAY------------------------------------------
+//-----------------------------Menu------------------------------------------
+void ATankPlayerController::_open_menu()
+{
+    if (AMenuHUD *menu_HUD = Cast<AMenuHUD>(GetHUD()))
+    {
+        menu_HUD->_show_menu();
+    }
+};
+
+

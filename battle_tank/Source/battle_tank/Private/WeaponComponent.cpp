@@ -3,7 +3,6 @@
 #include "WeaponComponent.h"
 //FIRST include
 #include "TankProjectile.h"
-
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
 {
@@ -30,6 +29,13 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 //----------------------------		PUBLIC		--------------------------	#### TODO : Refactor switch to Template
+//----------------------------		SET			----------------------------------
+void UWeaponComponent::_set_projectile(TSubclassOf<ATankProjectile> projectile_Subclass_0,
+									   TSubclassOf<ATankProjectile> projectile_Subclass_1)
+{
+	tank_projectile_0 = projectile_Subclass_0;
+	tank_projectile_1 = projectile_Subclass_1;
+};
 
 //----------------------------		GET			----------------------------------
 TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
@@ -37,10 +43,10 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 	switch (weapon_number % 10)
 	{
 	case 0:
-			return tank_projectile_0;
+		return tank_projectile_0;
 		break;
 	case 1:
-			return tank_projectile_1;
+		return tank_projectile_1;
 		break;
 	default:
 		return nullptr;
@@ -50,12 +56,15 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 
 float UWeaponComponent::_get_launch_speed()
 {
-	if (_get_current_projectile() == nullptr){ return 0.f;}
+	if (_get_current_projectile() == nullptr)
+	{
+		return 0.f;
+	}
 	return _get_current_projectile().GetDefaultObject()->launch_force; // Here is the point
 }
 //----------------------------		PLAY		----------------------------------
 //Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-void UWeaponComponent::_exchange_weapon(int number)
+int8 UWeaponComponent::_exchange_weapon(uint8 number)
 {
 	if (weapon_number % 10 != number)
 	{
@@ -68,8 +77,8 @@ void UWeaponComponent::_exchange_weapon(int number)
 				weapon_number = (weapon_number % 10) * 10 + number;
 				reloaded = false;
 				_reload();
+				return (int8)number;
 			}
-
 			break;
 		case 1:
 			if (tank_projectile_1 != nullptr)
@@ -77,34 +86,39 @@ void UWeaponComponent::_exchange_weapon(int number)
 				weapon_number = (weapon_number % 10) * 10 + number;
 				reloaded = false;
 				_reload();
+				return (int8)number;
 			}
 			break;
 		default:
 			break;
 		}
 	}
+	return -1;
 };
 
 //SET exchange weapon
-void UWeaponComponent::_exchange_weapon()
+int8 UWeaponComponent::_exchange_weapon()
 {
 	if (weapon_number != 0)
 	{
-		weapon_number = (((weapon_number % 10) * 10) + (weapon_number / 10));
+		int8 temp = weapon_number / 10;
+		weapon_number = (((weapon_number % 10) * 10) + temp);
 		reloaded = false;
 		_reload();
+		return temp;
 	}
+	return -1;
 };
 
 //Fire()
-void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
+bool UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 {
 	if (_get_current_projectile() == nullptr)
 	{
-		return;
+		return false;
 	}
 
-	if (_is_time_out() && reloaded == true)
+	if (FPlatformTime::Seconds() > end_reload_time && reloaded)
 	{
 		reloaded = false;
 		GetWorld()->SpawnActor<ATankProjectile>(
@@ -112,38 +126,29 @@ void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 					  launch_location,
 					  launch_normal.Rotation())
 			->_launch();
+		return true;
 	}
+	return false;
 };
 
 //Reload
-void UWeaponComponent::_reload()
+float UWeaponComponent::_reload()
 {
 	if (reloaded == false)
 	{
-		start_reload_time = FPlatformTime::Seconds();
+		float temp = _get_current_projectile().GetDefaultObject()->reload_time;
+		end_reload_time = FPlatformTime::Seconds() + temp;
 		reloaded = true;
-		// UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
+		UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
+		return temp;
 	}
-	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
+	return -1.f;
+	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , reloaded is %i"), FPlatformTime::Seconds() - end_reload_time, reloaded);
 };
 
-bool UWeaponComponent::_is_time_out()
-{
-	if ((FPlatformTime::Seconds() - start_reload_time) >
-		_get_current_projectile().GetDefaultObject()->reload_time)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
+//----------------------------		Enum	----------------------------------
 WeaponState UWeaponComponent::_get_weapon_state()
 {
-	UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
-
-	return reloaded ? (_is_time_out() ? WeaponState::ready : WeaponState::reloading)
-					: WeaponState::empty;
-}; 
+	return FPlatformTime::Seconds() > end_reload_time ? (reloaded ? WeaponState::ready : WeaponState::empty)
+													  : WeaponState::reloading;
+};

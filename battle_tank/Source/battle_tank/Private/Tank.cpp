@@ -63,9 +63,9 @@ void ATank::_controller_do(FVector aiming_normal)
 {
 	_turning_to(aiming_normal);
 
-	if (aiming_component && aiming_component->_should_draw())
+	if (aiming_component && aiming_component->_should_lock())
 	{
-		aiming_component->_draw_projectile_path(_get_launch_normal() * _get_launch_speed(),
+		aiming_component->_lock_projectile_path(_get_launch_normal() * _get_launch_speed(),
 												_get_launch_location(), this);
 	}
 
@@ -106,10 +106,54 @@ float ATank::_get_launch_speed()
 	return weapon_component->_get_launch_speed();
 }
 
+
 //---------------------------------------------		PUBLIC :PLAY		---------------------------	#### TODO : Refactor switch to Template
+//										UI
+// self action
+void ATank::_turning_to(FVector aiming_normal)
+{
+	if (barrel == nullptr || turrent == nullptr)
+	{
+		return;
+	}
+	FRotator launch_rotation = _get_launch_normal().Rotation();
+	float pitch = aiming_normal.Rotation().Pitch - launch_rotation.Pitch;
+	float yaw = aiming_normal.Rotation().Yaw - launch_rotation.Yaw;
+
+	if (FMath::Abs(yaw) <= 0.001f && FMath::Abs(pitch) <= 0.001f)
+	{
+		if (turning)
+		{
+			turning = false;
+		}
+		return;
+	}
+
+	if (FMath::Abs(pitch) > 0.001f)
+	{
+		//call _elevate_barrel
+		barrel->_elevate_barrel(pitch);
+	}
+	if (FMath::Abs(yaw) > 0.001f)
+	{
+		//call   _rotate_turrent
+		turrent->_rotate_turrent(yaw);
+	}
+
+	if (!turning)
+	{
+		turning = true;
+	}
+
+	/*  #### BUG fixed : Value tremble around destnation. 
+    *   Float value is not accurate.
+    *   Method is : Lower accurency.
+    */
+};
+
 //Exchange projectile by number
 //Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-void ATank::_set_weapon(int number)
+void ATank::_set_weapon(uint8 number)
 {
 	if (weapon_component == nullptr)
 	{
@@ -151,15 +195,16 @@ void ATank::_reload()
 };
 
 //DrawProjectilePath
-void ATank::_draw(bool if_draw)
+void ATank::_lock(bool if_lock)
 {
 	if (aiming_component == nullptr)
 	{
 		return;
 	}
-	aiming_component->_set_drawable(if_draw);
+	aiming_component->_lock(if_lock);
 }
 
+//										No UI
 //Move
 void ATank::_move_forward(bool if_move)
 {
@@ -200,38 +245,4 @@ void ATank::_burst(bool if_burst)
 		return;
 	}
 	move_component->_burst(if_burst);
-};
-
-//--------------------------------------------------Public : self action------------------------------------------------------------
-
-void ATank::_turning_to(FVector aiming_normal)
-{
-	if (barrel == nullptr || turrent == nullptr)
-	{
-		return;
-	}
-	//Caculate rotation speed : by using ----   aiming_normal & launch velocity
-	FRotator delta_rotator = aiming_normal.Rotation() - _get_launch_normal().Rotation();
-
-	//call _elevate_barrel
-	if (delta_rotator.Pitch > 0.0001f || delta_rotator.Pitch < -0.0001f)
-	{
-		barrel->_elevate_barrel(delta_rotator.Pitch);
-	}
-
-	//		####		Format Yaw change direction,
-	//		####		from -170 -> 170, move direction and amount is +340, but ACTUALLY should be -20.
-	if (delta_rotator.Yaw > 180.f)
-	{
-		delta_rotator.Yaw = delta_rotator.Yaw - 360.f;
-	}
-	if (delta_rotator.Yaw < -180.f)
-	{
-		delta_rotator.Yaw = delta_rotator.Yaw + 360.f;
-	}
-	//call   _rotate_turrent
-	if (delta_rotator.Yaw > 0.0001f || delta_rotator.Yaw < -0.0001f)
-	{
-		turrent->_rotate_turrent(delta_rotator.Yaw);
-	}
 };

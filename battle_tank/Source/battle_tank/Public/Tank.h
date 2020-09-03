@@ -62,7 +62,7 @@ public:
 
 	//--------------------------		PLAY		----------------------------------
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _set_weapon(int number);
+	void _set_weapon(uint8 number);
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _exchange_weapon();
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -70,7 +70,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _reload();
 	UFUNCTION(BlueprintCallable, Category = Aiming)
-	void _draw(bool if_draw);
+	void _lock(bool if_lock);
 	UFUNCTION(BlueprintCallable, Category = Move)
 	void _move_forward(bool if_move);
 	UFUNCTION(BlueprintCallable, Category = Move)
@@ -83,6 +83,7 @@ public:
 	void _burst(bool if_burst);
 
 protected:
+	bool turning = true;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

@@ -32,8 +32,8 @@ private:
 	float _max_elevate_speed = 40.f;
 
 	UPROPERTY(EditAnywhere, Category = Setup)
-	float _max_elevate_angle = 40.f;
+	float _max_relative_angle = 60.f;
 
 	UPROPERTY(EditAnywhere, Category = Setup)
-	float _min_elevate_angle = -20.f;
+	float _min_relative_angle = -20.f;
 };

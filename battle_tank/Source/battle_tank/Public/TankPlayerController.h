@@ -15,10 +15,17 @@ UCLASS()
 class BATTLE_TANK_API ATankPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+protected:
+	// Called to bind functionality to input
+	virtual void SetupInputComponent() override;
+	
+	//-------------------------------Menu---------------------------------
+	void _open_menu();
 
 private:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
+
 	//-------------------------------Property-------------------------
 	UPROPERTY(VisibleAnywhere)
 	float aiming_range = 100000.f;
@@ -44,6 +51,5 @@ private:
 
 	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
 
-	//-------------------------------PLAY---------------------------------
-	//Draw Projectile Path
+
 };

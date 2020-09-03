@@ -15,20 +15,29 @@ FVector UTankBarrel::_get_launch_normal() const
 
 // bool _set_aiming_normal(){}
 
-void UTankBarrel::_elevate_barrel(float relative_speed)
+void UTankBarrel::_elevate_barrel(float delta_pitch)
 {
-    relative_speed = FMath::Clamp<float>(relative_speed, -1, 1);
-    float time = GetWorld()->GetTimeSeconds();
-    //--------------------------------------------------------------------------------Debug
-    // UE_LOG(LogTemp, Warning, TEXT("At %f elevation speed is %f"), time, relative_speed);
+    if (FMath::Abs(GetOwner()->GetActorRotation().Roll) > 90.f)
+    {
+        delta_pitch = -delta_pitch;
+    }
+    /*  #### BUG fixed : When tank rolling-over, barrel turing to reverse direction. 
+        *Becuase we Add world rotation pitch to relative rotation pitch.
+        *Method is : When tank rolling-over, pass in parameter -dest_pitch.
+        */
 
+    //Clamp to 1 °/s                               #### TODO : adjustable Curve
+    delta_pitch = FMath::Clamp<float>(delta_pitch, -1, 1) *
+                  GetWorld()->DeltaTimeSeconds;
     //Angle that changed
-    float elevate_angle = relative_speed * _max_elevate_speed * GetWorld()->DeltaTimeSeconds;
-    //Add Relative rotation : RelativeRotation.Pitch --------------------------- get rotation right now and add new to it.
-    elevate_angle = GetRelativeRotation().Pitch + elevate_angle;
-    //Clamp
-    elevate_angle = FMath::Clamp<float>(elevate_angle, _min_elevate_angle, _max_elevate_angle);
-    //set
-    SetRelativeRotation(FRotator(elevate_angle, 0, 0));
+    delta_pitch *= _max_elevate_speed;
 
+    //Add Relative rotation.
+    float relative_angle = GetRelativeRotation().Pitch + delta_pitch;
+
+    //Clamp
+    relative_angle = FMath::Clamp<float>(relative_angle, _min_relative_angle, _max_relative_angle);
+
+    //set
+    SetRelativeRotation(FRotator(relative_angle, 0, 0));
 };

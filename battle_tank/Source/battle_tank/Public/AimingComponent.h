@@ -11,8 +11,7 @@ class ATank;
 UENUM()
 enum class AimingState : uint8
 {
-	turning,
-	aiming,
+	usable,
 	locking,
 	overheat
 };
@@ -28,21 +27,25 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void _draw_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore);
-	virtual bool _should_draw();
-	virtual void _set_drawable(bool flag);
-
-	UPROPERTY(BlueprintReadOnly, Category = "State")
-	AimingState aiming_state = AimingState::aiming;
-	
-protected:
-
-	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
-	float overheat_lag = 2.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float max_buffer = 5.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
-	float draw_buffer = 5.f;
+	float draw_buffer = max_buffer;
+	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
+	float cool_rate = 0.8f;
+	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
+	float recover_value = 2.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
+	float overheat_lag = 2.f;
+
+	virtual void _lock_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore);
+	virtual bool _should_lock();
+	virtual float _lock(bool flag);
+
+	UPROPERTY(BlueprintReadOnly, Category = "State")
+	AimingState aiming_state = AimingState::usable;
+	
+protected:
 
 private:
 	// Called every frame

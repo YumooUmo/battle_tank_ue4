@@ -35,7 +35,7 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 //-----------------------------------		public		---------------------------------
 
 //-----------------------------------		Draw		---------------------------------
-void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore)
+void UAimingComponent::_lock_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore)
 {
 	//Initiallize Parameters to _predict path method()
 
@@ -90,7 +90,7 @@ void UAimingComponent::_draw_projectile_path(FVector launch_velocity, FVector la
 	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }
 
-bool UAimingComponent::_should_draw()
+bool UAimingComponent::_should_lock()
 {
 	//Draw_Path : Pressed
 	if (aiming_state == AimingState::locking)
@@ -112,30 +112,35 @@ bool UAimingComponent::_should_draw()
 	{
 		if (draw_buffer < max_buffer)
 		{
-			draw_buffer += GetWorld()->DeltaTimeSeconds * 0.8;
+			draw_buffer += GetWorld()->DeltaTimeSeconds * cool_rate;
+			if (aiming_state == AimingState::overheat && draw_buffer > recover_value)
+			{
+				aiming_state = AimingState::usable;
+			}
 			if (draw_buffer > max_buffer)
 			{
 				draw_buffer = max_buffer;
 			}
 		}
-		if (aiming_state == AimingState::overheat && draw_buffer > 0)
-		{
-			aiming_state = AimingState::turning;
-		}
 		return false;
 	}
 };
 
-void UAimingComponent::_set_drawable(bool flag)
+// 
+float UAimingComponent::_lock(bool flag)
 {
 	//Draw_Path : Pressed
-	if (flag)
+	if (aiming_state != AimingState::overheat)
 	{
-		aiming_state = AimingState::locking;
+		if (flag)
+		{
+			aiming_state = AimingState::locking;
+		}
+		//Draw_Path : Released
+		else
+		{
+			aiming_state = AimingState::usable;
+		}
 	}
-	//Draw_Path : Released
-	else
-	{
-		aiming_state = AimingState::turning;
-	}
+	return draw_buffer;
 };

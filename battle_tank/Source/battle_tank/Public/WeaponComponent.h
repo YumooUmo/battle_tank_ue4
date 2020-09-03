@@ -25,11 +25,11 @@ class BATTLE_TANK_API UWeaponComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UWeaponComponent();
-	
-	//   Reload Property ---- start with reloaded	
+
+	//   Reload Property ---- start with reloaded
 	UFUNCTION(BlueprintCallable, Category = "State")
 	WeaponState _get_weapon_state();
-	
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -37,32 +37,35 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
 	bool reloaded = true;
 
-
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
-	//--------------------------------PUBLIC : GET
+	//		SET UP
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void _set_projectile(TSubclassOf<ATankProjectile> projectile_Subclass_0,
+						 TSubclassOf<ATankProjectile> projectile_Subclass_1);
+
+	//		GET
+
 	//GET Launch speed
 	virtual float _get_launch_speed();
 	//GET Projectile
 	virtual TSubclassOf<ATankProjectile> _get_current_projectile();
 
-	//--------------------------------		PUBLIC : PLAY action
+	//		PLAY action
 	//SET weapon number
-	virtual void _exchange_weapon(int projectile_number);
+	virtual int8 _exchange_weapon(uint8 projectile_number);
 
-	//SET exchange projectile
-	virtual void _exchange_weapon();
+	//Exchange projectile
+	virtual int8 _exchange_weapon();
 
-	//Fire
-	virtual void _fire(FVector launch_normal, FVector launch_location);
+	//Fire	- return bool for UI
+	virtual bool _fire(FVector launch_normal, FVector launch_location);
 
-	//Reload
-	virtual void _reload();
+	//Reload - return float for UI - need timer handler set Ready
+	virtual float _reload();
 
-	bool _is_time_out();
-;
 private:
 	//SET projectile_1
 	UPROPERTY(EditAnywhere, Category = setup)
@@ -74,7 +77,6 @@ private:
 
 	//Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW;
 	//Ten digit: 0-9 represents projectile LAST USED.
-	int weapon_number = 0;
-	float start_reload_time = 0.f;
-
+	uint8 weapon_number = 0;
+	float end_reload_time = 0.f;
 };

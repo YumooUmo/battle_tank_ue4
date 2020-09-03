@@ -19,5 +19,5 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = Setup)
-	float _max_rotate_speed = 40.f;
+	float _max_rotate_speed = 60.f;
 };

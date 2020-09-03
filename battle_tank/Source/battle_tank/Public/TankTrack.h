@@ -26,7 +26,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float _max_force = 2000000.f;
+	float _max_force = 3000000.f;
 
 	// FVector sockets[][];
 	// TArray<FVector> b[3][2];
