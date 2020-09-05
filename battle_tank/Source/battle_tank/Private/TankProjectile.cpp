@@ -3,6 +3,7 @@
 #include "TankProjectile.h"
 //FIRST include
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Engine/Texture2DDynamic.h"
 
 // Sets default values
 ATankProjectile::ATankProjectile()
@@ -44,4 +45,8 @@ void ATankProjectile::_launch()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Potential Error : 1/ Root Component of %s is not moveable. 2/ Root Component is Not a Primitive Component."), *(this->GetName()));
 	}
+};
+
+void ATankProjectile::_set_projectile_image(UTexture2DDynamic* projectile_image_toset){
+	projectile_image = projectile_image_toset;
 };

@@ -2,7 +2,7 @@
 
 #include "TankPlayerController.h"
 //FIRST include
-#include "MenuHUD.h"
+#include "TankHUD.h"
 #include "Tank.h"
 
 void ATankPlayerController::BeginPlay()
@@ -18,7 +18,7 @@ void ATankPlayerController::SetupInputComponent()
 
     if (InputComponent)
     {
-        InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ATankPlayerController::_open_menu);
+        InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ATankPlayerController::_open_pause_menu);
     }
 }
 
@@ -29,7 +29,7 @@ void ATankPlayerController::Tick(float DeltaTime)
     if (tank_controlled != nullptr)
     {
         _get_aiming_normal();
-        tank_controlled->_controller_do(aiming_normal);
+        tank_controlled->_controller_tick(aiming_normal);
     }
 }
 
@@ -53,12 +53,10 @@ ATank *ATankPlayerController::_get_controlled_tank() const
 }
 
 //-----------------------------Menu------------------------------------------
-void ATankPlayerController::_open_menu()
+void ATankPlayerController::_open_pause_menu()
 {
-    if (AMenuHUD *menu_HUD = Cast<AMenuHUD>(GetHUD()))
+    if (ATankHUD *menu_HUD = Cast<ATankHUD>(GetHUD()))
     {
-        menu_HUD->_show_menu();
+        menu_HUD->_show_pause_menu();
     }
 };
-
-

@@ -4,11 +4,16 @@
 //FIRST include
 #include "AimingComponent.h"
 #include "ForceNavMovementComponent.h"
+// #include "TankHUD.h"
 #include "TankBarrel.h"
+#include "TankHandlerComponent.h"
+#include "TankPlayerController.h"
 #include "TankProjectile.h"
 #include "TankTrack.h"
 #include "TankTurrent.h"
+#include "TankUIComponent.h"
 #include "WeaponComponent.h"
+// #include "TankWidget.h"
 
 // Sets default values
 ATank::ATank()
@@ -30,18 +35,32 @@ void ATank::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+//When Possessed By TankPlayerController - Setup UI
 // Called to bind functionality to input
 void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
+
+void ATank::UnPossessed()
+{
+};
+
+// void ATank::_show_aiming_box(){};
+// void ATank::_reload_projectile(){};
+// void ATank::_change_projectile(){};
+// void ATank::_update_lock_buffer(){};
+// void ATank::_show_lock_buffer(){};
+
 //-----------------------------------------------------Private--------------------------------------------------------
 //	Set Up
 void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 					UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
 					UAimingComponent *aiming_component_toset,
 					UWeaponComponent *weapon_component_toset,
-					UForceNavMovementComponent *move_component_toset)
+					UForceNavMovementComponent *move_component_toset,
+					UTankHandlerComponent *handler_component_toset,
+					UTankUIComponent *UI_component_toset)
 {
 	//Set Barrel Reference
 	barrel = barrel_to_set;
@@ -56,10 +75,12 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
+	handler_component = handler_component_toset;
+	UI_component = UI_component_toset;
 };
 
 //	Start Up : Controller_Tick
-void ATank::_controller_do(FVector aiming_normal)
+void ATank::_controller_tick(FVector aiming_normal)
 {
 	_turning_to(aiming_normal);
 
@@ -106,9 +127,8 @@ float ATank::_get_launch_speed()
 	return weapon_component->_get_launch_speed();
 }
 
-
 //---------------------------------------------		PUBLIC :PLAY		---------------------------	#### TODO : Refactor switch to Template
-//										UI
+// UI
 // self action
 void ATank::_turning_to(FVector aiming_normal)
 {
@@ -204,7 +224,7 @@ void ATank::_lock(bool if_lock)
 	aiming_component->_lock(if_lock);
 }
 
-//										No UI
+//	No UI
 //Move
 void ATank::_move_forward(bool if_move)
 {

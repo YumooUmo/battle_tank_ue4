@@ -127,7 +127,7 @@ bool UAimingComponent::_should_lock()
 };
 
 // 
-float UAimingComponent::_lock(bool flag)
+void UAimingComponent::_lock(bool flag)
 {
 	//Draw_Path : Pressed
 	if (aiming_state != AimingState::overheat)
@@ -142,5 +142,4 @@ float UAimingComponent::_lock(bool flag)
 			aiming_state = AimingState::usable;
 		}
 	}
-	return draw_buffer;
 };

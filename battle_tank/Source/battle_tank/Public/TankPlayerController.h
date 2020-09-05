@@ -20,7 +20,7 @@ protected:
 	virtual void SetupInputComponent() override;
 	
 	//-------------------------------Menu---------------------------------
-	void _open_menu();
+	void _open_pause_menu();
 
 private:
 	void BeginPlay() override;
@@ -45,11 +45,11 @@ private:
 	//-------By Location
 	// void _aiming() const;
 
-	//-------------------------------GET----------------------------------
+	
+public:
+//-------------------------------GET----------------------------------
 	UFUNCTION(BlueprintCallable, Category = GET_Tank)
 	virtual ATank *_get_controlled_tank() const;
 
 	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
-
-
 };

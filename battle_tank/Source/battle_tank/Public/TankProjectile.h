@@ -33,6 +33,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = Setup)
 	float launch_force = 50000.f;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = UI)
+	class UTexture2DDynamic* projectile_image;
+
+	UFUNCTION(BlueprintCallable, Category = UI)
+	void _set_projectile_image(UTexture2DDynamic* projectile_image_toset);
 	//Launch
 	virtual void _launch();
 

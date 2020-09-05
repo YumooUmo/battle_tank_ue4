@@ -3,7 +3,7 @@
 #include "SMenu.h"
 //include first
 #include "GameFramework/GameModeBase.h"
-#include "MenuHUD.h"
+#include "TankHUD.h"
 
 #define LOCTEXT_NAMESPACE "MainMenu"
 
@@ -112,6 +112,7 @@ FReply SMenu::OnQuitClicked() const
 FReply SMenu::OnSettingClicked()
 {
     setting_ptr.Get()->SetText(title);
+    UE_LOG(LogTemp, Error, TEXT("SMenu said : %s ~!"), *(title.ToString()));
     return FReply::Handled();
 };
 

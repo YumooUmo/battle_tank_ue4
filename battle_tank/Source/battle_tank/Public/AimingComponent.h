@@ -4,17 +4,11 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+#include "AimingState.h"
 //last generate
 #include "AimingComponent.generated.h"
 
 class ATank;
-UENUM()
-enum class AimingState : uint8
-{
-	usable,
-	locking,
-	overheat
-};
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UAimingComponent : public UActorComponent
@@ -40,7 +34,7 @@ public:
 
 	virtual void _lock_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore);
 	virtual bool _should_lock();
-	virtual float _lock(bool flag);
+	virtual void _lock(bool flag);
 
 	UPROPERTY(BlueprintReadOnly, Category = "State")
 	AimingState aiming_state = AimingState::usable;

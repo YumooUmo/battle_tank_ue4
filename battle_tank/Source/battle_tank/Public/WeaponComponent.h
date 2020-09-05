@@ -4,19 +4,13 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+#include "WeaponState.h"
 //last generate
 #include "WeaponComponent.generated.h"
-// Enum for UI call
 
 // class AWeapon;
 class ATankProjectile;
-UENUM()
-enum class WeaponState : uint8
-{
-	empty,
-	reloading,
-	ready
-};
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UWeaponComponent : public UActorComponent
 {
