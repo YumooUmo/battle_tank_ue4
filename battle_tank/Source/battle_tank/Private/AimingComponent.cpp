@@ -117,6 +117,7 @@ bool UAimingComponent::_should_lock()
 			{
 				aiming_state = AimingState::usable;
 			}
+			//limit
 			if (draw_buffer > max_buffer)
 			{
 				draw_buffer = max_buffer;

@@ -56,13 +56,17 @@ void UTankWidget::_show_reload_projectile()
 };
 
 //Change Projectile Image, set reload_time
-void UTankWidget::_set_projectile_Implementation(float reload_time_toset, UTexture2DDynamic *projectile_texture_toset)
+void UTankWidget::_setup_projectile(float reload_time_toset, UTexture2D *projectile_texture_toset)
 {
 	reload_time = reload_time_toset;
-	projectile_image->SetBrushFromTextureDynamic(projectile_texture_toset);
+	projectile_image->SetBrushFromTexture(projectile_texture_toset);
 };
 
 //Lock Buffer
+void UTankWidget::_setup_lock_buffer(float max_buffer_toset)
+{
+	max_buffer = max_buffer_toset;
+}
 void UTankWidget::_update_lock_buffer(float lock_buffer_toset, AimingState aiming_state_toset)
 {
 	lock_buffer = lock_buffer_toset;
@@ -144,5 +148,3 @@ float UTankWidget::_repeat(float max, float pace)
 	}
 	return sum * max;
 }
-
-

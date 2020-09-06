@@ -6,7 +6,6 @@
 #include "ForceNavMovementComponent.h"
 // #include "TankHUD.h"
 #include "TankBarrel.h"
-#include "TankHandlerComponent.h"
 #include "TankPlayerController.h"
 #include "TankProjectile.h"
 #include "TankTrack.h"
@@ -40,17 +39,13 @@ void ATank::Tick(float DeltaTime)
 void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	//Start being Possessed by Player
+	if (tank_UI_component)
+	{
+		tank_UI_component->_set_widget();
+	}
 }
-
-void ATank::UnPossessed()
-{
-};
-
-// void ATank::_show_aiming_box(){};
-// void ATank::_reload_projectile(){};
-// void ATank::_change_projectile(){};
-// void ATank::_update_lock_buffer(){};
-// void ATank::_show_lock_buffer(){};
 
 //-----------------------------------------------------Private--------------------------------------------------------
 //	Set Up
@@ -59,8 +54,7 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 					UAimingComponent *aiming_component_toset,
 					UWeaponComponent *weapon_component_toset,
 					UForceNavMovementComponent *move_component_toset,
-					UTankHandlerComponent *handler_component_toset,
-					UTankUIComponent *UI_component_toset)
+					UTankUIComponent *tank_UI_component_toset)
 {
 	//Set Barrel Reference
 	barrel = barrel_to_set;
@@ -75,12 +69,12 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
-	handler_component = handler_component_toset;
-	UI_component = UI_component_toset;
+
+	tank_UI_component = tank_UI_component_toset;
 };
 
 //	Start Up : Controller_Tick
-void ATank::_controller_tick(FVector aiming_normal)
+void ATank::_set_aiming_normal(FVector aiming_normal)
 {
 	_turning_to(aiming_normal);
 
@@ -172,7 +166,7 @@ void ATank::_turning_to(FVector aiming_normal)
 };
 
 //Exchange projectile by number
-//Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+//	TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
 void ATank::_set_weapon(uint8 number)
 {
 	if (weapon_component == nullptr)

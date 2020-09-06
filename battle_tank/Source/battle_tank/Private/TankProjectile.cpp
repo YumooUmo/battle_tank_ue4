@@ -47,6 +47,6 @@ void ATankProjectile::_launch()
 	}
 };
 
-void ATankProjectile::_set_projectile_image(UTexture2DDynamic* projectile_image_toset){
+void ATankProjectile::_set_projectile_image(UTexture2D* projectile_image_toset){
 	projectile_image = projectile_image_toset;
 };

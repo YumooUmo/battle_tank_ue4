@@ -29,7 +29,7 @@ void ATankPlayerController::Tick(float DeltaTime)
     if (tank_controlled != nullptr)
     {
         _get_aiming_normal();
-        tank_controlled->_controller_tick(aiming_normal);
+        tank_controlled->_set_aiming_normal(aiming_normal);
     }
 }
 

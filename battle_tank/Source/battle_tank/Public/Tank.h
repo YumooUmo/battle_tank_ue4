@@ -18,7 +18,6 @@ class UWeaponComponent;
 class UAimingComponent;
 class UForceNavMovementComponent;
 
-class UTankHandlerComponent;
 class UTankUIComponent;
 
 // class UTankWidget;
@@ -51,11 +50,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Component")
 	UWeaponComponent *weapon_component = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Handler")
-	UTankHandlerComponent *handler_component = nullptr;
-
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	UTankUIComponent *UI_component = nullptr;
+	UTankUIComponent *tank_UI_component = nullptr;
 
 	//-----------------------------		GET		------------------------------
 	FVector _get_launch_normal();
@@ -66,21 +62,11 @@ public:
 	//Get Current Projectile's Launch Speed
 	float _get_launch_speed();
 
-	//	UI
-	// ATankHUD = nullptr;
-	// UWidget widget = nullptr;
-
-	void _show_aiming_box();
-	void _reload_projectile();
-	void _change_projectile();
-	void _update_lock_buffer();
-	void _show_lock_buffer();
-
 	//-----------------		PUBLIC : SELF action	--------------------
 	//_turning_to to aiming_direction
 	virtual void _turning_to(FVector aiming_normal);
 	//	GO	(Tick)
-	virtual void _controller_tick(FVector aiming_normal);
+	virtual void _set_aiming_normal(FVector aiming_normal);
 
 	//--------------------------		PLAY		----------------------------------
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -113,7 +99,6 @@ protected:
 private:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void UnPossessed();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
@@ -127,6 +112,5 @@ private:
 						 UAimingComponent *aiming_component_toset,
 						 UWeaponComponent *weapon_component_toset,
 						 UForceNavMovementComponent *move_component_toset,
-						 UTankHandlerComponent *handler_component_toset,
-						 UTankUIComponent *UI_component_toset);
+						 UTankUIComponent *tank_UI_component_toset);
 };

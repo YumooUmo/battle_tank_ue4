@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankHUD.h"
+//Include First
 #include "Blueprint/UserWidget.h"
 #include "Engine/Engine.h"
 #include "SMenu.h"
@@ -52,7 +53,7 @@ void ATankHUD::_set_current_widget(UUserWidget *current_widget_toset = nullptr)
     if (current_widget != nullptr)
     {
         current_widget->RemoveFromViewport();
-        delete current_widget;
+        current_widget = nullptr;
     }
     if (current_widget_toset != nullptr)
     {
