@@ -27,6 +27,8 @@ public:
 	// UTankWidget(const FObjectInitializer &ObjectInitializer);
 	virtual void NativeConstruct() override;
 
+	void _setup(UImage *crosshair_toset, UImage *aiming_box_toset,
+				UImage *projectile_image_toset, UProgressBar *lock_buffer_bar_toset);
 	//	UI property
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = flicker)
 	float max_repeat_opacity = 0.6f;
@@ -35,16 +37,16 @@ public:
 	//(framerate)
 
 	//	UI object
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = UI)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
 	UImage *crosshair;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = UI)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
 	UImage *aiming_box;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = UI)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
 	UImage *projectile_image;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = UI)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
 	UProgressBar *lock_buffer_bar;
 
 	//CALL: Show Aiming Box
@@ -55,6 +57,8 @@ public:
 
 	//CALL : Reload Image
 	void _reload_projectile();
+	//CALL : hide - fire
+	void _hide_projectile_image();
 	//show
 	void _show_reload_projectile();
 

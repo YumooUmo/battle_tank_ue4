@@ -46,19 +46,23 @@ public:
 	virtual float _get_launch_speed();
 	//GET Projectile
 	virtual TSubclassOf<ATankProjectile> _get_current_projectile();
+	//GET Reload TIme
+	float _get_reload_time();
+	//Get Image
+	UTexture2D *_get_image();
 
 	//		PLAY action
 	//SET weapon number
-	virtual int8 _exchange_weapon(uint8 projectile_number);
+	virtual bool _exchange_weapon(uint8 projectile_number);
 
 	//Exchange projectile
-	virtual int8 _exchange_weapon();
+	virtual bool _exchange_weapon();
 
 	//Fire	- return bool for UI
 	virtual bool _fire(FVector launch_normal, FVector launch_location);
 
 	//Reload - return float for UI - need timer handler set Ready
-	virtual float _reload();
+	virtual bool _reload();
 
 private:
 	//SET projectile_1

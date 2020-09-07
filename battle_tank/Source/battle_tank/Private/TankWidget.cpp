@@ -9,9 +9,23 @@ void UTankWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 }
-//Aiming Box
+//setup
+void UTankWidget::_setup(UImage *crosshair_toset, UImage *aiming_box_toset,
+						 UImage *projectile_image_toset, UProgressBar *lock_buffer_bar_toset)
+{
+	crosshair = crosshair_toset;
+	aiming_box = aiming_box_toset;
+	projectile_image = projectile_image_toset;
+	lock_buffer_bar = lock_buffer_bar_toset;
+}
+
+// - Aiming Box -
 void UTankWidget::_show_aiming_box(bool flag)
 {
+	if (aiming_box == nullptr)
+	{
+		return;
+	}
 	if (flag)
 	{
 		if (aiming_box->Visibility == ESlateVisibility::Hidden)
@@ -28,9 +42,20 @@ void UTankWidget::_show_aiming_box(bool flag)
 	}
 };
 
-//Reload Image
+// - Change Projectile Image - set reload_time
+void UTankWidget::_setup_projectile(float reload_time_toset, UTexture2D *projectile_texture_toset)
+{
+	reload_time = reload_time_toset;
+	projectile_image->SetBrushFromTexture(projectile_texture_toset);
+};
+
+// - Reload Image -
 void UTankWidget::_reload_projectile()
 {
+	if (projectile_image == nullptr)
+	{
+		return;
+	}
 	if (reload_timer.IsValid())
 	{
 		sum_reload_time = 0.f;
@@ -38,6 +63,11 @@ void UTankWidget::_reload_projectile()
 	GetWorld()->GetTimerManager().SetTimer(reload_timer, this,
 										   &UTankWidget::_show_reload_projectile,
 										   pace, true);
+};
+//CALL : hide - fire
+void UTankWidget::_hide_projectile_image()
+{
+	projectile_image->SetVisibility(ESlateVisibility::Hidden);
 };
 //show every tick, stop at reload time finish;
 void UTankWidget::_show_reload_projectile()
@@ -55,14 +85,7 @@ void UTankWidget::_show_reload_projectile()
 	}
 };
 
-//Change Projectile Image, set reload_time
-void UTankWidget::_setup_projectile(float reload_time_toset, UTexture2D *projectile_texture_toset)
-{
-	reload_time = reload_time_toset;
-	projectile_image->SetBrushFromTexture(projectile_texture_toset);
-};
-
-//Lock Buffer
+// - Lock Buffer -
 void UTankWidget::_setup_lock_buffer(float max_buffer_toset)
 {
 	max_buffer = max_buffer_toset;
@@ -74,6 +97,14 @@ void UTankWidget::_update_lock_buffer(float lock_buffer_toset, AimingState aimin
 };
 void UTankWidget::_do_lock_buffer()
 {
+	if (lock_buffer_bar == nullptr)
+	{
+		return;
+	}
+	if (lock_buffer_timer.IsValid())
+	{
+		return;
+	}
 	if (max_buffer > 0)
 	{
 		lock_buffer_bar->SetRenderOpacity(100.f);
@@ -89,10 +120,10 @@ void UTankWidget::_show_lock_buffer()
 	if (lock_buffer == max_buffer)
 	{
 		lag += pace;
+		lock_buffer_bar->SetRenderOpacity(1.f - lag);
 		if (lag > 1.f)
 		{
 			GetWorld()->GetTimerManager().ClearTimer(lock_buffer_timer);
-			lock_buffer_bar->SetRenderOpacity(0.f);
 			lag = 0.f;
 		}
 	}

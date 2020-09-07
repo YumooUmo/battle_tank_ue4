@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include "AimingState.h"
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
-#include "AimingState.h"
 //last generate
 #include "AimingComponent.generated.h"
 
 class ATank;
+class UTankUIComponent;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UAimingComponent : public UActorComponent
@@ -21,10 +22,14 @@ public:
 
 	virtual void BeginPlay() override;
 
+	//Setup
+	void _setup_UI_component(UTankUIComponent *tank_UI_component_toset);
+
+	//Property
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float max_buffer = 5.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
-	float draw_buffer = max_buffer;
+	float lock_buffer = max_buffer;
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float cool_rate = 0.8f;
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
@@ -32,14 +37,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float overheat_lag = 2.f;
 
-	virtual void _lock_projectile_path(FVector launch_velocity, FVector launch_location, AActor *ignore);
-	virtual bool _should_lock();
-	virtual void _lock(bool flag);
-
 	UPROPERTY(BlueprintReadOnly, Category = "State")
 	AimingState aiming_state = AimingState::usable;
-	
+
+	//Lock action
+	virtual void _should_lock();
+	virtual void _lock(bool flag);
+
 protected:
+	UTankUIComponent *UI_component = nullptr;
+	//framerate to seconds
+	UPROPERTY(EditDefaultsOnly, Category = "Framerate(seconds)")
+	float pace = 0.01f;
+	FTimerHandle lock_timer;
 
 private:
 	// Called every frame

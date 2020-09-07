@@ -62,9 +62,28 @@ float UWeaponComponent::_get_launch_speed()
 	}
 	return _get_current_projectile().GetDefaultObject()->launch_force; // Here is the point
 }
+
+float UWeaponComponent::_get_reload_time()
+{
+	if (_get_current_projectile() == nullptr)
+	{
+		return 0.f;
+	}
+	return _get_current_projectile().GetDefaultObject()->reload_time; // Here is the point
+}
+
+UTexture2D *UWeaponComponent::_get_image()
+{
+	if (_get_current_projectile() == nullptr)
+	{
+		return nullptr;
+	}
+	return _get_current_projectile().GetDefaultObject()->projectile_image; // Here is the point
+}
+
 //----------------------------		PLAY		----------------------------------
 //Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-int8 UWeaponComponent::_exchange_weapon(uint8 number)
+bool UWeaponComponent::_exchange_weapon(uint8 number)
 {
 	if (weapon_number % 10 != number)
 	{
@@ -77,7 +96,7 @@ int8 UWeaponComponent::_exchange_weapon(uint8 number)
 				weapon_number = (weapon_number % 10) * 10 + number;
 				reloaded = false;
 				_reload();
-				return (int8)number;
+				return true;
 			}
 			break;
 		case 1:
@@ -86,18 +105,18 @@ int8 UWeaponComponent::_exchange_weapon(uint8 number)
 				weapon_number = (weapon_number % 10) * 10 + number;
 				reloaded = false;
 				_reload();
-				return (int8)number;
+				return true;
 			}
 			break;
 		default:
 			break;
 		}
 	}
-	return -1;
+	return false;
 };
 
 //SET exchange weapon
-int8 UWeaponComponent::_exchange_weapon()
+bool UWeaponComponent::_exchange_weapon()
 {
 	if (weapon_number != 0)
 	{
@@ -105,9 +124,9 @@ int8 UWeaponComponent::_exchange_weapon()
 		weapon_number = (((weapon_number % 10) * 10) + temp);
 		reloaded = false;
 		_reload();
-		return temp;
+		return true;
 	}
-	return -1;
+	return false;
 };
 
 //Fire()
@@ -132,17 +151,17 @@ bool UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 };
 
 //Reload
-float UWeaponComponent::_reload()
+bool UWeaponComponent::_reload()
 {
 	if (reloaded == false)
 	{
 		float temp = _get_current_projectile().GetDefaultObject()->reload_time;
 		end_reload_time = FPlatformTime::Seconds() + temp;
 		reloaded = true;
-		UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
-		return temp;
+		// UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
+		return true;
 	}
-	return -1.f;
+	return false;
 	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , reloaded is %i"), FPlatformTime::Seconds() - end_reload_time, reloaded);
 };
 

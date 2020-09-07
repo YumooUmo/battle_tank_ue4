@@ -26,6 +26,7 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 	// PrimaryActorTick.bCanEverTick =false; //------------------------------------------------------------------TODO : start_up
+	player_controller = Cast<ATankPlayerController>(GetController());
 }
 
 // Called every frame
@@ -40,14 +41,10 @@ void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//Start being Possessed by Player
-	if (tank_UI_component)
-	{
-		tank_UI_component->_set_widget();
-	}
+	//Show Widget : When start being Possessed by Player
 }
 
-//-----------------------------------------------------Private--------------------------------------------------------
+//----------------------------------		PUBLIC		----------------------------------------
 //	Set Up
 void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 					UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
@@ -69,21 +66,42 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
-
-	tank_UI_component = tank_UI_component_toset;
+	if (IsPlayerControlled())
+	{
+		tank_UI_component = tank_UI_component_toset;
+		aiming_component->_setup_UI_component(tank_UI_component_toset);
+		_set_widget();
+	}
 };
 
-//	Start Up : Controller_Tick
+// - Tank UI -
+//Set widget -
+void ATank::_set_widget()
+{
+	if (tank_UI_component == nullptr)
+	{
+		return;
+	}
+	player_controller->_set_current_widget(tank_UI_component->_initialize_widget());
+};
+
+//Unset widget -
+void ATank::_unset_widget()
+{
+	if (tank_UI_component->_get_widget() == nullptr)
+	{
+		return;
+	}
+	player_controller->_set_current_widget(nullptr);
+	tank_UI_component->_free_tank_widget();
+};
+
+//	-----------------------------		Start Up : Controller_Tick
 void ATank::_set_aiming_normal(FVector aiming_normal)
 {
 	_turning_to(aiming_normal);
 
-	if (aiming_component && aiming_component->_should_lock())
-	{
-		aiming_component->_lock_projectile_path(_get_launch_normal() * _get_launch_speed(),
-												_get_launch_location(), this);
-	}
-
+	//  #### TODO : Refactor timer to move component, and move "track" to component;
 	if (move_component && move_component->_should_move())
 	{
 		left_track->_apply_force(move_component->_get_left_throttle());
@@ -91,7 +109,7 @@ void ATank::_set_aiming_normal(FVector aiming_normal)
 	}
 }
 
-//---------------------------------------------        PUBLIC : GET        -------------------------------------
+//--------------------------------      PUBLIC : GET        -------------------------------------
 //Get Current Launch direction normal
 FVector ATank::_get_launch_normal()
 {
@@ -121,7 +139,31 @@ float ATank::_get_launch_speed()
 	return weapon_component->_get_launch_speed();
 }
 
-//---------------------------------------------		PUBLIC :PLAY		---------------------------	#### TODO : Refactor switch to Template
+float ATank::_get_max_lock_buffer()
+{
+	if (aiming_component == nullptr)
+	{
+		return 5.f;
+	}
+	return aiming_component->max_buffer;
+};
+float ATank::_get_reload_time()
+{
+	if (weapon_component == nullptr)
+	{
+		return 1.f;
+	}
+	return weapon_component->_get_reload_time();
+};
+UTexture2D *ATank::_get_projectile_image()
+{
+	if (weapon_component == nullptr)
+	{
+		return nullptr;
+	}
+	return weapon_component->_get_image();
+};
+//---------------------------------		PUBLIC :PLAY		---------------------------
 // UI
 // self action
 void ATank::_turning_to(FVector aiming_normal)
@@ -136,9 +178,10 @@ void ATank::_turning_to(FVector aiming_normal)
 
 	if (FMath::Abs(yaw) <= 0.001f && FMath::Abs(pitch) <= 0.001f)
 	{
-		if (turning)
+		if (tank_UI_component && turning)
 		{
 			turning = false;
+			tank_UI_component->_show_aiming_box(true);
 		}
 		return;
 	}
@@ -154,9 +197,10 @@ void ATank::_turning_to(FVector aiming_normal)
 		turrent->_rotate_turrent(yaw);
 	}
 
-	if (!turning)
+	if (tank_UI_component && !turning)
 	{
 		turning = true;
+		tank_UI_component->_show_aiming_box(false);
 	}
 
 	/*  #### BUG fixed : Value tremble around destnation. 
@@ -173,7 +217,10 @@ void ATank::_set_weapon(uint8 number)
 	{
 		return;
 	}
-	weapon_component->_exchange_weapon(number);
+	if (weapon_component->_exchange_weapon(number) && tank_UI_component)
+	{
+		tank_UI_component->_setup_projectile(_get_reload_time(), _get_projectile_image());
+	};
 };
 
 //Exchange
@@ -183,7 +230,10 @@ void ATank::_exchange_weapon()
 	{
 		return;
 	}
-	weapon_component->_exchange_weapon();
+	if (weapon_component->_exchange_weapon() && tank_UI_component)
+	{
+		tank_UI_component->_setup_projectile(_get_reload_time(), _get_projectile_image());
+	};
 };
 
 //Fire()
@@ -193,7 +243,10 @@ void ATank::_fire()
 	{
 		return;
 	}
-	weapon_component->_fire(_get_launch_normal(), _get_launch_location());
+	if (weapon_component->_fire(_get_launch_normal(), _get_launch_location()) && tank_UI_component)
+	{
+		tank_UI_component->_fire();
+	};
 };
 
 //Reload
@@ -203,8 +256,10 @@ void ATank::_reload()
 	{
 		return;
 	}
-
-	weapon_component->_reload();
+	if (weapon_component->_reload() && tank_UI_component)
+	{
+		tank_UI_component->_reload_projectile();
+	};
 	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
 };
 

@@ -6,10 +6,10 @@
 #include "GameFramework/HUD.h"
 //Generate Last
 #include "TankHUD.generated.h"
-
 /**
  * 
  */
+class UTankWidget;
 
 UCLASS()
 class BATTLE_TANK_API ATankHUD : public AHUD
@@ -17,7 +17,7 @@ class BATTLE_TANK_API ATankHUD : public AHUD
 	GENERATED_BODY()
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void DrawHUD() override;
 	//SWidget Menu
 	TSharedPtr<class SMenu> smenu;
 	//SWidget Container
@@ -33,5 +33,5 @@ public:
 	void _remove_menu();
 	// void DrawHUD() override;
 	//UMG
-	void _set_current_widget(UUserWidget *current_widget_toset);
+	void _set_current_widget(UTankWidget *current_widget_toset);
 };

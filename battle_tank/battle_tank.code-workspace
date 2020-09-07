@@ -19,7 +19,19 @@
 			"typeinfo": "cpp",
 			"__config": "cpp",
 			"__nullptr": "cpp",
-			"*.rh": "cpp"
+			"*.rh": "cpp",
+			"bitset": "cpp",
+			"deque": "cpp",
+			"hash_map": "cpp",
+			"iterator": "cpp",
+			"list": "cpp",
+			"map": "cpp",
+			"queue": "cpp",
+			"set": "cpp",
+			"stack": "cpp",
+			"vector": "cpp",
+			"xtree": "cpp",
+			"__tree": "cpp"
 		}
 	},
 	"extensions": {

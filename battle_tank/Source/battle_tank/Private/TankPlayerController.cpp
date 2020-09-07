@@ -2,14 +2,16 @@
 
 #include "TankPlayerController.h"
 //FIRST include
-#include "TankHUD.h"
 #include "Tank.h"
+#include "TankHUD.h"
+// #include "TankWidget.h"
 
 void ATankPlayerController::BeginPlay()
 {
     Super::BeginPlay();
     //get possessed tank
-    tank_controlled = _get_controlled_tank();
+    tank_controlled = Cast<ATank>(GetPawn());
+    tank_HUD = Cast<ATankHUD>(GetHUD());
 }
 
 void ATankPlayerController::SetupInputComponent()
@@ -26,6 +28,7 @@ void ATankPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     //--------------------------
+
     if (tank_controlled != nullptr)
     {
         _get_aiming_normal();
@@ -46,17 +49,20 @@ void ATankPlayerController::_get_aiming_normal()
         aiming_normal);
 };
 
-//return a Tank pointer
-ATank *ATankPlayerController::_get_controlled_tank() const
-{
-    return Cast<ATank>(GetPawn());
-}
-
 //-----------------------------Menu------------------------------------------
 void ATankPlayerController::_open_pause_menu()
 {
-    if (ATankHUD *menu_HUD = Cast<ATankHUD>(GetHUD()))
+    if (tank_HUD)
     {
-        menu_HUD->_show_pause_menu();
+        tank_HUD->_show_pause_menu();
     }
+};
+
+void ATankPlayerController::_set_current_widget(UTankWidget *widget_toset)
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_set_current_widget(widget_toset);
 };

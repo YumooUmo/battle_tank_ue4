@@ -53,6 +53,19 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UTankUIComponent *tank_UI_component = nullptr;
 
+	//-----------------------------		SETUP		------------------------------
+	//  	Set UP
+	//- BP -
+	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
+	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
+						 UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
+						 UAimingComponent *aiming_component_toset,
+						 UWeaponComponent *weapon_component_toset,
+						 UForceNavMovementComponent *move_component_toset,
+						 UTankUIComponent *tank_UI_component_toset);
+	// - Tank UI -
+	void _set_widget();
+	void _unset_widget();
 	//-----------------------------		GET		------------------------------
 	FVector _get_launch_normal();
 
@@ -61,6 +74,10 @@ public:
 
 	//Get Current Projectile's Launch Speed
 	float _get_launch_speed();
+
+	float _get_max_lock_buffer();
+	float _get_reload_time();
+	UTexture2D *_get_projectile_image();
 
 	//-----------------		PUBLIC : SELF action	--------------------
 	//_turning_to to aiming_direction
@@ -94,6 +111,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	ATankPlayerController *player_controller = nullptr;
 	bool turning = true;
 
 private:
@@ -103,14 +121,4 @@ private:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
-	//-----------------------------		SETUP		------------------------------
-	//  	Set UP
-	//STATIC MESH
-	UFUNCTION(BlueprintCallable, Category = Mesh_Setup)
-	virtual void _set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
-						 UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
-						 UAimingComponent *aiming_component_toset,
-						 UWeaponComponent *weapon_component_toset,
-						 UForceNavMovementComponent *move_component_toset,
-						 UTankUIComponent *tank_UI_component_toset);
 };

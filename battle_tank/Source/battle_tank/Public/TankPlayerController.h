@@ -8,6 +8,9 @@
 #include "TankPlayerController.generated.h"
 
 class ATank;
+class ATankHUD;
+class UTankWidget;
+
 /**
  * 
  */
@@ -18,7 +21,7 @@ class BATTLE_TANK_API ATankPlayerController : public APlayerController
 protected:
 	// Called to bind functionality to input
 	virtual void SetupInputComponent() override;
-	
+
 	//-------------------------------Menu---------------------------------
 	void _open_pause_menu();
 
@@ -34,22 +37,21 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float crosshair_y = 0.35;
 
+	ATankHUD *tank_HUD = nullptr;
 	FVector aiming_normal{0};
 
 	ATank *tank_controlled = nullptr;
 
 	//-------------------------------TICK--------------------------------
-	UFUNCTION(BlueprintCallable, Category = Comppnent)
-	void _get_aiming_normal();
 
 	//-------By Location
 	// void _aiming() const;
 
-	
 public:
-//-------------------------------GET----------------------------------
-	UFUNCTION(BlueprintCallable, Category = GET_Tank)
-	virtual ATank *_get_controlled_tank() const;
-
+	//-------------------------------GET----------------------------------
 	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
+	UFUNCTION(BlueprintCallable, Category = Comppnent)
+	void _get_aiming_normal();
+
+	void _set_current_widget(UTankWidget *widget_toset);
 };

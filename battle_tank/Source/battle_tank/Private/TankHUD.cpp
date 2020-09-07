@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/Engine.h"
 #include "SMenu.h"
+#include "TankWidget.h"
 #include "Widgets/SWeakWidget.h"
 
 // #include "GameFramework/HUD.h"
@@ -13,6 +14,11 @@
 void ATankHUD::BeginPlay()
 {
     Super::BeginPlay();
+};
+
+void ATankHUD::DrawHUD()
+{
+    Super::DrawHUD();
 };
 
 void ATankHUD::_show_pause_menu()
@@ -48,7 +54,7 @@ void ATankHUD::_remove_menu()
     }
 };
 
-void ATankHUD::_set_current_widget(UUserWidget *current_widget_toset = nullptr)
+void ATankHUD::_set_current_widget(UTankWidget *current_widget_toset = nullptr)
 {
     if (current_widget != nullptr)
     {
