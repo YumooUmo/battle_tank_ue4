@@ -73,7 +73,8 @@ void UAimingComponent::_should_lock()
 			}
 		}
 	}
-	player_controller->_update_lock_buffer(lock_buffer, aiming_state);
+	// - UI -
+	player_controller->_update_lock_buffer(FMath::GetRangePct(0.f, max_buffer, lock_buffer), aiming_state);
 };
 
 //CALL
@@ -83,7 +84,6 @@ void UAimingComponent::_lock(bool flag)
 	{
 		return;
 	}
-
 	//Draw_Path : Pressed
 	if (aiming_state != AimingState::overheat)
 	{
@@ -94,10 +94,11 @@ void UAimingComponent::_lock(bool flag)
 			{
 				return;
 			}
-			player_controller->_do_lock_buffer();
 			GetWorld()->GetTimerManager().SetTimer(lock_timer, this,
 												   &UAimingComponent::_should_lock,
 												   pace, true);
+			// - UI -
+			player_controller->_do_lock_buffer();
 		}
 		//Draw_Path : Released
 		else

@@ -101,7 +101,7 @@ void ATankPlayerController::_setup_projectile()
     {
         return;
     }
-    tank_HUD->_setup_projectile(tank_controlled->_get_reload_time(), tank_controlled->_get_projectile_image());
+    tank_HUD->_setup_projectile(tank_controlled->_get_projectile_image());
 };
 //Tank : Reload Image
 void ATankPlayerController::_reload_projectile()
@@ -112,6 +112,15 @@ void ATankPlayerController::_reload_projectile()
     }
     tank_HUD->_reload_projectile();
 };
+//Tank : Ready - Claer timer
+void ATankPlayerController::_reload_ready()
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_reload_ready();
+}
 //Tank : Hide Image
 void ATankPlayerController::_hide_projectile_image()
 {
@@ -123,23 +132,14 @@ void ATankPlayerController::_hide_projectile_image()
 }
 
 // - LOCK - (Aiming)
-// - HUD : Setup lock buffer
-void ATankPlayerController::_setup_lock_buffer()
-{
-    if (!tank_HUD)
-    {
-        return;
-    }
-    tank_HUD->_setup_lock_buffer(tank_controlled->_get_max_lock_buffer());
-}
 //Tank : update
-void ATankPlayerController::_update_lock_buffer(float lock_buffer_toset, AimingState aiming_state_toset)
+void ATankPlayerController::_update_lock_buffer(float lock_buffer_percent, AimingState aiming_state_toset)
 {
     if (!tank_HUD)
     {
         return;
     }
-    tank_HUD->_update_lock_buffer(lock_buffer_toset, aiming_state_toset);
+    tank_HUD->_update_lock_buffer(lock_buffer_percent, aiming_state_toset);
 };
 //Tank : _Lock draw
 void ATankPlayerController::_do_lock_buffer()

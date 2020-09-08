@@ -20,7 +20,7 @@ void ATankHUD::BeginPlay()
 /* - Flicker -
  * function -                 #### TODO : Add Curve
  */
-float ATankHUD::_repeat(float flick_frequence)
+float ATankHUD::_flicker(float flick_frequence)
 {
     if (!add)
     {
@@ -111,7 +111,6 @@ void ATankHUD::_setup_tank_widget()
     if (tank_widget)
     {
         player_controller = Cast<ATankPlayerController>(PlayerOwner);
-        player_controller->_setup_lock_buffer();
         player_controller->_setup_projectile();
         tank_widget->AddToViewport();
     }
@@ -147,13 +146,12 @@ void ATankHUD::_change_crosshair_color(bool flag)
 };
 
 //HUD start - change projectile image
-void ATankHUD::_setup_projectile(float reload_time_toset, UTexture2D *projectile_texture_toset)
+void ATankHUD::_setup_projectile(UTexture2D *projectile_texture_toset)
 {
     if (!tank_widget)
     {
         return;
     }
-    reload_time = reload_time_toset;
     tank_widget->_set_projectile_image_texture(projectile_texture_toset);
 };
 //Tank call - Reload Image
@@ -161,9 +159,9 @@ void ATankHUD::_reload_projectile()
 {
     if (tank_widget && tank_widget->_get_projectile_image())
     {
+        sum_flick = 0.f;
         if (reload_timer.IsValid())
         {
-            sum_reload_time = 0.f;
             return;
         }
         GetWorld()->GetTimerManager().SetTimer(reload_timer, this,
@@ -171,41 +169,34 @@ void ATankHUD::_reload_projectile()
                                                pace, true);
     }
 };
+//Tank call - Reload ready
+void ATankHUD::_reload_ready()
+{
+    if (tank_widget && tank_widget->_get_projectile_image())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(reload_timer);
+        tank_widget->_set_projectile_image_ropacity(1.f);
+    }
+}
+//SHOW
+void ATankHUD::_show_reload_projectile()
+{
+    tank_widget->_set_projectile_image_ropacity(_flicker(4.f) * max_flicker_opacity);
+};
 //Tank call - Hide
 void ATankHUD::_hide_projectile_image()
 {
     if (tank_widget && tank_widget->_get_projectile_image())
     {
-        sum_flick = 0.f;
         tank_widget->_set_projectile_image_ropacity(0.f);
-    }
-};
-//SHOW every tick, stop at reload time finish;
-void ATankHUD::_show_reload_projectile()
-{
-    if (sum_reload_time < reload_time)
-    {
-        sum_reload_time += pace;
-        tank_widget->_set_projectile_image_ropacity(_repeat(4.f) * max_repeat_opacity);
-        if (sum_reload_time >= reload_time)
-        {
-            sum_reload_time = 0.f;
-            tank_widget->_set_projectile_image_ropacity(1.f);
-            GetWorld()->GetTimerManager().ClearTimer(reload_timer);
-        }
     }
 };
 
 // - Lock Buffer - (Aiming)
-//HUD start - Setup lock buffer
-void ATankHUD::_setup_lock_buffer(float max_buffer_toset)
-{
-    max_buffer = max_buffer_toset;
-}
 //Tank call - update
-void ATankHUD::_update_lock_buffer(float lock_buffer_toset, AimingState aiming_state_toset)
+void ATankHUD::_update_lock_buffer(float percent_toset, AimingState aiming_state_toset)
 {
-    lock_buffer = lock_buffer_toset;
+    lock_buffer_percent = percent_toset;
     aiming_state = aiming_state_toset;
 };
 //Tank call - Lock
@@ -217,13 +208,10 @@ void ATankHUD::_do_lock_buffer()
         {
             return;
         }
-        if (max_buffer > 0) //BUG
-        {
-            tank_widget->_set_lock_buffer_bar_ropacity(100.f);
-            GetWorld()->GetTimerManager().SetTimer(lock_buffer_timer, this,
-                                                   &ATankHUD::_show_lock_buffer,
-                                                   pace, true);
-        }
+        tank_widget->_set_lock_buffer_bar_ropacity(100.f);
+        GetWorld()->GetTimerManager().SetTimer(lock_buffer_timer, this,
+                                               &ATankHUD::_show_lock_buffer,
+                                               pace, true);
     }
 };
 //SHOW
@@ -231,7 +219,7 @@ void ATankHUD::_show_lock_buffer()
 {
     //Delay Disapear
     static float lag = 0.f;
-    if (lock_buffer == max_buffer)
+    if (lock_buffer_percent > 98.f)
     {
         lag += pace * 0.5f;
         tank_widget->_set_lock_buffer_bar_ropacity(1.f - lag);
@@ -245,20 +233,28 @@ void ATankHUD::_show_lock_buffer()
     {
         if (aiming_state == AimingState::usable)
         {
-            tank_widget->_set_lock_buffer_bar_fcolor(FLinearColor(0.065f, 0.130f, 0.796f, 0.85f));
+            tank_widget->_set_lock_buffer_bar_fcolor(FLinearColor(0.065f, 0.130f, 0.796f, 0.8f));
         }
         else if (aiming_state == AimingState::locking)
         {
-            tank_widget->_set_lock_buffer_bar_fcolor(FLinearColor(0.755f, 0.529f, 0.072f, 0.85f));
+            tank_widget->_set_lock_buffer_bar_fcolor(FLinearColor(0.755f, 0.529f, 0.072f, 0.8f));
         }
         else if (aiming_state == AimingState::overheat)
         {
-            tank_widget->_set_lock_buffer_bar_fcolor(
-                lock_buffer > 0 ? FLinearColor(0.242f, 0.242f, 0.242f, 0.85f)
-                                : FLinearColor(0.638f, 0.f, 0.005f, 0.85f));
+            if (lock_buffer_percent > 0)
+            {
+                tank_widget->_set_lock_buffer_bar_fcolor(
+                    FLinearColor(0.242f, 0.242f, 0.242f, 0.8f));
+            }
+            else
+            {
+                tank_widget->_set_lock_buffer_bar_fcolor(
+                    FLinearColor(0.638f, 0.f, 0.005f, 0.8f));
+                tank_widget->_set_lock_buffer_bar_percent(-lock_buffer_percent);
+                return;
+            }
         }
-        tank_widget->_set_lock_buffer_bar_percent(lock_buffer * 100.f / max_buffer);
-        UE_LOG(LogTemp, Warning, TEXT("We Made it ~! Buffer ~!  %f ???"), lock_buffer * 100.f / max_buffer);
+        tank_widget->_set_lock_buffer_bar_percent(lock_buffer_percent);
         lag = 0.f;
     }
 };

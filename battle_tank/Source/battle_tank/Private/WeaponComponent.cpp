@@ -2,7 +2,10 @@
 
 #include "WeaponComponent.h"
 //FIRST include
+#include "TankPlayerController.h"
 #include "TankProjectile.h"
+#include "TimerManager.h"
+
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
 {
@@ -19,6 +22,7 @@ void UWeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+	player_controller = Cast<ATankPlayerController>(Cast<APawn>(GetOwner())->GetController());
 }
 
 // Called every frame
@@ -38,6 +42,7 @@ void UWeaponComponent::_set_projectile(TSubclassOf<ATankProjectile> projectile_S
 };
 
 //----------------------------		GET			----------------------------------
+//Subclass of projectile -
 TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 {
 	switch (weapon_number % 10)
@@ -53,7 +58,7 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 		break;
 	}
 };
-
+//launch_speed -
 float UWeaponComponent::_get_launch_speed()
 {
 	if (_get_current_projectile() == nullptr)
@@ -62,7 +67,7 @@ float UWeaponComponent::_get_launch_speed()
 	}
 	return _get_current_projectile().GetDefaultObject()->launch_force; // Here is the point
 }
-
+//reload_time -
 float UWeaponComponent::_get_reload_time()
 {
 	if (_get_current_projectile() == nullptr)
@@ -71,7 +76,7 @@ float UWeaponComponent::_get_reload_time()
 	}
 	return _get_current_projectile().GetDefaultObject()->reload_time; // Here is the point
 }
-
+//Image -
 UTexture2D *UWeaponComponent::_get_image()
 {
 	if (_get_current_projectile() == nullptr)
@@ -80,10 +85,15 @@ UTexture2D *UWeaponComponent::_get_image()
 	}
 	return _get_current_projectile().GetDefaultObject()->projectile_image; // Here is the point
 }
+//Enum -
+WeaponState UWeaponComponent::_get_weapon_state()
+{
+	return weapon_state;
+};
 
 //----------------------------		PLAY		----------------------------------
 //Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-bool UWeaponComponent::_exchange_weapon(uint8 number)
+void UWeaponComponent::_set_weapon(uint8 number)
 {
 	if (weapon_number % 10 != number)
 	{
@@ -94,80 +104,94 @@ bool UWeaponComponent::_exchange_weapon(uint8 number)
 			if (tank_projectile_0 != nullptr)
 			{
 				weapon_number = (weapon_number % 10) * 10 + number;
-				reloaded = false;
+				weapon_state = WeaponState::empty;
+
 				_reload();
-				return true;
 			}
 			break;
 		case 1:
 			if (tank_projectile_1 != nullptr)
 			{
 				weapon_number = (weapon_number % 10) * 10 + number;
-				reloaded = false;
+				weapon_state = WeaponState::empty;
 				_reload();
-				return true;
 			}
 			break;
 		default:
 			break;
 		}
 	}
-	return false;
+	// - UI -
+	if (player_controller)
+	{
+		player_controller->_setup_projectile();
+	}
 };
 
 //SET exchange weapon
-bool UWeaponComponent::_exchange_weapon()
+void UWeaponComponent::_exchange_weapon()
 {
 	if (weapon_number != 0)
 	{
 		int8 temp = weapon_number / 10;
 		weapon_number = (((weapon_number % 10) * 10) + temp);
-		reloaded = false;
+		weapon_state = WeaponState::empty;
 		_reload();
-		return true;
 	}
-	return false;
+	// - UI -
+	if (player_controller)
+	{
+		player_controller->_setup_projectile();
+	}
 };
 
-//Fire()
-bool UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
+//Fire
+void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 {
-	if (_get_current_projectile() == nullptr)
+	if (_get_current_projectile())
 	{
-		return false;
+		if (weapon_state == WeaponState::ready)
+		{
+			weapon_state = WeaponState::empty;
+			GetWorld()->SpawnActor<ATankProjectile>(
+						  _get_current_projectile(),
+						  launch_location,
+						  launch_normal.Rotation())
+				->_launch();
+			// - UI -
+			if (player_controller)
+			{
+				player_controller->_hide_projectile_image();
+			}
+		}
 	}
-
-	if (FPlatformTime::Seconds() > end_reload_time && reloaded)
-	{
-		reloaded = false;
-		GetWorld()->SpawnActor<ATankProjectile>(
-					  _get_current_projectile(),
-					  launch_location,
-					  launch_normal.Rotation())
-			->_launch();
-		return true;
-	}
-	return false;
 };
 
 //Reload
-bool UWeaponComponent::_reload()
+void UWeaponComponent::_reload()
 {
-	if (reloaded == false)
+	if (weapon_state == WeaponState::empty)
 	{
-		float temp = _get_current_projectile().GetDefaultObject()->reload_time;
-		end_reload_time = FPlatformTime::Seconds() + temp;
-		reloaded = true;
-		// UE_LOG(LogTemp, Warning, TEXT("reloaded ~!"));
-		return true;
+		weapon_state = WeaponState::reloading;
+		GetWorld()->GetTimerManager().SetTimer(reload_timer, this,
+											   &UWeaponComponent::_reload_ready,
+											   _get_reload_time(), false);
+		// - UI -
+		if (player_controller)
+		{
+			player_controller->_reload_projectile();
+		}
 	}
-	return false;
-	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , reloaded is %i"), FPlatformTime::Seconds() - end_reload_time, reloaded);
 };
 
-//----------------------------		Enum	----------------------------------
-WeaponState UWeaponComponent::_get_weapon_state()
+//Ready
+void UWeaponComponent::_reload_ready()
 {
-	return FPlatformTime::Seconds() > end_reload_time ? (reloaded ? WeaponState::ready : WeaponState::empty)
-													  : WeaponState::reloading;
-};
+	weapon_state = WeaponState::ready;
+	GetWorld()->GetTimerManager().ClearTimer(reload_timer);
+	// - UI -
+	if (player_controller)
+	{
+		player_controller->_reload_ready();
+	}
+}

@@ -40,13 +40,13 @@ public:
 	//													#### TODO : Template for Component create
 
 	UPROPERTY(BlueprintReadWrite, Category = "Component")
-	UAimingComponent *aiming_component = nullptr;
+	UAimingComponent *aiming_component;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Component")
-	UForceNavMovementComponent *move_component = nullptr;
+	UForceNavMovementComponent *move_component;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Component")
-	UWeaponComponent *weapon_component = nullptr;
+	UWeaponComponent *weapon_component;
 
 	//-----------------------------		SETUP		------------------------------
 	//  	Set UP
@@ -103,6 +103,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Controller")
 	ATankPlayerController *player_controller = nullptr;
 	bool turning = true;
 

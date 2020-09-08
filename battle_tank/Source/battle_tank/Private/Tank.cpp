@@ -64,7 +64,6 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
-
 	// if (IsPlayerControlled())
 	// {
 	// 	player_controller->_setup_tank_widget();
@@ -126,7 +125,7 @@ float ATank::_get_reload_time()
 {
 	if (weapon_component == nullptr)
 	{
-		return 1.f;
+		return 0.f;
 	}
 	return weapon_component->_get_reload_time();
 };
@@ -152,7 +151,8 @@ void ATank::_turning_to(FVector aiming_normal)
 	float pitch = aiming_normal.Rotation().Pitch - launch_rotation.Pitch;
 	float yaw = aiming_normal.Rotation().Yaw - launch_rotation.Yaw;
 
-	if (FMath::Abs(yaw) <= 0.5f && FMath::Abs(pitch) <= 0.5f)
+	UE_LOG(LogTemp, Warning, TEXT("YES ! ~~~!  %f"), yaw);
+	if (FMath::Abs(yaw) <= 0.05f && FMath::Abs(pitch) <= 0.05f)
 	{
 		if (turning)
 		{
@@ -165,12 +165,12 @@ void ATank::_turning_to(FVector aiming_normal)
 		return;
 	}
 
-	if (FMath::Abs(pitch) > 0.1f)
+	if (FMath::Abs(pitch) > 0.05f)
 	{
 		//call _elevate_barrel
 		barrel->_elevate_barrel(pitch);
 	}
-	if (FMath::Abs(yaw) > 0.1f)
+	if (FMath::Abs(yaw) > 0.05f)
 	{
 		//call   _rotate_turrent
 		turrent->_rotate_turrent(yaw);
@@ -196,11 +196,7 @@ void ATank::_set_weapon(uint8 number)
 	{
 		return;
 	}
-	if (weapon_component->_exchange_weapon(number) && player_controller)
-	{
-		player_controller->_setup_projectile();
-		player_controller->_reload_projectile();
-	};
+	weapon_component->_set_weapon(number);
 };
 //Exchange
 void ATank::_exchange_weapon()
@@ -209,11 +205,7 @@ void ATank::_exchange_weapon()
 	{
 		return;
 	}
-	if (weapon_component->_exchange_weapon() && player_controller)
-	{
-		player_controller->_setup_projectile();
-		player_controller->_reload_projectile();
-	};
+	weapon_component->_exchange_weapon();
 };
 //Fire()
 void ATank::_fire()
@@ -222,10 +214,7 @@ void ATank::_fire()
 	{
 		return;
 	}
-	if (weapon_component->_fire(_get_launch_normal(), _get_launch_location()) && player_controller)
-	{
-		player_controller->_hide_projectile_image();
-	};
+	weapon_component->_fire(_get_launch_normal(), _get_launch_location());
 };
 //Reload
 void ATank::_reload()
@@ -234,11 +223,7 @@ void ATank::_reload()
 	{
 		return;
 	}
-	if (weapon_component->_reload() && player_controller)
-	{
-		player_controller->_reload_projectile();
-	};
-	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
+	weapon_component->_reload();
 };
 
 // - Lock - AimingComponent/DrawProjectilePath

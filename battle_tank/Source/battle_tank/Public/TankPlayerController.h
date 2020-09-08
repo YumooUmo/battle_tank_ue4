@@ -3,6 +3,7 @@
 #pragma once
 // #include "battle_tank.h"
 #include "AimingState.h"
+#include "WeaponState.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 //last generate
@@ -47,7 +48,6 @@ private:
 public:
 	//-------------------------------GET----------------------------------
 	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
-	UFUNCTION(BlueprintCallable, Category = Comppnent)
 	void _get_aiming_normal();
 
 	void _setup_tank_widget();
@@ -66,14 +66,14 @@ public:
 	void _setup_projectile();
 	//Tank : Reload Image
 	void _reload_projectile();
+	//Tank : Ready
+	void _reload_ready();
 	//Tank : Hide
 	void _hide_projectile_image();
 
 	// - LOCK - (Aiming)
-	// - HUD : Setup lock buffer
-	void _setup_lock_buffer();
 	//Tank : update
-	void _update_lock_buffer(float lock_buffer_toset, AimingState aiming_state_toset);
+	void _update_lock_buffer(float lock_buffer_percent, AimingState aiming_state_toset);
 	//Tank : _Lock draw
 	void _do_lock_buffer();
 };

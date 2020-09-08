@@ -26,12 +26,15 @@ void UTankBarrel::_elevate_barrel(float delta_pitch)
         *Method is : When tank rolling-over, pass in parameter -dest_pitch.
         */
 
-    //Clamp to 1 °/s                               #### TODO : adjustable Curve
-    delta_pitch = FMath::Clamp<float>(delta_pitch*5.f, -_max_elevate_speed, _max_elevate_speed) *
-                  GetWorld()->DeltaTimeSeconds;
-    //Angle that changed
-    // delta_pitch *= _max_elevate_speed;
-
+    if (FMath::Abs(delta_pitch) > 0.05f)
+    {
+        //Clamp to 1 °/s                               #### TODO : adjustable Curve
+        delta_pitch = FMath::Clamp<float>(delta_pitch * 10.f,
+                                          -_max_elevate_speed,
+                                          _max_elevate_speed) *
+                      GetWorld()->DeltaTimeSeconds;
+        //Angle that changed
+    }
     //Add Relative rotation.
     float relative_angle = GetRelativeRotation().Pitch + delta_pitch;
 
