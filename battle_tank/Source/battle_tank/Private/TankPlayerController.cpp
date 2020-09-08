@@ -28,7 +28,10 @@ void ATankPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     //--------------------------
-
+    // if (!tank_HUD)
+    // {
+    //     tank_HUD = Cast<ATankHUD>(GetHUD());
+    // }
     if (tank_controlled != nullptr)
     {
         _get_aiming_normal();
@@ -58,11 +61,92 @@ void ATankPlayerController::_open_pause_menu()
     }
 };
 
-void ATankPlayerController::_set_current_widget(UTankWidget *widget_toset)
+void ATankPlayerController::_setup_tank_widget()
+{
+    // tank_HUD = Cast<ATankHUD>(GetHUD());
+    if (tank_HUD)
+    {
+        tank_HUD->_setup_tank_widget();
+    }
+};
+
+void ATankPlayerController::_unset_tank_widget()
 {
     if (!tank_HUD)
     {
         return;
     }
-    tank_HUD->_set_current_widget(widget_toset);
+    tank_HUD->_remove_tank_widget();
+};
+
+/* - Tank UI - 
+ * - tank_widget & tank_HUD
+ */
+// - Turning -
+//Tank : Change Aiming Box
+void ATankPlayerController::_change_crosshair_color(bool flag)
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_change_crosshair_color(flag);
+}
+
+// - Weapon - (Projectile)
+// - HUD : change projectile image
+void ATankPlayerController::_setup_projectile()
+{
+    if (!tank_HUD || tank_controlled == nullptr)
+    {
+        return;
+    }
+    tank_HUD->_setup_projectile(tank_controlled->_get_reload_time(), tank_controlled->_get_projectile_image());
+};
+//Tank : Reload Image
+void ATankPlayerController::_reload_projectile()
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_reload_projectile();
+};
+//Tank : Hide Image
+void ATankPlayerController::_hide_projectile_image()
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_hide_projectile_image();
+}
+
+// - LOCK - (Aiming)
+// - HUD : Setup lock buffer
+void ATankPlayerController::_setup_lock_buffer()
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_setup_lock_buffer(tank_controlled->_get_max_lock_buffer());
+}
+//Tank : update
+void ATankPlayerController::_update_lock_buffer(float lock_buffer_toset, AimingState aiming_state_toset)
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_update_lock_buffer(lock_buffer_toset, aiming_state_toset);
+};
+//Tank : _Lock draw
+void ATankPlayerController::_do_lock_buffer()
+{
+    if (!tank_HUD)
+    {
+        return;
+    }
+    tank_HUD->_do_lock_buffer();
 };

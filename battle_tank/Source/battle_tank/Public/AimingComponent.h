@@ -8,8 +8,8 @@
 //last generate
 #include "AimingComponent.generated.h"
 
+class ATankPlayerController;
 class ATank;
-class UTankUIComponent;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UAimingComponent : public UActorComponent
@@ -23,7 +23,7 @@ public:
 	virtual void BeginPlay() override;
 
 	//Setup
-	void _setup_UI_component(UTankUIComponent *tank_UI_component_toset);
+	void _set_controller(ATankPlayerController *player_controller_toset);
 
 	//Property
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
@@ -44,11 +44,17 @@ public:
 	virtual void _should_lock();
 	virtual void _lock(bool flag);
 
+	//CALL : Draw Projectile Path
+	void _draw_projectile_path();
+
 protected:
-	UTankUIComponent *UI_component = nullptr;
+	ATankPlayerController *player_controller = nullptr;
+	ATank *owner_tank = nullptr;
+
 	//framerate to seconds
 	UPROPERTY(EditDefaultsOnly, Category = "Framerate(seconds)")
 	float pace = 0.01f;
+
 	FTimerHandle lock_timer;
 
 private:

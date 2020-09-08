@@ -2,8 +2,10 @@
 
 #include "AimingComponent.h"
 //FIRST include
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tank.h"
-#include "TankUIComponent.h"
+#include "TankPlayerController.h"
 #include "TimerManager.h"
 
 // Sets default values for this component's properties
@@ -21,6 +23,8 @@ void UAimingComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+	owner_tank = Cast<ATank>(GetOwner());
+	player_controller = Cast<ATankPlayerController>(owner_tank->GetController());
 }
 
 // Called every frame
@@ -33,10 +37,6 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 //-----------------------------------		private		---------------------------------
 
 //-----------------------------------		public		---------------------------------
-void UAimingComponent::_setup_UI_component(UTankUIComponent *UI_component_toset)
-{
-	UI_component = UI_component_toset;
-}
 
 //-----------------------------------		Lock Action		---------------------------------
 void UAimingComponent::_should_lock()
@@ -52,7 +52,7 @@ void UAimingComponent::_should_lock()
 		else
 		{
 			lock_buffer -= pace;
-			UI_component->_draw_projectile_path();
+			UAimingComponent::_draw_projectile_path();
 		}
 	}
 	//Draw_Path : Not Pressed
@@ -73,12 +73,17 @@ void UAimingComponent::_should_lock()
 			}
 		}
 	}
-	UI_component->_update_lock_buffer(lock_buffer, aiming_state);
+	player_controller->_update_lock_buffer(lock_buffer, aiming_state);
 };
 
 //CALL
 void UAimingComponent::_lock(bool flag)
 {
+	if (!player_controller)
+	{
+		return;
+	}
+
 	//Draw_Path : Pressed
 	if (aiming_state != AimingState::overheat)
 	{
@@ -89,10 +94,10 @@ void UAimingComponent::_lock(bool flag)
 			{
 				return;
 			}
-			UI_component->_do_lock_buffer();
+			player_controller->_do_lock_buffer();
 			GetWorld()->GetTimerManager().SetTimer(lock_timer, this,
-													&UAimingComponent::_should_lock,
-													pace, true);
+												   &UAimingComponent::_should_lock,
+												   pace, true);
 		}
 		//Draw_Path : Released
 		else
@@ -101,3 +106,65 @@ void UAimingComponent::_lock(bool flag)
 		}
 	}
 };
+
+//Draw : Projectile path
+void UAimingComponent::_draw_projectile_path()
+{
+	if (owner_tank == nullptr)
+	{
+		return;
+	}
+	//Initiallize Parameters to _predict path method()
+	FVector launch_velocity = (owner_tank->_get_launch_normal()) * (owner_tank->_get_launch_speed());
+	FVector launch_location = owner_tank->_get_launch_location();
+
+	FPredictProjectilePathParams PredictParams{
+		10.f,			 //CollisionRadius
+		launch_location, //start location
+		launch_velocity, //----------------- get owner->barrel aiming velocity : launch_velocity
+		3.0f,			 //MaxSimTime
+		ECollisionChannel::ECC_Visibility,
+		nullptr}; //													####	TODO : Debug
+	PredictParams.ActorsToIgnore.Add(owner_tank);
+	// PredictParams.OverrideGravityZ = -5000.f;
+
+	//Initiallize Result Struct to _predict path method()
+	FPredictProjectilePathResult PredictResult;
+
+	if (UGameplayStatics::PredictProjectilePath(
+			this,
+			PredictParams,
+			PredictResult))
+	{
+		//----####有效射程	in MaxSimTime
+		//获得第一个击中点
+		//---------------------------------------------------------Debug
+		DrawDebugLine(
+			GetWorld(),
+			launch_location, //start location
+			PredictResult.HitResult.Location,
+			FColor::Blue,
+			false,
+			0.0f,
+			0.0f,
+			100.0f);
+	}
+	else
+	{
+		//-----####有效射程外 out of MaxSimTime
+		//---------------------------------------------------------Debug
+		DrawDebugLine(
+			GetWorld(),
+			launch_location, //start location
+			PredictResult.LastTraceDestination.Location,
+			FColor::Blue,
+			false,
+			0.0f,
+			0.0f,
+			100.0f);
+	}
+	// //------------------------------------Debug
+	// UE_LOG(LogTemp, Error, TEXT("Hit Result is : %s"), *(PredictResult.HitResult.Location.ToString()));
+	// UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
+	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
+}

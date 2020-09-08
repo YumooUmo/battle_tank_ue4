@@ -27,10 +27,10 @@ void UTankBarrel::_elevate_barrel(float delta_pitch)
         */
 
     //Clamp to 1 °/s                               #### TODO : adjustable Curve
-    delta_pitch = FMath::Clamp<float>(delta_pitch, -1, 1) *
+    delta_pitch = FMath::Clamp<float>(delta_pitch*5.f, -_max_elevate_speed, _max_elevate_speed) *
                   GetWorld()->DeltaTimeSeconds;
     //Angle that changed
-    delta_pitch *= _max_elevate_speed;
+    // delta_pitch *= _max_elevate_speed;
 
     //Add Relative rotation.
     float relative_angle = GetRelativeRotation().Pitch + delta_pitch;

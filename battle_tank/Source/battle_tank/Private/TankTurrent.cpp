@@ -28,9 +28,9 @@ void UTankTurrent::_rotate_turrent(float delta_yaw)
         *Method is : When tank rolling-over, pass in parameter -dest_pitch.
         */
 
-        delta_yaw = FMath::Clamp<float>(delta_yaw, -1, 1);
+        delta_yaw = FMath::Clamp<float>(delta_yaw*5.f, -_max_rotate_speed, _max_rotate_speed);
         //Angle that changed
-        float rotate_angle = delta_yaw * _max_rotate_speed * GetWorld()->DeltaTimeSeconds;
+        float rotate_angle = delta_yaw * GetWorld()->DeltaTimeSeconds;
         //Add Relative rotation : RelativeRotation.Pitch --------------------------- get rotation right now and add new to it.
         rotate_angle = GetRelativeRotation().Yaw + rotate_angle;
         //set

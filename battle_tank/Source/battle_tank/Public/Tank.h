@@ -18,8 +18,6 @@ class UWeaponComponent;
 class UAimingComponent;
 class UForceNavMovementComponent;
 
-class UTankUIComponent;
-
 // class UTankWidget;
 
 UCLASS()
@@ -50,9 +48,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Component")
 	UWeaponComponent *weapon_component = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	UTankUIComponent *tank_UI_component = nullptr;
-
 	//-----------------------------		SETUP		------------------------------
 	//  	Set UP
 	//- BP -
@@ -61,11 +56,8 @@ public:
 						 UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
 						 UAimingComponent *aiming_component_toset,
 						 UWeaponComponent *weapon_component_toset,
-						 UForceNavMovementComponent *move_component_toset,
-						 UTankUIComponent *tank_UI_component_toset);
-	// - Tank UI -
-	void _set_widget();
-	void _unset_widget();
+						 UForceNavMovementComponent *move_component_toset);
+
 	//-----------------------------		GET		------------------------------
 	FVector _get_launch_normal();
 
@@ -120,5 +112,4 @@ private:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
-
 };

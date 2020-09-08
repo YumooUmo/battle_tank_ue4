@@ -10,7 +10,6 @@
 #include "TankProjectile.h"
 #include "TankTrack.h"
 #include "TankTurrent.h"
-#include "TankUIComponent.h"
 #include "WeaponComponent.h"
 // #include "TankWidget.h"
 
@@ -50,8 +49,7 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 					UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
 					UAimingComponent *aiming_component_toset,
 					UWeaponComponent *weapon_component_toset,
-					UForceNavMovementComponent *move_component_toset,
-					UTankUIComponent *tank_UI_component_toset)
+					UForceNavMovementComponent *move_component_toset)
 {
 	//Set Barrel Reference
 	barrel = barrel_to_set;
@@ -66,34 +64,11 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
-	if (IsPlayerControlled())
-	{
-		tank_UI_component = tank_UI_component_toset;
-		aiming_component->_setup_UI_component(tank_UI_component_toset);
-		_set_widget();
-	}
-};
 
-// - Tank UI -
-//Set widget -
-void ATank::_set_widget()
-{
-	if (tank_UI_component == nullptr)
-	{
-		return;
-	}
-	player_controller->_set_current_widget(tank_UI_component->_initialize_widget());
-};
-
-//Unset widget -
-void ATank::_unset_widget()
-{
-	if (tank_UI_component->_get_widget() == nullptr)
-	{
-		return;
-	}
-	player_controller->_set_current_widget(nullptr);
-	tank_UI_component->_free_tank_widget();
+	// if (IsPlayerControlled())
+	// {
+	// 	player_controller->_setup_tank_widget();
+	// };
 };
 
 //	-----------------------------		Start Up : Controller_Tick
@@ -163,6 +138,7 @@ UTexture2D *ATank::_get_projectile_image()
 	}
 	return weapon_component->_get_image();
 };
+
 //---------------------------------		PUBLIC :PLAY		---------------------------
 // UI
 // self action
@@ -176,31 +152,34 @@ void ATank::_turning_to(FVector aiming_normal)
 	float pitch = aiming_normal.Rotation().Pitch - launch_rotation.Pitch;
 	float yaw = aiming_normal.Rotation().Yaw - launch_rotation.Yaw;
 
-	if (FMath::Abs(yaw) <= 0.001f && FMath::Abs(pitch) <= 0.001f)
+	if (FMath::Abs(yaw) <= 0.5f && FMath::Abs(pitch) <= 0.5f)
 	{
-		if (tank_UI_component && turning)
+		if (turning)
 		{
 			turning = false;
-			tank_UI_component->_show_aiming_box(true);
+			if (player_controller)
+			{
+				player_controller->_change_crosshair_color(true);
+			}
 		}
 		return;
 	}
 
-	if (FMath::Abs(pitch) > 0.001f)
+	if (FMath::Abs(pitch) > 0.1f)
 	{
 		//call _elevate_barrel
 		barrel->_elevate_barrel(pitch);
 	}
-	if (FMath::Abs(yaw) > 0.001f)
+	if (FMath::Abs(yaw) > 0.1f)
 	{
 		//call   _rotate_turrent
 		turrent->_rotate_turrent(yaw);
 	}
 
-	if (tank_UI_component && !turning)
+	if (player_controller && !turning)
 	{
 		turning = true;
-		tank_UI_component->_show_aiming_box(false);
+		player_controller->_change_crosshair_color(false);
 	}
 
 	/*  #### BUG fixed : Value tremble around destnation. 
@@ -210,19 +189,19 @@ void ATank::_turning_to(FVector aiming_normal)
 };
 
 //Exchange projectile by number
-//	TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+// - Weapon -	#### TODO : add new weapon
 void ATank::_set_weapon(uint8 number)
 {
 	if (weapon_component == nullptr)
 	{
 		return;
 	}
-	if (weapon_component->_exchange_weapon(number) && tank_UI_component)
+	if (weapon_component->_exchange_weapon(number) && player_controller)
 	{
-		tank_UI_component->_setup_projectile(_get_reload_time(), _get_projectile_image());
+		player_controller->_setup_projectile();
+		player_controller->_reload_projectile();
 	};
 };
-
 //Exchange
 void ATank::_exchange_weapon()
 {
@@ -230,12 +209,12 @@ void ATank::_exchange_weapon()
 	{
 		return;
 	}
-	if (weapon_component->_exchange_weapon() && tank_UI_component)
+	if (weapon_component->_exchange_weapon() && player_controller)
 	{
-		tank_UI_component->_setup_projectile(_get_reload_time(), _get_projectile_image());
+		player_controller->_setup_projectile();
+		player_controller->_reload_projectile();
 	};
 };
-
 //Fire()
 void ATank::_fire()
 {
@@ -243,12 +222,11 @@ void ATank::_fire()
 	{
 		return;
 	}
-	if (weapon_component->_fire(_get_launch_normal(), _get_launch_location()) && tank_UI_component)
+	if (weapon_component->_fire(_get_launch_normal(), _get_launch_location()) && player_controller)
 	{
-		tank_UI_component->_fire();
+		player_controller->_hide_projectile_image();
 	};
 };
-
 //Reload
 void ATank::_reload()
 {
@@ -256,14 +234,14 @@ void ATank::_reload()
 	{
 		return;
 	}
-	if (weapon_component->_reload() && tank_UI_component)
+	if (weapon_component->_reload() && player_controller)
 	{
-		tank_UI_component->_reload_projectile();
+		player_controller->_reload_projectile();
 	};
 	// UE_LOG(LogTemp, Warning, TEXT("Can't reload , Minus : %f , Reloaded is %i"), FPlatformTime::Seconds() - start_reload_time, reloaded);
 };
 
-//DrawProjectilePath
+// - Lock - AimingComponent/DrawProjectilePath
 void ATank::_lock(bool if_lock)
 {
 	if (aiming_component == nullptr)

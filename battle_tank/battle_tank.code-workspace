@@ -31,7 +31,14 @@
 			"stack": "cpp",
 			"vector": "cpp",
 			"xtree": "cpp",
-			"__tree": "cpp"
+			"__tree": "cpp",
+			"valarray": "cpp",
+			"algorithm": "cpp",
+			"chrono": "cpp",
+			"memory": "cpp",
+			"limits": "cpp",
+			"random": "cpp",
+			"ratio": "cpp"
 		}
 	},
 	"extensions": {

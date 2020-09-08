@@ -5,27 +5,67 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/Engine.h"
 #include "SMenu.h"
+#include "TankPlayerController.h"
 #include "TankWidget.h"
 #include "Widgets/SWeakWidget.h"
-
 // #include "GameFramework/HUD.h"
 // #include "GameFramework/PlayerController.h"
 
 void ATankHUD::BeginPlay()
 {
     Super::BeginPlay();
+    _setup_tank_widget();
 };
 
-void ATankHUD::DrawHUD()
+/* - Flicker -
+ * function -                 #### TODO : Add Curve
+ */
+float ATankHUD::_repeat(float flick_frequence)
 {
-    Super::DrawHUD();
-};
+    if (!add)
+    {
+        if (sum_flick <= 0)
+        {
+            sum_flick = 0;
+            add = true;
+        }
+        else if (sum_flick > 0)
+        {
+            sum_flick -= pace * flick_frequence;
+            if (sum_flick <= 0)
+            {
+                sum_flick = 0;
+                add = true;
+            }
+        }
+    }
+    else
+    {
+        if (sum_flick >= 1.f)
+        {
+            sum_flick = 1.f;
+            add = false;
+        }
+        else if (sum_flick < 1.f)
+        {
+            sum_flick += pace * flick_frequence;
+            if (sum_flick >= 1.f)
+            {
+                sum_flick = 1.f;
+                add = false;
+            }
+        }
+    }
+    return sum_flick;
+}
 
+/* - Pause Menu -
+ * Slate -
+ */
 void ATankHUD::_show_pause_menu()
 {
     if (GEngine && GEngine->GameViewport)
     {
-        UE_LOG(LogTemp, Error, TEXT("We Definitly Made IT ~!"));
         FText text = FText::FromString("HaHaHa");
         smenu = SNew(SMenu).OwningHUD(this).Title(text);
         // smenu->Get().OnSettingClicked();
@@ -50,20 +90,175 @@ void ATankHUD::_remove_menu()
         PlayerOwner->bShowMouseCursor = false;
         PlayerOwner->SetInputMode(FInputModeGameOnly());
         // this->Destroy();
-        // UE_LOG(LogTemp, Warning, TEXT("HUD Destroy ~!"));
     }
 };
 
-void ATankHUD::_set_current_widget(UTankWidget *current_widget_toset = nullptr)
+/* - Tank Widget -
+ * Setup -
+ */
+void ATankHUD::_setup_tank_widget()
 {
-    if (current_widget != nullptr)
+    if (!tank_widget_subclass)
     {
-        current_widget->RemoveFromViewport();
-        current_widget = nullptr;
+        return;
     }
-    if (current_widget_toset != nullptr)
+    if (tank_widget != nullptr)
     {
-        current_widget = current_widget_toset;
-        current_widget->AddToViewport();
+        tank_widget->RemoveFromViewport();
+        tank_widget = nullptr;
+    }
+    tank_widget = CreateWidget<UTankWidget>(GetWorld(), tank_widget_subclass);
+    if (tank_widget)
+    {
+        player_controller = Cast<ATankPlayerController>(PlayerOwner);
+        player_controller->_setup_lock_buffer();
+        player_controller->_setup_projectile();
+        tank_widget->AddToViewport();
+    }
+};
+
+void ATankHUD::_remove_tank_widget()
+{
+    if (tank_widget != nullptr)
+    {
+        tank_widget->RemoveFromViewport();
+        tank_widget = nullptr;
+    }
+};
+
+/* - Tank Widget -
+ * Draw - 
+ */
+// - Turning -
+//Tank call - SHOW Aiming Box
+void ATankHUD::_change_crosshair_color(bool flag)
+{
+    if (tank_widget && tank_widget->_get_crosshair())
+    {
+        if (flag)
+        {
+            tank_widget->_set_crosshair_fcolor(FLinearColor(0.638f, 0.f, 0.005f, 0.85f));
+        }
+        else
+        {
+            tank_widget->_set_crosshair_fcolor(FLinearColor(0.065f, 0.130f, 0.796f, 0.85f));
+        }
+    }
+};
+
+//HUD start - change projectile image
+void ATankHUD::_setup_projectile(float reload_time_toset, UTexture2D *projectile_texture_toset)
+{
+    if (!tank_widget)
+    {
+        return;
+    }
+    reload_time = reload_time_toset;
+    tank_widget->_set_projectile_image_texture(projectile_texture_toset);
+};
+//Tank call - Reload Image
+void ATankHUD::_reload_projectile()
+{
+    if (tank_widget && tank_widget->_get_projectile_image())
+    {
+        if (reload_timer.IsValid())
+        {
+            sum_reload_time = 0.f;
+            return;
+        }
+        GetWorld()->GetTimerManager().SetTimer(reload_timer, this,
+                                               &ATankHUD::_show_reload_projectile,
+                                               pace, true);
+    }
+};
+//Tank call - Hide
+void ATankHUD::_hide_projectile_image()
+{
+    if (tank_widget && tank_widget->_get_projectile_image())
+    {
+        sum_flick = 0.f;
+        tank_widget->_set_projectile_image_ropacity(0.f);
+    }
+};
+//SHOW every tick, stop at reload time finish;
+void ATankHUD::_show_reload_projectile()
+{
+    if (sum_reload_time < reload_time)
+    {
+        sum_reload_time += pace;
+        tank_widget->_set_projectile_image_ropacity(_repeat(4.f) * max_repeat_opacity);
+        if (sum_reload_time >= reload_time)
+        {
+            sum_reload_time = 0.f;
+            tank_widget->_set_projectile_image_ropacity(1.f);
+            GetWorld()->GetTimerManager().ClearTimer(reload_timer);
+        }
+    }
+};
+
+// - Lock Buffer - (Aiming)
+//HUD start - Setup lock buffer
+void ATankHUD::_setup_lock_buffer(float max_buffer_toset)
+{
+    max_buffer = max_buffer_toset;
+}
+//Tank call - update
+void ATankHUD::_update_lock_buffer(float lock_buffer_toset, AimingState aiming_state_toset)
+{
+    lock_buffer = lock_buffer_toset;
+    aiming_state = aiming_state_toset;
+};
+//Tank call - Lock
+void ATankHUD::_do_lock_buffer()
+{
+    if (tank_widget && tank_widget->_get_lock_buffer_bar())
+    {
+        if (lock_buffer_timer.IsValid())
+        {
+            return;
+        }
+        if (max_buffer > 0) //BUG
+        {
+            tank_widget->_set_lock_buffer_bar_ropacity(100.f);
+            GetWorld()->GetTimerManager().SetTimer(lock_buffer_timer, this,
+                                                   &ATankHUD::_show_lock_buffer,
+                                                   pace, true);
+        }
+    }
+};
+//SHOW
+void ATankHUD::_show_lock_buffer()
+{
+    //Delay Disapear
+    static float lag = 0.f;
+    if (lock_buffer == max_buffer)
+    {
+        lag += pace * 0.5f;
+        tank_widget->_set_lock_buffer_bar_ropacity(1.f - lag);
+        if (lag > 1.f)
+        {
+            GetWorld()->GetTimerManager().ClearTimer(lock_buffer_timer);
+            lag = 0.f;
+        }
+    }
+    else
+    {
+        if (aiming_state == AimingState::usable)
+        {
+            tank_widget->_set_lock_buffer_bar_fcolor(FLinearColor(0.065f, 0.130f, 0.796f, 0.85f));
+        }
+        else if (aiming_state == AimingState::locking)
+        {
+            tank_widget->_set_lock_buffer_bar_fcolor(FLinearColor(0.755f, 0.529f, 0.072f, 0.85f));
+        }
+        else if (aiming_state == AimingState::overheat)
+        {
+            tank_widget->_set_lock_buffer_bar_fcolor(
+                lock_buffer > 0 ? FLinearColor(0.242f, 0.242f, 0.242f, 0.85f)
+                                : FLinearColor(0.638f, 0.f, 0.005f, 0.85f));
+        }
+        tank_widget->_set_lock_buffer_bar_percent(lock_buffer * 100.f / max_buffer);
+        UE_LOG(LogTemp, Warning, TEXT("We Made it ~! Buffer ~!  %f ???"), lock_buffer * 100.f / max_buffer);
+        lag = 0.f;
     }
 };
