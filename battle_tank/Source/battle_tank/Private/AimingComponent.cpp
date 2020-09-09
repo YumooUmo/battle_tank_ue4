@@ -15,13 +15,16 @@ UAimingComponent::UAimingComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	// ...
+	FString name = GetName();
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent %s C++ Construct "), *name);
 }
 
 // Called when the game starts
 void UAimingComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	FString name = GetName();
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent %s C++ BeginPlay "), *name);
 	// ...
 	owner_tank = Cast<ATank>(GetOwner());
 	player_controller = Cast<ATankPlayerController>(owner_tank->GetController());
@@ -80,7 +83,7 @@ void UAimingComponent::_should_lock()
 //CALL
 void UAimingComponent::_lock(bool flag)
 {
-	if (!player_controller)
+	if (!ensure(player_controller))
 	{
 		return;
 	}
@@ -111,7 +114,7 @@ void UAimingComponent::_lock(bool flag)
 //Draw : Projectile path
 void UAimingComponent::_draw_projectile_path()
 {
-	if (owner_tank == nullptr)
+	if (!ensure(owner_tank))
 	{
 		return;
 	}

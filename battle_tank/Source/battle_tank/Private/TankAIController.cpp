@@ -19,7 +19,7 @@ void ATankAIController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
     // UE_LOG(LogTemp, Warning, TEXT("Ticking"));
 
-    if (tank_controlled && tank_of_player)
+    if (ensure(tank_controlled && tank_of_player))
     {
         //Tick pass : pass in for aiming ; and self action
         tank_controlled->_set_aiming_normal((tank_of_player->GetActorLocation() - tank_controlled->_get_launch_location()).GetSafeNormal());

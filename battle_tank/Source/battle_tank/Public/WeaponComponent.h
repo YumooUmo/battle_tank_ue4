@@ -1,5 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "Components/ActorComponent.h"
@@ -26,6 +25,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = setup)
 	TSubclassOf<ATankProjectile> tank_projectile_1 = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = setup)
+	float launch_force = 500000.f;
 	//Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW;
 	//Ten digit: 0-9 represents projectile LAST USED.
 	uint8 weapon_number = 0;

@@ -10,6 +10,8 @@ void ATankPlayerController::BeginPlay()
 {
     Super::BeginPlay();
     //get possessed tank
+    FString name = GetName();
+    UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ BeginPlay "), *name);
     tank_controlled = Cast<ATank>(GetPawn());
     tank_HUD = Cast<ATankHUD>(GetHUD());
 }
@@ -28,7 +30,7 @@ void ATankPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     //--------------------------
-    // if (!tank_HUD)
+    // if (!ensure(tank_HUD))
     // {
     //     tank_HUD = Cast<ATankHUD>(GetHUD());
     // }
@@ -72,7 +74,7 @@ void ATankPlayerController::_setup_tank_widget()
 
 void ATankPlayerController::_unset_tank_widget()
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }
@@ -86,7 +88,7 @@ void ATankPlayerController::_unset_tank_widget()
 //Tank : Change Aiming Box
 void ATankPlayerController::_change_crosshair_color(bool flag)
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }
@@ -97,7 +99,7 @@ void ATankPlayerController::_change_crosshair_color(bool flag)
 // - HUD : change projectile image
 void ATankPlayerController::_setup_projectile()
 {
-    if (!tank_HUD || tank_controlled == nullptr)
+    if (!ensure(tank_HUD && tank_controlled))
     {
         return;
     }
@@ -106,7 +108,7 @@ void ATankPlayerController::_setup_projectile()
 //Tank : Reload Image
 void ATankPlayerController::_reload_projectile()
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }
@@ -115,7 +117,7 @@ void ATankPlayerController::_reload_projectile()
 //Tank : Ready - Claer timer
 void ATankPlayerController::_reload_ready()
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }
@@ -124,7 +126,7 @@ void ATankPlayerController::_reload_ready()
 //Tank : Hide Image
 void ATankPlayerController::_hide_projectile_image()
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }
@@ -135,7 +137,7 @@ void ATankPlayerController::_hide_projectile_image()
 //Tank : update
 void ATankPlayerController::_update_lock_buffer(float lock_buffer_percent, AimingState aiming_state_toset)
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }
@@ -144,7 +146,7 @@ void ATankPlayerController::_update_lock_buffer(float lock_buffer_percent, Aimin
 //Tank : _Lock draw
 void ATankPlayerController::_do_lock_buffer()
 {
-    if (!tank_HUD)
+    if (!ensure(tank_HUD))
     {
         return;
     }

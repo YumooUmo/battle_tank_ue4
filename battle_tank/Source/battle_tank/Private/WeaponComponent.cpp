@@ -61,29 +61,30 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 //launch_speed -
 float UWeaponComponent::_get_launch_speed()
 {
-	if (_get_current_projectile() == nullptr)
+	if (!ensure(_get_current_projectile()))
 	{
 		return 0.f;
 	}
-	return _get_current_projectile().GetDefaultObject()->launch_force; // Here is the point
+	ATankProjectile *projectile = _get_current_projectile().GetDefaultObject();
+	return  projectile->_get_launch_speed(launch_force); // Here is the point
 }
 //reload_time -
 float UWeaponComponent::_get_reload_time()
 {
-	if (_get_current_projectile() == nullptr)
+	if (!ensure(_get_current_projectile()))
 	{
 		return 0.f;
 	}
-	return _get_current_projectile().GetDefaultObject()->reload_time; // Here is the point
+	return _get_current_projectile().GetDefaultObject()->_get_reload_time(); // Here is the point
 }
 //Image -
 UTexture2D *UWeaponComponent::_get_image()
 {
-	if (_get_current_projectile() == nullptr)
+	if (!ensure(_get_current_projectile()))
 	{
 		return nullptr;
 	}
-	return _get_current_projectile().GetDefaultObject()->projectile_image; // Here is the point
+	return _get_current_projectile().GetDefaultObject()->_get_projectile_image(); // Here is the point
 }
 //Enum -
 WeaponState UWeaponComponent::_get_weapon_state()
@@ -148,7 +149,7 @@ void UWeaponComponent::_exchange_weapon()
 //Fire
 void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 {
-	if (_get_current_projectile())
+	if (ensure(_get_current_projectile()))
 	{
 		if (weapon_state == WeaponState::ready)
 		{
@@ -157,7 +158,7 @@ void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 						  _get_current_projectile(),
 						  launch_location,
 						  launch_normal.Rotation())
-				->_launch();
+				->_launch(launch_force);
 			// - UI -
 			if (player_controller)
 			{
@@ -190,7 +191,7 @@ void UWeaponComponent::_reload_ready()
 	weapon_state = WeaponState::ready;
 	GetWorld()->GetTimerManager().ClearTimer(reload_timer);
 	// - UI -
-	if (player_controller)
+	if (ensure(player_controller))
 	{
 		player_controller->_reload_ready();
 	}

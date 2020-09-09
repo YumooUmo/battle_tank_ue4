@@ -14,7 +14,8 @@
 void ATankHUD::BeginPlay()
 {
     Super::BeginPlay();
-    _setup_tank_widget();
+    FString name = GetName();
+    UE_LOG(LogTemp, Warning, TEXT("DONKEY : HUD %s C++ BeginPlay "), *name);
 };
 
 /* - Flicker -
@@ -98,7 +99,7 @@ void ATankHUD::_remove_menu()
  */
 void ATankHUD::_setup_tank_widget()
 {
-    if (!tank_widget_subclass)
+    if (!ensure(tank_widget_subclass))
     {
         return;
     }
@@ -118,7 +119,7 @@ void ATankHUD::_setup_tank_widget()
 
 void ATankHUD::_remove_tank_widget()
 {
-    if (tank_widget != nullptr)
+    if (!ensure(tank_widget))
     {
         tank_widget->RemoveFromViewport();
         tank_widget = nullptr;
@@ -148,7 +149,7 @@ void ATankHUD::_change_crosshair_color(bool flag)
 //HUD start - change projectile image
 void ATankHUD::_setup_projectile(UTexture2D *projectile_texture_toset)
 {
-    if (!tank_widget)
+    if (!ensure(tank_widget))
     {
         return;
     }
@@ -157,10 +158,10 @@ void ATankHUD::_setup_projectile(UTexture2D *projectile_texture_toset)
 //Tank call - Reload Image
 void ATankHUD::_reload_projectile()
 {
-    if (tank_widget && tank_widget->_get_projectile_image())
+    if (ensure(tank_widget && tank_widget->_get_projectile_image()))
     {
         sum_flick = 0.f;
-        if (reload_timer.IsValid())
+        if (ensure(reload_timer.IsValid()))
         {
             return;
         }
@@ -172,7 +173,7 @@ void ATankHUD::_reload_projectile()
 //Tank call - Reload ready
 void ATankHUD::_reload_ready()
 {
-    if (tank_widget && tank_widget->_get_projectile_image())
+    if (ensure(tank_widget && tank_widget->_get_projectile_image()))
     {
         GetWorld()->GetTimerManager().ClearTimer(reload_timer);
         tank_widget->_set_projectile_image_ropacity(1.f);
@@ -186,7 +187,7 @@ void ATankHUD::_show_reload_projectile()
 //Tank call - Hide
 void ATankHUD::_hide_projectile_image()
 {
-    if (tank_widget && tank_widget->_get_projectile_image())
+    if (ensure(tank_widget && tank_widget->_get_projectile_image()))
     {
         tank_widget->_set_projectile_image_ropacity(0.f);
     }
@@ -202,9 +203,9 @@ void ATankHUD::_update_lock_buffer(float percent_toset, AimingState aiming_state
 //Tank call - Lock
 void ATankHUD::_do_lock_buffer()
 {
-    if (tank_widget && tank_widget->_get_lock_buffer_bar())
+    if (ensure(tank_widget && tank_widget->_get_lock_buffer_bar()))
     {
-        if (lock_buffer_timer.IsValid())
+        if (ensure(lock_buffer_timer.IsValid()))
         {
             return;
         }

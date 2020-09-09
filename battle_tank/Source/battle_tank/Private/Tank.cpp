@@ -18,14 +18,22 @@ ATank::ATank()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	FString name = GetName();
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ Construct "), *name);
 }
 
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
+	FString name = GetName();
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ BeginPlay "), *name);
 	// PrimaryActorTick.bCanEverTick =false; //------------------------------------------------------------------TODO : start_up
 	player_controller = Cast<ATankPlayerController>(GetController());
+	if (player_controller)
+	{
+		player_controller->_setup_tank_widget();
+	}
 }
 
 // Called every frame
@@ -71,12 +79,13 @@ void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
 };
 
 //	-----------------------------		Start Up : Controller_Tick
+// #### TODO : Refactor MoveComponent
 void ATank::_set_aiming_normal(FVector aiming_normal)
 {
 	_turning_to(aiming_normal);
 
 	//  #### TODO : Refactor timer to move component, and move "track" to component;
-	if (move_component && move_component->_should_move())
+	if (ensure(move_component && move_component->_should_move()))
 	{
 		left_track->_apply_force(move_component->_get_left_throttle());
 		right_track->_apply_force(move_component->_get_right_throttle());
@@ -87,7 +96,7 @@ void ATank::_set_aiming_normal(FVector aiming_normal)
 //Get Current Launch direction normal
 FVector ATank::_get_launch_normal()
 {
-	if (barrel == nullptr)
+	if (!ensure(barrel))
 	{
 		return GetActorForwardVector();
 	}
@@ -96,7 +105,7 @@ FVector ATank::_get_launch_normal()
 //Get Current Launch location
 FVector ATank::_get_launch_location()
 {
-	if (barrel == nullptr)
+	if (!ensure(barrel))
 	{
 		return GetActorLocation();
 	}
@@ -106,7 +115,7 @@ FVector ATank::_get_launch_location()
 //Get Current Projectile's Launch Speed
 float ATank::_get_launch_speed()
 {
-	if (weapon_component == nullptr)
+	if (!ensure(weapon_component))
 	{
 		return 600.f;
 	}
@@ -115,7 +124,7 @@ float ATank::_get_launch_speed()
 
 float ATank::_get_max_lock_buffer()
 {
-	if (aiming_component == nullptr)
+	if (!ensure(aiming_component))
 	{
 		return 5.f;
 	}
@@ -123,7 +132,7 @@ float ATank::_get_max_lock_buffer()
 };
 float ATank::_get_reload_time()
 {
-	if (weapon_component == nullptr)
+	if (!ensure(weapon_component))
 	{
 		return 0.f;
 	}
@@ -131,7 +140,7 @@ float ATank::_get_reload_time()
 };
 UTexture2D *ATank::_get_projectile_image()
 {
-	if (weapon_component == nullptr)
+	if (!ensure(weapon_component))
 	{
 		return nullptr;
 	}
@@ -143,7 +152,7 @@ UTexture2D *ATank::_get_projectile_image()
 // self action
 void ATank::_turning_to(FVector aiming_normal)
 {
-	if (barrel == nullptr || turrent == nullptr)
+	if (!ensure(barrel && turrent))
 	{
 		return;
 	}
@@ -151,7 +160,7 @@ void ATank::_turning_to(FVector aiming_normal)
 	float pitch = aiming_normal.Rotation().Pitch - launch_rotation.Pitch;
 	float yaw = aiming_normal.Rotation().Yaw - launch_rotation.Yaw;
 
-	UE_LOG(LogTemp, Warning, TEXT("YES ! ~~~!  %f"), yaw);
+	// UE_LOG(LogTemp, Warning, TEXT("YES ! ~~~!  %f"), yaw);
 	if (FMath::Abs(yaw) <= 0.05f && FMath::Abs(pitch) <= 0.05f)
 	{
 		if (turning)
@@ -192,7 +201,7 @@ void ATank::_turning_to(FVector aiming_normal)
 // - Weapon -	#### TODO : add new weapon
 void ATank::_set_weapon(uint8 number)
 {
-	if (weapon_component == nullptr)
+	if (!ensure(weapon_component))
 	{
 		return;
 	}
@@ -201,7 +210,7 @@ void ATank::_set_weapon(uint8 number)
 //Exchange
 void ATank::_exchange_weapon()
 {
-	if (weapon_component == nullptr)
+	if (!ensure(weapon_component))
 	{
 		return;
 	}
@@ -210,7 +219,7 @@ void ATank::_exchange_weapon()
 //Fire()
 void ATank::_fire()
 {
-	if (barrel == nullptr || weapon_component == nullptr)
+	if (!ensure(barrel && weapon_component))
 	{
 		return;
 	}
@@ -219,7 +228,7 @@ void ATank::_fire()
 //Reload
 void ATank::_reload()
 {
-	if (weapon_component == nullptr)
+	if (!ensure(weapon_component))
 	{
 		return;
 	}
@@ -229,7 +238,7 @@ void ATank::_reload()
 // - Lock - AimingComponent/DrawProjectilePath
 void ATank::_lock(bool if_lock)
 {
-	if (aiming_component == nullptr)
+	if (!ensure(aiming_component))
 	{
 		return;
 	}
@@ -240,7 +249,7 @@ void ATank::_lock(bool if_lock)
 //Move
 void ATank::_move_forward(bool if_move)
 {
-	if (move_component == nullptr)
+	if (!ensure(move_component))
 	{
 		return;
 	}
@@ -248,7 +257,7 @@ void ATank::_move_forward(bool if_move)
 };
 void ATank::_move_backward(bool if_move)
 {
-	if (move_component == nullptr)
+	if (!ensure(move_component))
 	{
 		return;
 	}
@@ -256,7 +265,7 @@ void ATank::_move_backward(bool if_move)
 };
 void ATank::_move_left(bool if_move)
 {
-	if (move_component == nullptr)
+	if (!ensure(move_component))
 	{
 		return;
 	}
@@ -264,7 +273,7 @@ void ATank::_move_left(bool if_move)
 };
 void ATank::_move_right(bool if_move)
 {
-	if (move_component == nullptr)
+	if (!ensure(move_component))
 	{
 		return;
 	}
@@ -272,7 +281,7 @@ void ATank::_move_right(bool if_move)
 };
 void ATank::_burst(bool if_burst)
 {
-	if (move_component == nullptr)
+	if (!ensure(move_component))
 	{
 		return;
 	}

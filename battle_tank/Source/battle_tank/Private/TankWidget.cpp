@@ -5,11 +5,16 @@
 #include "UMG.h"
 // UTankWidget::UTankWidget(const FObjectInitializer &ObjectInitializer){};
 
-UTankWidget::UTankWidget(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer){};
+UTankWidget::UTankWidget(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer){
+		FString name =GetName();
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : Widget %s C++ Construct "),*name);
+};
 
 void UTankWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+		FString name =GetName();
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : Widget %s C++ NativeConstruct "),*name);
 }
 
 // - GET -
