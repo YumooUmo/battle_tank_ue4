@@ -2,6 +2,8 @@
 
 #include "WeaponComponent.h"
 //FIRST include
+#include "Config.h"
+#include "TankHUD.h"
 #include "TankPlayerController.h"
 #include "TankProjectile.h"
 #include "TimerManager.h"
@@ -22,7 +24,6 @@ void UWeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	player_controller = Cast<ATankPlayerController>(Cast<APawn>(GetOwner())->GetController());
 }
 
 // Called every frame
@@ -32,8 +33,10 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	// ...
 }
-//----------------------------		PUBLIC		--------------------------	#### TODO : Refactor switch to Template
-//----------------------------		SET			----------------------------------
+
+// ## PUBLIC ##
+// - SET UP -
+//set projectile
 void UWeaponComponent::_set_projectile(TSubclassOf<ATankProjectile> projectile_Subclass_0,
 									   TSubclassOf<ATankProjectile> projectile_Subclass_1)
 {
@@ -41,7 +44,24 @@ void UWeaponComponent::_set_projectile(TSubclassOf<ATankProjectile> projectile_S
 	tank_projectile_1 = projectile_Subclass_1;
 };
 
-//----------------------------		GET			----------------------------------
+//set HUD -
+void UWeaponComponent::_set_hud()
+{
+	if (ensure(Cast<ATankHUD>(
+			Cast<APlayerController>(
+				Cast<APawn>(GetOwner())
+					->GetController())
+				->GetHUD())))
+	{
+		tank_hud = Cast<ATankHUD>(
+			Cast<APlayerController>(
+				Cast<APawn>(GetOwner())
+					->GetController())
+				->GetHUD());
+	}
+};
+
+// - GET -
 //Subclass of projectile -
 TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 {
@@ -61,17 +81,17 @@ TSubclassOf<ATankProjectile> UWeaponComponent::_get_current_projectile()
 //launch_speed -
 float UWeaponComponent::_get_launch_speed()
 {
-	if (!ensure(_get_current_projectile()))
+	if (!_get_current_projectile())
 	{
 		return 0.f;
 	}
 	ATankProjectile *projectile = _get_current_projectile().GetDefaultObject();
-	return  projectile->_get_launch_speed(launch_force); // Here is the point
+	return projectile->_get_launch_speed(launch_force); // Here is the point
 }
 //reload_time -
 float UWeaponComponent::_get_reload_time()
 {
-	if (!ensure(_get_current_projectile()))
+	if (!_get_current_projectile())
 	{
 		return 0.f;
 	}
@@ -80,7 +100,7 @@ float UWeaponComponent::_get_reload_time()
 //Image -
 UTexture2D *UWeaponComponent::_get_image()
 {
-	if (!ensure(_get_current_projectile()))
+	if (!_get_current_projectile())
 	{
 		return nullptr;
 	}
@@ -92,9 +112,9 @@ WeaponState UWeaponComponent::_get_weapon_state()
 	return weapon_state;
 };
 
-//----------------------------		PLAY		----------------------------------
-//Add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
-void UWeaponComponent::_set_weapon(uint8 number)
+// - Bind Action -
+//add check : if projectile exists (is set already) ? 	------------####   TODO-------------add new weapon FUNCTION() : SET new tank_projectile;
+bool UWeaponComponent::_set_weapon(uint8 number)
 {
 	if (weapon_number % 10 != number)
 	{
@@ -102,35 +122,44 @@ void UWeaponComponent::_set_weapon(uint8 number)
 		switch (number)
 		{
 		case 0:
-			if (tank_projectile_0 != nullptr)
+			if (tank_projectile_0)
 			{
 				weapon_number = (weapon_number % 10) * 10 + number;
 				weapon_state = WeaponState::empty;
-
 				_reload();
+			}
+			else
+			{
+				return false;
 			}
 			break;
 		case 1:
-			if (tank_projectile_1 != nullptr)
+			if (tank_projectile_1)
 			{
 				weapon_number = (weapon_number % 10) * 10 + number;
 				weapon_state = WeaponState::empty;
 				_reload();
 			}
+			else
+			{
+				return false;
+			}
 			break;
 		default:
+			return false;
 			break;
 		}
 	}
 	// - UI -
-	if (player_controller)
+	if (tank_hud)
 	{
-		player_controller->_setup_projectile();
+		tank_hud->_setup_projectile(_get_image());
 	}
+	return true;
 };
 
-//SET exchange weapon
-void UWeaponComponent::_exchange_weapon()
+//set exchange weapon
+bool UWeaponComponent::_exchange_weapon()
 {
 	if (weapon_number != 0)
 	{
@@ -139,17 +168,23 @@ void UWeaponComponent::_exchange_weapon()
 		weapon_state = WeaponState::empty;
 		_reload();
 	}
-	// - UI -
-	if (player_controller)
+	else
 	{
-		player_controller->_setup_projectile();
+		//NO last used weapon
+		return false;
 	}
+	// - UI -
+	if (tank_hud)
+	{
+		tank_hud->_setup_projectile(_get_image());
+	}
+	return true;
 };
 
-//Fire
+//fire
 void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 {
-	if (ensure(_get_current_projectile()))
+	if (_get_current_projectile())
 	{
 		if (weapon_state == WeaponState::ready)
 		{
@@ -160,15 +195,15 @@ void UWeaponComponent::_fire(FVector launch_normal, FVector launch_location)
 						  launch_normal.Rotation())
 				->_launch(launch_force);
 			// - UI -
-			if (player_controller)
+			if (tank_hud)
 			{
-				player_controller->_hide_projectile_image();
+				tank_hud->_hide_projectile_image();
 			}
 		}
 	}
 };
 
-//Reload
+//reload
 void UWeaponComponent::_reload()
 {
 	if (weapon_state == WeaponState::empty)
@@ -178,21 +213,21 @@ void UWeaponComponent::_reload()
 											   &UWeaponComponent::_reload_ready,
 											   _get_reload_time(), false);
 		// - UI -
-		if (player_controller)
+		if (tank_hud)
 		{
-			player_controller->_reload_projectile();
+			tank_hud->_reload_projectile();
 		}
 	}
 };
 
-//Ready
+//ready
 void UWeaponComponent::_reload_ready()
 {
 	weapon_state = WeaponState::ready;
 	GetWorld()->GetTimerManager().ClearTimer(reload_timer);
 	// - UI -
-	if (ensure(player_controller))
+	if (tank_hud)
 	{
-		player_controller->_reload_ready();
+		tank_hud->_reload_ready();
 	}
-}
+};

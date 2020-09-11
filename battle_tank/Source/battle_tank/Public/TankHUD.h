@@ -11,7 +11,6 @@
  * 
  */
 class UTankWidget;
-class ATankPlayerController;
 
 UCLASS()
 class BATTLE_TANK_API ATankHUD : public AHUD
@@ -20,23 +19,18 @@ class BATTLE_TANK_API ATankHUD : public AHUD
 
 private:
 	virtual void BeginPlay() override;
-	ATankPlayerController *player_controller = nullptr;
 
 	//SWidget Menu
 	TSharedPtr<class SMenu> smenu;
 	//SWidget Container
 	TSharedPtr<class SWidget> widget_container;
 
-	//UMG
-	UTankWidget *tank_widget = nullptr;
+protected:
 	//UMG
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 	TSubclassOf<UUserWidget> tank_widget_subclass;
-
-protected:
-	// - Framerate -
-	UPROPERTY(EditDefaultsOnly, Category = "FrameratePace")
-	float pace = 0.01f;
+	//UMG
+	UTankWidget *tank_widget;
 
 	// - Flicker -
 	//Opacity
@@ -67,8 +61,9 @@ public:
 	void _remove_menu();
 
 	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void _setup_widget_class(TSubclassOf<UUserWidget> tank_widget_subclass_toset);
+
 	void _setup_tank_widget();
-	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void _remove_tank_widget();
 
 	/* - Draw - 
@@ -88,7 +83,7 @@ public:
 	void _show_reload_projectile();
 	//Tank call - Hide
 	void _hide_projectile_image();
-	
+
 	// - Lock Buffer -
 	//Tank call - update
 	void _update_lock_buffer(float percent_toset, AimingState aiming_state_toset);

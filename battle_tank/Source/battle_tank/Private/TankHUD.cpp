@@ -3,19 +3,23 @@
 #include "TankHUD.h"
 //Include First
 #include "Blueprint/UserWidget.h"
+#include "Config.h"
 #include "Engine/Engine.h"
 #include "SMenu.h"
-#include "TankPlayerController.h"
 #include "TankWidget.h"
 #include "Widgets/SWeakWidget.h"
-// #include "GameFramework/HUD.h"
-// #include "GameFramework/PlayerController.h"
 
 void ATankHUD::BeginPlay()
 {
     Super::BeginPlay();
     FString name = GetName();
     UE_LOG(LogTemp, Warning, TEXT("DONKEY : HUD %s C++ BeginPlay "), *name);
+};
+
+// - Set UP -
+void ATankHUD::_setup_widget_class(TSubclassOf<UUserWidget> tank_widget_subclass_toset)
+{
+    tank_widget_subclass = tank_widget_subclass_toset;
 };
 
 /* - Flicker -
@@ -111,15 +115,13 @@ void ATankHUD::_setup_tank_widget()
     tank_widget = CreateWidget<UTankWidget>(GetWorld(), tank_widget_subclass);
     if (tank_widget)
     {
-        player_controller = Cast<ATankPlayerController>(PlayerOwner);
-        player_controller->_setup_projectile();
         tank_widget->AddToViewport();
     }
 };
 
 void ATankHUD::_remove_tank_widget()
 {
-    if (!ensure(tank_widget))
+    if (tank_widget)
     {
         tank_widget->RemoveFromViewport();
         tank_widget = nullptr;
@@ -133,7 +135,7 @@ void ATankHUD::_remove_tank_widget()
 //Tank call - SHOW Aiming Box
 void ATankHUD::_change_crosshair_color(bool flag)
 {
-    if (tank_widget && tank_widget->_get_crosshair())
+    if (tank_widget)
     {
         if (flag)
         {
@@ -149,19 +151,18 @@ void ATankHUD::_change_crosshair_color(bool flag)
 //HUD start - change projectile image
 void ATankHUD::_setup_projectile(UTexture2D *projectile_texture_toset)
 {
-    if (!ensure(tank_widget))
+    if (tank_widget)
     {
-        return;
+        tank_widget->_set_projectile_image_texture(projectile_texture_toset);
     }
-    tank_widget->_set_projectile_image_texture(projectile_texture_toset);
 };
 //Tank call - Reload Image
 void ATankHUD::_reload_projectile()
 {
-    if (ensure(tank_widget && tank_widget->_get_projectile_image()))
+    if (tank_widget)
     {
         sum_flick = 0.f;
-        if (ensure(reload_timer.IsValid()))
+        if (reload_timer.IsValid())
         {
             return;
         }
@@ -173,7 +174,7 @@ void ATankHUD::_reload_projectile()
 //Tank call - Reload ready
 void ATankHUD::_reload_ready()
 {
-    if (ensure(tank_widget && tank_widget->_get_projectile_image()))
+    if (tank_widget)
     {
         GetWorld()->GetTimerManager().ClearTimer(reload_timer);
         tank_widget->_set_projectile_image_ropacity(1.f);
@@ -187,7 +188,7 @@ void ATankHUD::_show_reload_projectile()
 //Tank call - Hide
 void ATankHUD::_hide_projectile_image()
 {
-    if (ensure(tank_widget && tank_widget->_get_projectile_image()))
+    if (tank_widget)
     {
         tank_widget->_set_projectile_image_ropacity(0.f);
     }
@@ -203,9 +204,9 @@ void ATankHUD::_update_lock_buffer(float percent_toset, AimingState aiming_state
 //Tank call - Lock
 void ATankHUD::_do_lock_buffer()
 {
-    if (ensure(tank_widget && tank_widget->_get_lock_buffer_bar()))
+    if (tank_widget)
     {
-        if (ensure(lock_buffer_timer.IsValid()))
+        if (lock_buffer_timer.IsValid())
         {
             return;
         }

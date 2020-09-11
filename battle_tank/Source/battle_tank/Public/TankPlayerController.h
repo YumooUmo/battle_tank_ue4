@@ -2,16 +2,12 @@
 
 #pragma once
 // #include "battle_tank.h"
-#include "AimingState.h"
-#include "WeaponState.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 //last generate
 #include "TankPlayerController.generated.h"
 
 class ATank;
-class ATankHUD;
-class UTankWidget;
 
 /**
  * 
@@ -20,18 +16,19 @@ UCLASS()
 class BATTLE_TANK_API ATankPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-protected:
-	// Called to bind functionality to input
-	virtual void SetupInputComponent() override;
-
-	//-------------------------------Menu---------------------------------
-	void _open_pause_menu();
 
 private:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 
-	//-------------------------------Property-------------------------
+protected:
+	// Called to bind functionality to input
+	virtual void SetupInputComponent() override;
+
+	//Begin play initialize
+	ATank *tank_controlled = nullptr;
+
+	// -Aiming -
 	FVector aiming_normal{0.f, 0.f, 0.f};
 
 	UPROPERTY(VisibleAnywhere)
@@ -41,39 +38,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming")
 	float crosshair_y = 0.35;
 
-	//Begin play initialize
-	ATankHUD *tank_HUD = nullptr;
-	ATank *tank_controlled = nullptr;
-
 public:
-	//-------------------------------GET----------------------------------
-	// bool _get_screen_aiming_location(FVector &location_screen_aiming) const;
+	// - aiming -
 	void _get_aiming_normal();
 
-	void _setup_tank_widget();
-	void _unset_tank_widget();
-
-	/* - Draw - 
-    * 
-    */
-
-	// - Turning -
-	//Tank : Show Aiming Box
-	void _change_crosshair_color(bool flag);
-
-	// - Weapon - (Projectile)
-	// - HUD : change projectile image
-	void _setup_projectile();
-	//Tank : Reload Image
-	void _reload_projectile();
-	//Tank : Ready
-	void _reload_ready();
-	//Tank : Hide
-	void _hide_projectile_image();
-
-	// - LOCK - (Aiming)
-	//Tank : update
-	void _update_lock_buffer(float lock_buffer_percent, AimingState aiming_state_toset);
-	//Tank : _Lock draw
-	void _do_lock_buffer();
+	// - Paus Menu -
+	void _open_pause_menu();
 };

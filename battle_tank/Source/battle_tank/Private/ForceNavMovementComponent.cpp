@@ -2,6 +2,9 @@
 
 #include "ForceNavMovementComponent.h"
 //FIRST include
+#include "Config.h"
+#include "TankTrack.h"
+#include "TimerManager.h"
 
 // Sets default values for this component's properties
 UForceNavMovementComponent::UForceNavMovementComponent()
@@ -29,31 +32,30 @@ void UForceNavMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
     // ...
 }
 
-//		---		PRIVATE : self action
-//Throttle
+// - Set Up -
+void UForceNavMovementComponent::_setup(UTankTrack *left_track_toset, UTankTrack *right_track_toset)
+{
+    left_track = left_track_toset;
+    right_track = right_track_toset;
+};
 
-//		---		PUBLIC : Move
-bool UForceNavMovementComponent::_should_move()
+// - MOVE -
+//keyboard
+void UForceNavMovementComponent::_move_keyboard()
 {
     if (left_throttle == 0.f && right_throttle == 0.f && l_dest == 0.f && r_dest == 0.f)
     {
-        return false;
+        if (move_timer.IsValid())
+            GetWorld()->GetTimerManager().ClearTimer(move_timer);
+        return;
     }
-    else
-    {
-        _do_move();
-        return true;
-    }
-};
 
-void UForceNavMovementComponent::_do_move()
-{
-    float l_clamp = FMath::Clamp<float>(l_dest, -1.f, 1.f);
-    float r_clamp = FMath::Clamp<float>(r_dest, -1.f, 1.f);
+    float l_clamp = FMath::Clamp(l_dest, -1.42f, 1.42f);
+    float r_clamp = FMath::Clamp(r_dest, -1.42f, 1.42f);
 
     if (left_throttle < l_clamp)
     {
-        left_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
+        left_throttle += pace * throttle_rate;
         if (left_throttle > l_clamp)
         {
             left_throttle = l_clamp;
@@ -61,7 +63,7 @@ void UForceNavMovementComponent::_do_move()
     }
     if (left_throttle > l_clamp)
     {
-        left_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
+        left_throttle -= pace * throttle_rate;
         if (left_throttle < l_clamp)
         {
             left_throttle = l_clamp;
@@ -69,7 +71,7 @@ void UForceNavMovementComponent::_do_move()
     }
     if (right_throttle < r_clamp)
     {
-        right_throttle += GetWorld()->DeltaTimeSeconds * throttle_rate;
+        right_throttle += pace * throttle_rate;
         if (right_throttle > r_clamp)
         {
             right_throttle = r_clamp;
@@ -77,15 +79,54 @@ void UForceNavMovementComponent::_do_move()
     }
     if (right_throttle > r_clamp)
     {
-        right_throttle -= GetWorld()->DeltaTimeSeconds * throttle_rate;
+        right_throttle -= pace * throttle_rate;
         if (right_throttle < r_clamp)
         {
             right_throttle = r_clamp;
         }
     }
+    _apply_force();
+}
+//stick
+void UForceNavMovementComponent::_input_stick(float lt_x, float lt_y)
+{
+    if (move_timer.IsValid())
+    {
+        return;
+    }
+    FMath::Clamp<float>(lt_y, -1.f, 1.f);
+    FMath::Clamp<float>(lt_x, -1.f, 1.f);
+    left_throttle = lt_y - lt_x;
+    right_throttle = lt_y + lt_x;
+    _apply_force();
+};
+//set burst
+void UForceNavMovementComponent::_burst(bool if_burst)
+{
+    burst = if_burst;
+};
+//apply force
+void UForceNavMovementComponent::_apply_force()
+{
+    if (left_track)
+    {
+        left_track->_apply_force(_get_left_throttle());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Left track is nullptr ~!"));
+    }
+    if (left_track)
+    {
+        right_track->_apply_force(_get_right_throttle());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Right track is nullptr ~!"));
+    }
 }
 
-//Output Throttle
+// - Get Throttle -
 float UForceNavMovementComponent::_get_left_throttle()
 {
     if (burst)
@@ -109,10 +150,11 @@ float UForceNavMovementComponent::_get_right_throttle()
     }
 };
 
-//Format Input
-void UForceNavMovementComponent::_move_forward(bool if_move)
+// - Format Input -
+//keyboard
+void UForceNavMovementComponent::_move_forward(bool if_pressed)
 {
-    if (if_move)
+    if (if_pressed)
     {
         l_dest += 1.f;
         r_dest += 1.f;
@@ -122,10 +164,14 @@ void UForceNavMovementComponent::_move_forward(bool if_move)
         l_dest -= 1.f;
         r_dest -= 1.f;
     }
+    if (!move_timer.IsValid())
+        GetWorld()->GetTimerManager().SetTimer(move_timer, this,
+                                               &UForceNavMovementComponent::_move_keyboard,
+                                               pace, true);
 };
-void UForceNavMovementComponent::_move_backward(bool if_move)
+void UForceNavMovementComponent::_move_backward(bool if_pressed)
 {
-    if (if_move)
+    if (if_pressed)
     {
         l_dest -= 1.f;
         r_dest -= 1.f;
@@ -135,10 +181,14 @@ void UForceNavMovementComponent::_move_backward(bool if_move)
         l_dest += 1.f;
         r_dest += 1.f;
     }
+    if (!move_timer.IsValid())
+        GetWorld()->GetTimerManager().SetTimer(move_timer, this,
+                                               &UForceNavMovementComponent::_move_keyboard,
+                                               pace, true);
 };
-void UForceNavMovementComponent::_move_left(bool if_move)
+void UForceNavMovementComponent::_move_left(bool if_pressed)
 {
-    if (if_move)
+    if (if_pressed)
     {
         l_dest -= 1.f;
         r_dest += 1.f;
@@ -148,10 +198,14 @@ void UForceNavMovementComponent::_move_left(bool if_move)
         l_dest += 1.f;
         r_dest -= 1.f;
     }
+    if (!move_timer.IsValid())
+        GetWorld()->GetTimerManager().SetTimer(move_timer, this,
+                                               &UForceNavMovementComponent::_move_keyboard,
+                                               pace, true);
 };
-void UForceNavMovementComponent::_move_right(bool if_move)
+void UForceNavMovementComponent::_move_right(bool if_pressed)
 {
-    if (if_move)
+    if (if_pressed)
     {
         l_dest += 1.f;
         r_dest -= 1.f;
@@ -161,14 +215,14 @@ void UForceNavMovementComponent::_move_right(bool if_move)
         l_dest -= 1.f;
         r_dest += 1.f;
     }
-};
-void UForceNavMovementComponent::_burst(bool if_burst)
-{
-    burst = if_burst;
+    if (!move_timer.IsValid())
+        GetWorld()->GetTimerManager().SetTimer(move_timer, this,
+                                               &UForceNavMovementComponent::_move_keyboard,
+                                               pace, true);
 };
 
+//stick
 // void _intend	----------------------------------------------	TODO
-
 void UForceNavMovementComponent::_ai_direct(FVector intend_normal)
 {
     // GetOwner()
@@ -176,10 +230,11 @@ void UForceNavMovementComponent::_ai_direct(FVector intend_normal)
 
     float dot = FVector::DotProduct(intend_normal, forward);
     float cross = FVector::CrossProduct(intend_normal, forward).Z;
+    left_throttle = FMath::Clamp<float>(dot - cross, -1.f, 1.f);
+    right_throttle = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
     _burst(dot > 0.8 ? true : false);
     //when intend on right of forward, cross is +, we should turn right, so left_throttle work, left + cross
-    l_dest = FMath::Clamp<float>(dot - cross, -1.f, 1.f);
-    r_dest = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
+    _apply_force();
 }
 void UForceNavMovementComponent::RequestDirectMove(const FVector &MoveVelocity, bool bForceMaxSpeed)
 {

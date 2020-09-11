@@ -6,11 +6,11 @@ void UTankTurrent::_rotate_turrent(float delta_yaw)
 {
         if (delta_yaw > 180.f)
         {
-                delta_yaw = delta_yaw - 360.f;
+                delta_yaw -= 360.f;
         }
         if (delta_yaw < -180.f)
         {
-                delta_yaw = delta_yaw + 360.f;
+                delta_yaw += 360.f;
         }
         /* BUG fixed :Format Yaw change direction 
          *  When turning from -170 -> 170, 

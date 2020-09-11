@@ -2,10 +2,12 @@
 
 #include "AimingComponent.h"
 //FIRST include
+#include "Config.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
-#include "Tank.h"
-#include "TankPlayerController.h"
+#include "TankBarrel.h"
+#include "TankHUD.h"
+#include "TankTurrent.h"
 #include "TimerManager.h"
 
 // Sets default values for this component's properties
@@ -18,7 +20,6 @@ UAimingComponent::UAimingComponent()
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent %s C++ Construct "), *name);
 }
-
 // Called when the game starts
 void UAimingComponent::BeginPlay()
 {
@@ -26,10 +27,7 @@ void UAimingComponent::BeginPlay()
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent %s C++ BeginPlay "), *name);
 	// ...
-	owner_tank = Cast<ATank>(GetOwner());
-	player_controller = Cast<ATankPlayerController>(owner_tank->GetController());
 }
-
 // Called every frame
 void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
@@ -37,11 +35,169 @@ void UAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-//-----------------------------------		private		---------------------------------
+// ## PUBLIC ##
 
-//-----------------------------------		public		---------------------------------
+// - SetUp -
+void UAimingComponent::_setup(UTankTurrent *turrent_toset, UTankBarrel *barrel_toset)
+{
+	if (!turrent)
+	{
+		turrent = turrent_toset;
+	}
+	if (!barrel)
+	{
+		barrel = barrel_toset;
+	}
+};
+// Set HUD -
+void UAimingComponent::_set_hud()
+{
+	if (ensure(Cast<ATankHUD>(
+			Cast<APlayerController>(
+				Cast<APawn>(GetOwner())
+					->GetController())
+				->GetHUD())))
+		tank_hud = Cast<ATankHUD>(
+			Cast<APlayerController>(
+				Cast<APawn>(GetOwner())
+					->GetController())
+				->GetHUD());
+};
+void UAimingComponent::_set_widget()
+{
+	tank_hud->_setup_tank_widget();
+};
 
-//-----------------------------------		Lock Action		---------------------------------
+// - Break -
+void UAimingComponent::_break_barrel()
+{
+	if (barrel)
+	{
+		delete barrel;
+		barrel = nullptr;
+	}
+};
+void UAimingComponent::_break()
+{
+	if (barrel)
+	{
+		delete barrel;
+		barrel = nullptr;
+	}
+	if (turrent)
+	{
+		delete turrent;
+		turrent = nullptr;
+	}
+};
+
+// - GET -
+// launch vector
+FVector UAimingComponent::_get_launch_normal()
+{
+	if (!barrel)
+	{
+		return GetOwner()->GetActorForwardVector();
+	}
+	return barrel->GetForwardVector();
+};
+// launch location
+FVector UAimingComponent::_get_launch_location()
+{
+	if (!barrel)
+	{
+		return GetOwner()->GetActorLocation();
+	}
+	return barrel->_get_launch_location();
+}
+// is_barrel
+bool UAimingComponent::_is_barrel()
+{
+	return barrel ? true : false;
+};
+// is_turrent
+bool UAimingComponent::_is_turrent()
+{
+	return turrent ? true : false;
+};
+
+// - Turing -
+// self action
+void UAimingComponent::_turning_to(FVector aiming_normal)
+{
+	if (!barrel || !turrent)
+	{
+		return;
+	}
+	FVector launch_normal = _get_launch_normal();
+
+	// UE_LOG(LogTemp, Warning, TEXT("YES ! ~~~!  %f"), yaw);
+
+	if (launch_normal.Equals(aiming_normal, 0.01f))
+	{
+		if (is_moving)
+		{
+			if (tank_hud)
+				tank_hud->_change_crosshair_color(true);
+			is_moving = false;
+		}
+		return;
+	}
+
+	FRotator launch_rotation = launch_normal.Rotation();
+	float pitch = aiming_normal.Rotation().Pitch - launch_rotation.Pitch;
+	float yaw = aiming_normal.Rotation().Yaw - launch_rotation.Yaw;
+
+	//call _elevate_barrel
+	barrel->_elevate_barrel(pitch);
+	//call   _rotate_turrent
+	turrent->_rotate_turrent(yaw);
+
+	if (!is_moving)
+	{
+		if (tank_hud)
+			tank_hud->_change_crosshair_color(false);
+		is_moving = true;
+	}
+
+	/*  #### BUG fixed : Value tremble around destnation. 
+    *   Float value is not accurate.
+    *   Method is : Lower accurency.
+    */
+};
+
+// - Lock Action -
+// - call in
+void UAimingComponent::_lock(bool flag)
+{
+	if (!(launch_speed > 0))
+	{
+		return;
+	}
+	//Draw_Path : Pressed
+	if (aiming_state != AimingState::overheat)
+	{
+		if (flag)
+		{
+			aiming_state = AimingState::locking;
+			if (lock_timer.IsValid())
+			{
+				return;
+			}
+			GetWorld()->GetTimerManager().SetTimer(lock_timer, this,
+												   &UAimingComponent::_should_lock,
+												   pace, true);
+			// - UI -
+			tank_hud->_do_lock_buffer();
+		}
+		//Draw_Path : Released
+		else
+		{
+			aiming_state = AimingState::usable;
+		}
+	}
+};
+// lock buffer counter
 void UAimingComponent::_should_lock()
 {
 	//Draw_Path : Pressed
@@ -77,60 +233,30 @@ void UAimingComponent::_should_lock()
 		}
 	}
 	// - UI -
-	player_controller->_update_lock_buffer(FMath::GetRangePct(0.f, max_buffer, lock_buffer), aiming_state);
+	tank_hud->_update_lock_buffer(FMath::GetRangePct(0.f, max_buffer, lock_buffer), aiming_state);
 };
-
-//CALL
-void UAimingComponent::_lock(bool flag)
+/*OUT Dpendence - launch speed*/
+void UAimingComponent::_update_launch_speed(float launch_speed_toset)
 {
-	if (!ensure(player_controller))
-	{
-		return;
-	}
-	//Draw_Path : Pressed
-	if (aiming_state != AimingState::overheat)
-	{
-		if (flag)
-		{
-			aiming_state = AimingState::locking;
-			if (lock_timer.IsValid())
-			{
-				return;
-			}
-			GetWorld()->GetTimerManager().SetTimer(lock_timer, this,
-												   &UAimingComponent::_should_lock,
-												   pace, true);
-			// - UI -
-			player_controller->_do_lock_buffer();
-		}
-		//Draw_Path : Released
-		else
-		{
-			aiming_state = AimingState::usable;
-		}
-	}
+	launch_speed = launch_speed_toset;
 };
 
-//Draw : Projectile path
+// - Draw UI -
 void UAimingComponent::_draw_projectile_path()
 {
-	if (!ensure(owner_tank))
-	{
-		return;
-	}
 	//Initiallize Parameters to _predict path method()
-	FVector launch_velocity = (owner_tank->_get_launch_normal()) * (owner_tank->_get_launch_speed());
-	FVector launch_location = owner_tank->_get_launch_location();
+	FVector launch_velocity = _get_launch_normal() * launch_speed;
+	FVector launch_location = _get_launch_location();
 
 	FPredictProjectilePathParams PredictParams{
 		10.f,			 //CollisionRadius
 		launch_location, //start location
-		launch_velocity, //----------------- get owner->barrel aiming velocity : launch_velocity
-		3.0f,			 //MaxSimTime
+		launch_velocity,
+		3.0f, //MaxSimTime
 		ECollisionChannel::ECC_Visibility,
-		nullptr}; //													####	TODO : Debug
-	PredictParams.ActorsToIgnore.Add(owner_tank);
-	// PredictParams.OverrideGravityZ = -5000.f;
+		nullptr};
+
+	PredictParams.ActorsToIgnore.Add(GetOwner());
 
 	//Initiallize Result Struct to _predict path method()
 	FPredictProjectilePathResult PredictResult;
@@ -167,8 +293,4 @@ void UAimingComponent::_draw_projectile_path()
 			0.0f,
 			100.0f);
 	}
-	// //------------------------------------Debug
-	// UE_LOG(LogTemp, Error, TEXT("Hit Result is : %s"), *(PredictResult.HitResult.Location.ToString()));
-	// UE_LOG(LogTemp, Error, TEXT("Last Trace Destnation is : %s"), *(PredictResult.LastTraceDestination.Location.ToString()));
-	// UE_LOG(LogTemp, Error, TEXT("Barrel location is : %s"), *(owner->barrel->GetSocketLocation(FName(TEXT("launch_socket"))).ToString()));
 }

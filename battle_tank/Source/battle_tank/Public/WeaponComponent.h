@@ -9,7 +9,7 @@
 
 // class AWeapon;
 class ATankProjectile;
-class ATankPlayerController;
+class ATankHUD;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UWeaponComponent : public UActorComponent
@@ -17,6 +17,18 @@ class BATTLE_TANK_API UWeaponComponent : public UActorComponent
 	GENERATED_BODY()
 
 private:
+
+	//Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW;
+	//Ten digit: 0-9 represents projectile LAST USED.
+	uint8 weapon_number = 0;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	WeaponState weapon_state = WeaponState::empty;
+
 	//SET projectile_1
 	UPROPERTY(EditAnywhere, Category = setup)
 	TSubclassOf<ATankProjectile> tank_projectile_0 = nullptr;
@@ -27,20 +39,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = setup)
 	float launch_force = 500000.f;
-	//Single digit: 0-9 (project_tile % 10) represents the projectile USED RIGHT NOW;
-	//Ten digit: 0-9 represents projectile LAST USED.
-	uint8 weapon_number = 0;
-
-	ATankPlayerController *player_controller;
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	WeaponState weapon_state = WeaponState::empty;
-
+	
 	FTimerHandle reload_timer;
+
+	// - UI -
+	ATankHUD *tank_hud;
 
 public:
 	// Sets default values for this component's properties
@@ -53,6 +56,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void _set_projectile(TSubclassOf<ATankProjectile> projectile_Subclass_0,
 						 TSubclassOf<ATankProjectile> projectile_Subclass_1);
+	//set HUD
+	void _set_hud();
 
 	// - GET -
 	UFUNCTION(BlueprintCallable, Category = "State")
@@ -69,10 +74,10 @@ public:
 
 	// - Bind Action -
 	//SET weapon by number
-	virtual void _set_weapon(uint8 projectile_number);
+	virtual bool _set_weapon(uint8 projectile_number);
 
 	//Exchange projectile
-	virtual void _exchange_weapon();
+	virtual bool _exchange_weapon();
 
 	//Fire	- return bool for UI
 	virtual void _fire(FVector launch_normal, FVector launch_location);

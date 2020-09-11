@@ -10,7 +10,7 @@ FVector UTankBarrel::_get_launch_location() const
 
 FVector UTankBarrel::_get_launch_normal() const
 {
-    return (GetSocketLocation(FName(TEXT("launch_socket"))) - GetSocketLocation(FName(TEXT("launch_base_socket")))).GetSafeNormal();
+    return GetForwardVector();
 };
 
 // bool _set_aiming_normal(){}

@@ -34,11 +34,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
 	UProgressBar *lock_buffer_bar;
 
-	// - GET -
-	UImage *_get_crosshair();
-	UImage *_get_projectile_image();
-	UProgressBar *_get_lock_buffer_bar();
-
 	// - Draw -
 	void _set_crosshair_fcolor(FLinearColor color_toset);
 

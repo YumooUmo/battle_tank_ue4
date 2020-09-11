@@ -13,7 +13,6 @@ ATankProjectile::ATankProjectile()
 	//SET move_component
 	// projectile_movement_component = CreateDefaultSubobject<UProjectileMovementComponent>(FName(TEXT("projectile_movement_component")));
 	// projectile_movement_component->bAutoActivate = false;
-	UE_LOG(LogTemp, Warning, TEXT("DONKEY : Projectile C++ Construct "));
 }
 
 // Called when the game starts or when spawned
@@ -21,7 +20,6 @@ void ATankProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	_set_mass(mass_toset);
-	UE_LOG(LogTemp, Warning, TEXT("DONKEY : Projectile C++ BeginPlay "));
 }
 
 // Called every frame

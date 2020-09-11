@@ -4,14 +4,7 @@
 //FIRST include
 #include "AimingComponent.h"
 #include "ForceNavMovementComponent.h"
-// #include "TankHUD.h"
-#include "TankBarrel.h"
-#include "TankPlayerController.h"
-#include "TankProjectile.h"
-#include "TankTrack.h"
-#include "TankTurrent.h"
 #include "WeaponComponent.h"
-// #include "TankWidget.h"
 
 // Sets default values
 ATank::ATank()
@@ -25,15 +18,27 @@ ATank::ATank()
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
+	//BP
 	Super::BeginPlay();
+	PrimaryActorTick.bCanEverTick = false;
+	//Cpp
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ BeginPlay "), *name);
-	// PrimaryActorTick.bCanEverTick =false; //------------------------------------------------------------------TODO : start_up
-	player_controller = Cast<ATankPlayerController>(GetController());
-	if (player_controller)
+
+	// - UI -
+	if (IsPlayerControlled())
 	{
-		player_controller->_setup_tank_widget();
+		if (ensure(aiming_component))
+		{
+			aiming_component->_set_hud();
+			aiming_component->_set_widget();
+		}
+
+		if (ensure(weapon_component))
+			weapon_component->_set_hud();
 	}
+	// - Initialize  weapon -
+	_set_weapon(0);
 }
 
 // Called every frame
@@ -42,7 +47,6 @@ void ATank::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-//When Possessed By TankPlayerController - Setup UI
 // Called to bind functionality to input
 void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
@@ -53,203 +57,92 @@ void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 
 //----------------------------------		PUBLIC		----------------------------------------
 //	Set Up
-void ATank::_set_up(UTankBarrel *barrel_to_set, UTankTurrent *turrent_to_set,
-					UTankTrack *left_track_to_set, UTankTrack *right_track_to_set,
-					UAimingComponent *aiming_component_toset,
-					UWeaponComponent *weapon_component_toset,
-					UForceNavMovementComponent *move_component_toset)
+void ATank::_setup(UAimingComponent *aiming_component_toset,
+				   UWeaponComponent *weapon_component_toset,
+				   UForceNavMovementComponent *move_component_toset)
 {
-	//Set Barrel Reference
-	barrel = barrel_to_set;
-	//Set Turrent Reference
-	turrent = turrent_to_set;
-	//Set Track Reference
-	left_track = left_track_to_set;
-	right_track = right_track_to_set;
-
 	//runtime new component : Component* component = NewObject<Comoponent>(FName);
 	//-----------------------component->RegisterComponent();
 	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
-	// if (IsPlayerControlled())
-	// {
-	// 	player_controller->_setup_tank_widget();
-	// };
 };
 
-//	-----------------------------		Start Up : Controller_Tick
-// #### TODO : Refactor MoveComponent
-void ATank::_set_aiming_normal(FVector aiming_normal)
-{
-	_turning_to(aiming_normal);
+// - Get -
 
-	//  #### TODO : Refactor timer to move component, and move "track" to component;
-	if (ensure(move_component && move_component->_should_move()))
-	{
-		left_track->_apply_force(move_component->_get_left_throttle());
-		right_track->_apply_force(move_component->_get_right_throttle());
-	}
-}
+// ## Bind Action ##
 
-//--------------------------------      PUBLIC : GET        -------------------------------------
-//Get Current Launch direction normal
-FVector ATank::_get_launch_normal()
-{
-	if (!ensure(barrel))
-	{
-		return GetActorForwardVector();
-	}
-	return barrel->_get_launch_normal();
-};
-//Get Current Launch location
-FVector ATank::_get_launch_location()
-{
-	if (!ensure(barrel))
-	{
-		return GetActorLocation();
-	}
-
-	return barrel->_get_launch_location();
-}
-//Get Current Projectile's Launch Speed
-float ATank::_get_launch_speed()
-{
-	if (!ensure(weapon_component))
-	{
-		return 600.f;
-	}
-	return weapon_component->_get_launch_speed();
-}
-
-float ATank::_get_max_lock_buffer()
-{
-	if (!ensure(aiming_component))
-	{
-		return 5.f;
-	}
-	return aiming_component->max_buffer;
-};
-float ATank::_get_reload_time()
-{
-	if (!ensure(weapon_component))
-	{
-		return 0.f;
-	}
-	return weapon_component->_get_reload_time();
-};
-UTexture2D *ATank::_get_projectile_image()
-{
-	if (!ensure(weapon_component))
-	{
-		return nullptr;
-	}
-	return weapon_component->_get_image();
-};
-
-//---------------------------------		PUBLIC :PLAY		---------------------------
-// UI
-// self action
+/*	with UI */
+// - Aiming -
 void ATank::_turning_to(FVector aiming_normal)
 {
-	if (!ensure(barrel && turrent))
+	if (aiming_component)
 	{
-		return;
+		aiming_component->_turning_to(aiming_normal);
 	}
-	FRotator launch_rotation = _get_launch_normal().Rotation();
-	float pitch = aiming_normal.Rotation().Pitch - launch_rotation.Pitch;
-	float yaw = aiming_normal.Rotation().Yaw - launch_rotation.Yaw;
+}
 
-	// UE_LOG(LogTemp, Warning, TEXT("YES ! ~~~!  %f"), yaw);
-	if (FMath::Abs(yaw) <= 0.05f && FMath::Abs(pitch) <= 0.05f)
-	{
-		if (turning)
-		{
-			turning = false;
-			if (player_controller)
-			{
-				player_controller->_change_crosshair_color(true);
-			}
-		}
-		return;
-	}
-
-	if (FMath::Abs(pitch) > 0.05f)
-	{
-		//call _elevate_barrel
-		barrel->_elevate_barrel(pitch);
-	}
-	if (FMath::Abs(yaw) > 0.05f)
-	{
-		//call   _rotate_turrent
-		turrent->_rotate_turrent(yaw);
-	}
-
-	if (player_controller && !turning)
-	{
-		turning = true;
-		player_controller->_change_crosshair_color(false);
-	}
-
-	/*  #### BUG fixed : Value tremble around destnation. 
-    *   Float value is not accurate.
-    *   Method is : Lower accurency.
-    */
-};
-
-//Exchange projectile by number
-// - Weapon -	#### TODO : add new weapon
-void ATank::_set_weapon(uint8 number)
+void ATank::_aiming_at(FVector location)
 {
-	if (!ensure(weapon_component))
-	{
-		return;
-	}
-	weapon_component->_set_weapon(number);
-};
-//Exchange
-void ATank::_exchange_weapon()
-{
-	if (!ensure(weapon_component))
-	{
-		return;
-	}
-	weapon_component->_exchange_weapon();
-};
-//Fire()
-void ATank::_fire()
-{
-	if (!ensure(barrel && weapon_component))
-	{
-		return;
-	}
-	weapon_component->_fire(_get_launch_normal(), _get_launch_location());
-};
-//Reload
-void ATank::_reload()
-{
-	if (!ensure(weapon_component))
-	{
-		return;
-	}
-	weapon_component->_reload();
-};
+	_turning_to(location - aiming_component->_get_launch_location());
+}
 
-// - Lock - AimingComponent/DrawProjectilePath
+// - Lock -
 void ATank::_lock(bool if_lock)
 {
-	if (!ensure(aiming_component))
+	if (!aiming_component)
 	{
 		return;
 	}
 	aiming_component->_lock(if_lock);
 }
 
-//	No UI
-//Move
+// - Weapon -	#### TODO : add new weapon
+//set projectile by number - (Initialize Weapon)
+void ATank::_set_weapon(uint8 number)
+{
+	if (!weapon_component)
+	{
+		return;
+	}
+	if (weapon_component->_set_weapon(number))
+		aiming_component->_update_launch_speed(weapon_component->_get_launch_speed());
+};
+//exchange
+void ATank::_exchange_weapon()
+{
+	if (!weapon_component)
+	{
+		return;
+	}
+	if (weapon_component->_exchange_weapon())
+		aiming_component->_update_launch_speed(weapon_component->_get_launch_speed());
+};
+//fire()
+void ATank::_fire()
+{
+	if (!weapon_component || !aiming_component || !aiming_component->_is_barrel())
+	{
+		return;
+	}
+	weapon_component->_fire(aiming_component->_get_launch_normal(),
+							aiming_component->_get_launch_location());
+};
+//reload
+void ATank::_reload()
+{
+	if (!weapon_component)
+	{
+		return;
+	}
+	weapon_component->_reload();
+};
+
+/*	without UI */
+// - Move -
 void ATank::_move_forward(bool if_move)
 {
-	if (!ensure(move_component))
+	if (!move_component)
 	{
 		return;
 	}
@@ -257,7 +150,7 @@ void ATank::_move_forward(bool if_move)
 };
 void ATank::_move_backward(bool if_move)
 {
-	if (!ensure(move_component))
+	if (!move_component)
 	{
 		return;
 	}
@@ -265,7 +158,7 @@ void ATank::_move_backward(bool if_move)
 };
 void ATank::_move_left(bool if_move)
 {
-	if (!ensure(move_component))
+	if (!move_component)
 	{
 		return;
 	}
@@ -273,7 +166,7 @@ void ATank::_move_left(bool if_move)
 };
 void ATank::_move_right(bool if_move)
 {
-	if (!ensure(move_component))
+	if (!move_component)
 	{
 		return;
 	}
@@ -281,9 +174,14 @@ void ATank::_move_right(bool if_move)
 };
 void ATank::_burst(bool if_burst)
 {
-	if (!ensure(move_component))
+	if (!move_component)
 	{
 		return;
 	}
 	move_component->_burst(if_burst);
 };
+//move by stick
+void ATank::_move_stick(float LT_X, float LT_Y)
+{
+	move_component->_input_stick(LT_X, LT_Y);
+}
