@@ -120,9 +120,14 @@ bool UAimingComponent::_is_turrent()
 {
 	return turrent ? true : false;
 };
+//is aiming on
+bool UAimingComponent::_is_aiming_on()
+{
+	return ai_aiming;
+};
 
 // - Turing -
-// self action
+// turning action
 void UAimingComponent::_turning_to(FVector aiming_normal)
 {
 	if (!barrel || !turrent)
@@ -164,6 +169,28 @@ void UAimingComponent::_turning_to(FVector aiming_normal)
     *   Float value is not accurate.
     *   Method is : Lower accurency.
     */
+};
+// ai aiming
+void UAimingComponent::_ai_turning(FVector aiming_location)
+{
+	FVector ai_aiming_vector = aiming_location - _get_launch_location();
+	ai_aiming_vector.Normalize();
+	_turning_to(ai_aiming_vector);
+	if (ai_aiming_vector.Equals(_get_launch_normal(), ai_aiming_tolerance))
+	{
+		if (!ai_aiming)
+		{
+			ai_aiming = true;
+		}
+		return;
+	}
+	else
+	{
+		if (ai_aiming)
+		{
+			ai_aiming = false;
+		}
+	}
 };
 
 // - Lock Action -
@@ -269,28 +296,22 @@ void UAimingComponent::_draw_projectile_path()
 		//----####有效射程	in MaxSimTime
 		//获得第一个击中点
 		//---------------------------------------------------------Debug
-		DrawDebugLine(
+		DrawDebugSphere(
 			GetWorld(),
-			launch_location, //start location
 			PredictResult.HitResult.Location,
-			FColor::Blue,
-			false,
-			0.0f,
-			0.0f,
-			100.0f);
+			100.f,
+			64.f,
+			FColor::Blue);
 	}
 	else
 	{
 		//-----####有效射程外 out of MaxSimTime
 		//---------------------------------------------------------Debug
-		DrawDebugLine(
-			GetWorld(),
-			launch_location, //start location
+		DrawDebugSphere(
+			GetWorld(), //start location
 			PredictResult.LastTraceDestination.Location,
-			FColor::Blue,
-			false,
-			0.0f,
-			0.0f,
-			100.0f);
+			100.f,
+			64.f,
+			FColor::Blue);
 	}
 }

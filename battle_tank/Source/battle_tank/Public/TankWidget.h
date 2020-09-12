@@ -14,6 +14,7 @@
 class UImage;
 class UProgressBar;
 class UTexture;
+class UTextBlock;
 // class AimingState;
 
 UCLASS()
@@ -34,6 +35,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
 	UProgressBar *lock_buffer_bar;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (BindWidget))
+	UTextBlock *ammo_amount;
+
 	// - Draw -
 	void _set_crosshair_fcolor(FLinearColor color_toset);
 
@@ -41,9 +45,12 @@ public:
 
 	void _set_projectile_image_ropacity(float render_opacity_toset);
 
+	void _set_ammo_amount(FText ammo_toset);
+
 	void _set_lock_buffer_bar_ropacity(float render_opacity_toset);
 
 	void _set_lock_buffer_bar_fcolor(FLinearColor color_toset);
 
 	void _set_lock_buffer_bar_percent(float percent_toset);
+
 };

@@ -11,6 +11,7 @@
 class UTankBarrel;
 class UTankTurrent;
 class ATankHUD;
+class ATankProjectile;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BATTLE_TANK_API UAimingComponent : public UActorComponent
@@ -28,6 +29,10 @@ protected:
 	// UPROPERTY(BlueprintReadOnly, Category = "Mesh")
 	UTankTurrent *turrent = nullptr;
 	bool is_moving = true;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	float ai_aiming_tolerance = 0.03f;
+	bool ai_aiming = false;
 
 	// - Lock -
 	/*OUT Dpendence - launch speed*/
@@ -64,6 +69,7 @@ public:
 	// UI
 	void _set_hud();
 	void _set_widget();
+
 	// - Break -
 	void _break_barrel();
 	void _break();
@@ -77,10 +83,14 @@ public:
 	bool _is_barrel();
 	// is_turrent
 	bool _is_turrent();
+	//is aiming on (for AI, return ai_aiming)
+	bool _is_aiming_on();
 
 	// - Turing -
 	//_turning_to to aiming_direction
 	virtual void _turning_to(FVector aiming_normal);
+	//ai aiming
+	virtual void _ai_turning(FVector aiming_location);
 
 	// - Lock -
 	//action

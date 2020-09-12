@@ -18,27 +18,12 @@ ATank::ATank()
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
-	//BP
+	// - BP -
 	Super::BeginPlay();
 	PrimaryActorTick.bCanEverTick = false;
 	//Cpp
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ BeginPlay "), *name);
-
-	// - UI -
-	if (IsPlayerControlled())
-	{
-		if (ensure(aiming_component))
-		{
-			aiming_component->_set_hud();
-			aiming_component->_set_widget();
-		}
-
-		if (ensure(weapon_component))
-			weapon_component->_set_hud();
-	}
-	// - Initialize  weapon -
-	_set_weapon(0);
 }
 
 // Called every frame
@@ -67,13 +52,34 @@ void ATank::_setup(UAimingComponent *aiming_component_toset,
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
 };
+//setup - UI -
+void ATank::_setup_ui()
+{
+	// - UI -
+	if (IsPlayerControlled())
+	{
+		if (ensure(aiming_component))
+		{
+			aiming_component->_set_hud();
+			aiming_component->_set_widget();
+		}
+		if (ensure(weapon_component))
+		{
+			weapon_component->_set_hud();
+		}
+	}
+};
 
 // - Get -
+// is aiming on
+bool ATank::_is_aiming_on()
+{
+	if (aiming_component)
+		return aiming_component->_is_aiming_on();
+	return false;
+}
 
-// ## Bind Action ##
-
-/*	with UI */
-// - Aiming -
+// - Turning -
 void ATank::_turning_to(FVector aiming_normal)
 {
 	if (aiming_component)
@@ -81,19 +87,23 @@ void ATank::_turning_to(FVector aiming_normal)
 		aiming_component->_turning_to(aiming_normal);
 	}
 }
-
-void ATank::_aiming_at(FVector location)
+// - AI - aiming at location
+void ATank::_ai_turning(FVector location)
 {
-	_turning_to(location - aiming_component->_get_launch_location());
+	if (aiming_component)
+		aiming_component->_ai_turning(location);
 }
 
+// ## Bind Action ##
+/*	with UI */
 // - Lock -
 void ATank::_lock(bool if_lock)
 {
-	if (!aiming_component)
+	if (!aiming_component || !weapon_component)
 	{
 		return;
 	}
+	aiming_component->_update_launch_speed(weapon_component->_get_launch_speed());
 	aiming_component->_lock(if_lock);
 }
 
@@ -105,8 +115,7 @@ void ATank::_set_weapon(uint8 number)
 	{
 		return;
 	}
-	if (weapon_component->_set_weapon(number))
-		aiming_component->_update_launch_speed(weapon_component->_get_launch_speed());
+	weapon_component->_set_weapon(number);
 };
 //exchange
 void ATank::_exchange_weapon()
@@ -115,8 +124,7 @@ void ATank::_exchange_weapon()
 	{
 		return;
 	}
-	if (weapon_component->_exchange_weapon())
-		aiming_component->_update_launch_speed(weapon_component->_get_launch_speed());
+	weapon_component->_exchange_weapon();
 };
 //fire()
 void ATank::_fire()
@@ -127,6 +135,7 @@ void ATank::_fire()
 	}
 	weapon_component->_fire(aiming_component->_get_launch_normal(),
 							aiming_component->_get_launch_location());
+	aiming_component->_lock(false);
 };
 //reload
 void ATank::_reload()

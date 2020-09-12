@@ -2,8 +2,8 @@
 
 #include "TankProjectile.h"
 //FIRST include
-#include "Engine/Texture2DDynamic.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ATankProjectile::ATankProjectile()
@@ -13,6 +13,14 @@ ATankProjectile::ATankProjectile()
 	//SET move_component
 	// projectile_movement_component = CreateDefaultSubobject<UProjectileMovementComponent>(FName(TEXT("projectile_movement_component")));
 	// projectile_movement_component->bAutoActivate = false;
+	projectile_mesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("ProjectileMesh"));
+	SetRootComponent(projectile_mesh);
+	projectile_mesh->SetNotifyRigidBodyCollision(true);
+	projectile_mesh->SetVisibility(true);
+	projectile_mesh->SetSimulatePhysics(true);
+	
+	launch_blast = CreateDefaultSubobject<UParticleSystemComponent>(FName("LaunchBlast"));
+	launch_blast->AttachTo(projectile_mesh);
 }
 
 // Called when the game starts or when spawned
@@ -28,8 +36,12 @@ void ATankProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-//------------------------------------------------------public-----------------------------------------------------------------
 // - GET -
+// //get ammo
+// uint8 ATankProjectile::_get_ammo_defaults()
+// {
+// 	return ammo_defaults;
+// }
 //get mass
 float ATankProjectile::_get_mass()
 {
@@ -56,7 +68,7 @@ float ATankProjectile::_get_launch_speed(float launch_force)
 	}
 	if (mass_toset > 0)
 		return launch_force / mass_toset;
-	return 10000.f;
+	return 1.f;
 };
 
 // - SET -
@@ -74,6 +86,11 @@ void ATankProjectile::_set_mass(float mass_override)
 		root->SetMassOverrideInKg(NAME_None, mass_override, true);
 	}
 };
+// //set ammo
+// void ATankProjectile::_set_ammo_defaults(uint8 ammo_toset)
+// {
+// 	_set_ammo_defaults = ammo_toset;
+// };
 
 //Launch
 void ATankProjectile::_launch(float launch_force)
@@ -87,6 +104,7 @@ void ATankProjectile::_launch(float launch_force)
 	if (this->IsRootComponentMovable())
 	{
 		// UE_LOG(LogTemp,Error,TEXT("ForwardVector Component of %s is "),*(GetActorForwardVector().ToString()));
+		UE_LOG(LogTemp, Warning, TEXT("DONKEY :Projectile Add Impulse  %f ~! "), launch_force);
 		projectile->AddImpulse(GetActorForwardVector() * launch_force);
 	}
 	else

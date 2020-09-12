@@ -25,7 +25,7 @@ private:
 
 	// - Friction -
 	UPROPERTY(EditAnywhere, Category = "Friction")
-	float friction_factor = 3.f;
+	float friction_factor = 5.f;
 	float side_speed = 0.f;
 	/* Dependency owner */
 	//mass

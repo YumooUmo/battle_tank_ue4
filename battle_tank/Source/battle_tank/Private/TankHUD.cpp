@@ -176,10 +176,16 @@ void ATankHUD::_reload_ready()
 {
     if (tank_widget)
     {
-        GetWorld()->GetTimerManager().ClearTimer(reload_timer);
+        if (reload_timer.IsValid())
+            GetWorld()->GetTimerManager().ClearTimer(reload_timer);
         tank_widget->_set_projectile_image_ropacity(1.f);
     }
 }
+//Tank call - Set image opacity
+void ATankHUD::_set_pjt_image_opacity(float opacity)
+{
+    tank_widget->_set_projectile_image_ropacity(opacity);
+};
 //SHOW
 void ATankHUD::_show_reload_projectile()
 {
@@ -192,6 +198,12 @@ void ATankHUD::_hide_projectile_image()
     {
         tank_widget->_set_projectile_image_ropacity(0.f);
     }
+};
+//SET ammo
+void ATankHUD::_set_ammo_amount(uint8 ammo_toset)
+{
+    FText ammo = FText::FromString(FString::FromInt(ammo_toset));
+    tank_widget->_set_ammo_amount(ammo);
 };
 
 // - Lock Buffer - (Aiming)

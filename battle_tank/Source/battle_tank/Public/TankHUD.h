@@ -79,10 +79,14 @@ public:
 	void _reload_projectile();
 	//Tank call - Reload ready
 	void _reload_ready();
+	//Tank call - Set image opacity
+	void _set_pjt_image_opacity(float opacity);
 	//SHOW
 	void _show_reload_projectile();
 	//Tank call - Hide
 	void _hide_projectile_image();
+	//SET ammo
+	void _set_ammo_amount(uint8 ammo_toset);
 
 	// - Lock Buffer -
 	//Tank call - update

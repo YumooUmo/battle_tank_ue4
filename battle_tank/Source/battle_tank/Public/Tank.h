@@ -50,12 +50,21 @@ public:
 	virtual void _setup(UAimingComponent *aiming_component_toset,
 						UWeaponComponent *weapon_component_toset,
 						UForceNavMovementComponent *move_component_toset);
+	//setup - UI -
+	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
+	virtual void _setup_ui();
 
 	// - GET -
+	bool _is_aiming_on();
 
 	// - Bind Action -
 	// - Aiming -
+	//player
 	virtual void _turning_to(FVector aiming_normal);
+	//ai aiming
+	void _ai_turning(FVector location);
+
+	// - Lock -
 	UFUNCTION(BlueprintCallable, Category = Aiming)
 	void _lock(bool if_lock);
 	// - Weapon -
@@ -80,7 +89,4 @@ public:
 	void _burst(bool if_burst);
 	UFUNCTION(BlueprintCallable, Category = Move)
 	void _move_stick(float LT_X, float LT_Y);
-
-	// - AI -
-	void _aiming_at(FVector location);
 };

@@ -41,6 +41,11 @@ void UTankWidget::_set_projectile_image_ropacity(float render_opacity_toset)
 		projectile_image->SetRenderOpacity(render_opacity_toset);
 };
 
+void UTankWidget::_set_ammo_amount(FText ammo_toset){
+	ammo_amount->SetText(ammo_toset);
+};
+
+
 // - Lock Buffer Bar -
 void UTankWidget::_set_lock_buffer_bar_ropacity(float render_opacity_toset)
 {

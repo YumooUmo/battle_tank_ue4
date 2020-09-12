@@ -232,7 +232,6 @@ void UForceNavMovementComponent::_ai_direct(FVector intend_normal)
     float cross = FVector::CrossProduct(intend_normal, forward).Z;
     left_throttle = FMath::Clamp<float>(dot - cross, -1.f, 1.f);
     right_throttle = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
-    _burst(dot > 0.8 ? true : false);
     //when intend on right of forward, cross is +, we should turn right, so left_throttle work, left + cross
     _apply_force();
 }

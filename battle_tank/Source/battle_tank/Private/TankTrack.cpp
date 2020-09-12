@@ -105,7 +105,6 @@ void UTankTrack::_grounded(UPrimitiveComponent *HitComponent,
                            FVector NormalImpulse,
                            const FHitResult &Hit)
 {
-    UE_LOG(LogTemp, Error, TEXT("What ?~!"));
     _apply_side_friction();
     _apply_force();
 };

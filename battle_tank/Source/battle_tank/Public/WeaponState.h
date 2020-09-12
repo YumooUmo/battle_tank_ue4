@@ -5,5 +5,6 @@ enum class WeaponState : uint8
 {
 	empty,
 	reloading,
-	ready
+	ready,
+	out_of_ammo
 };
