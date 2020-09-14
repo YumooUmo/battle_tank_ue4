@@ -7,7 +7,6 @@
 #include "TankPlayerController.h"
 #include "TankProjectile.h"
 #include "TimerManager.h"
-
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
 {

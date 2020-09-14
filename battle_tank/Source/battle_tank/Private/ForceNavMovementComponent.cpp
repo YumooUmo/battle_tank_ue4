@@ -125,6 +125,26 @@ void UForceNavMovementComponent::_apply_force()
         UE_LOG(LogTemp, Error, TEXT("Right track is nullptr ~!"));
     }
 }
+void UForceNavMovementComponent::_stop_apply_force()
+{
+    if (left_track)
+    {
+        left_track->_apply_force(0.f);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Left track is nullptr ~!"));
+    }
+    if (left_track)
+    {
+        right_track->_apply_force(0.f);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Right track is nullptr ~!"));
+    }
+    _burst(false);
+};
 
 // - Get Throttle -
 float UForceNavMovementComponent::_get_left_throttle()
@@ -227,13 +247,25 @@ void UForceNavMovementComponent::_ai_direct(FVector intend_normal)
 {
     // GetOwner()
     FVector forward = GetOwner()->GetActorForwardVector();
-
+    // UE_LOG(LogTemp, Error, TEXT("DONKEY : Intend vector %s"), *(intend_normal.ToString()))
     float dot = FVector::DotProduct(intend_normal, forward);
     float cross = FVector::CrossProduct(intend_normal, forward).Z;
     left_throttle = FMath::Clamp<float>(dot - cross, -1.f, 1.f);
     right_throttle = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
+    // UE_LOG(LogTemp, Error, TEXT("DONKEY : Left %f"), left_throttle);
     //when intend on right of forward, cross is +, we should turn right, so left_throttle work, left + cross
+    if (dot > 0.9)
+    {
+        _burst(true);
+    }
+    else
+    {
+        _burst(false);
+    }
     _apply_force();
+    GetWorld()->GetTimerManager().SetTimer(move_timer, this,
+                                           &UForceNavMovementComponent::_stop_apply_force,
+                                           pace * 5, false);
 }
 void UForceNavMovementComponent::RequestDirectMove(const FVector &MoveVelocity, bool bForceMaxSpeed)
 {

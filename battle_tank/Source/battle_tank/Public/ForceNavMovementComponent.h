@@ -39,7 +39,7 @@ protected:
 	// float turn_rate = 1.5; //turning speed
 
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float throttle_rate = 2.f; //Force increass time
+	float throttle_rate = 3.f; //Force increass time
 
 	FTimerHandle move_timer;
 
@@ -58,7 +58,7 @@ public:
 	void _move_keyboard();
 	//apply force
 	void _apply_force();
-
+	void _stop_apply_force();
 	// - BindAction input -
 	//keyboard
 	void _move_forward(bool if_move);

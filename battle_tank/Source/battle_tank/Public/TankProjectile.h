@@ -7,9 +7,11 @@
 //last generate
 #include "TankProjectile.generated.h"
 
+class URadialForceComponent;
 class UParticleSystemComponent;
 
-UCLASS() class BATTLE_TANK_API ATankProjectile : public AActor
+UCLASS()
+class BATTLE_TANK_API ATankProjectile : public AActor
 {
 	GENERATED_BODY()
 
@@ -17,26 +19,56 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// //Ammo
-	// UPROPERTY(EditAnywhere, Category = AmmoAmount)
-	// uint8 ammo_defaults = 30;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "StaticMesh")
 	UStaticMeshComponent *projectile_mesh = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "StaticMesh")
+	// - Particles -
+	//launch
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Launch")
 	UParticleSystemComponent *launch_blast = nullptr;
+	//impact
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Hit")
+	UParticleSystemComponent *impact_blast = nullptr;
 
-	//Reload time
+	//hit pawn impact
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Hit")
+	UParticleSystemComponent *pawn_blast = nullptr;
+
+	// - Explosion Force -
+	//Radius Force
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Hit")
+	URadialForceComponent *radial_force = nullptr;
+
+	// - Hit -
+	uint8 hit_count = 0;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Hit")
+	uint8 max_hit_count = 5;
+
+	UFUNCTION()
+	void _hit(UPrimitiveComponent *HitComponent,
+			  AActor *OtherActor,
+			  UPrimitiveComponent *OtherComponent,
+			  FVector NormalImpulse,
+			  const FHitResult &Hit);
+
+	// - Reload -
 	UPROPERTY(EditAnywhere, Category = Reload)
 	float reload_time = 2.f;
 
-	//Mass
+	// - Mass -
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Mass)
 	float mass_toset = 100.f;
 
-	//Launch
+	// - Launch -
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Launch)
 	float launch_force_override = -1.f;
+
+	// - Life Destroy -
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Life)
+	float life_span = 5.f;
+	uint8 max_life_hit = 200;
+
+	FTimerHandle destroy_timer;
 
 	// - UI -
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = UI)
@@ -76,4 +108,7 @@ public:
 
 	// - Launch -
 	virtual void _launch(float launch_force);
+
+	// - Destroy -
+	virtual void _destroy();
 };

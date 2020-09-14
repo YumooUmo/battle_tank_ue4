@@ -1,6 +1,9 @@
 *.VC.db
 *.mp4
 
+battle_tank/Content/MS_Vegetables/
+battle_tank/Content/StarterContent/
+
 # Visual Studio 2015 user specific files
 */.vs/
 

@@ -2,8 +2,11 @@
 
 #include "TankProjectile.h"
 //FIRST include
+#include "Config.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PhysicsEngine/RadialForceComponent.h"
+#include "TimerManager.h"
 
 // Sets default values
 ATankProjectile::ATankProjectile()
@@ -18,16 +21,33 @@ ATankProjectile::ATankProjectile()
 	projectile_mesh->SetNotifyRigidBodyCollision(true);
 	projectile_mesh->SetVisibility(true);
 	projectile_mesh->SetSimulatePhysics(true);
-	
+
 	launch_blast = CreateDefaultSubobject<UParticleSystemComponent>(FName("LaunchBlast"));
-	launch_blast->AttachTo(projectile_mesh);
-}
+	launch_blast->AttachToComponent(projectile_mesh,
+									FAttachmentTransformRules::KeepRelativeTransform);
+
+	impact_blast = CreateDefaultSubobject<UParticleSystemComponent>(FName("ImpactBlast"));
+	impact_blast->bAutoActivate = false;
+	impact_blast->AttachToComponent(projectile_mesh,
+									FAttachmentTransformRules::KeepRelativeTransform);
+
+	pawn_blast = CreateDefaultSubobject<UParticleSystemComponent>(FName("PawnBlast"));
+	pawn_blast->bAutoActivate = false;
+	pawn_blast->AttachToComponent(projectile_mesh,
+								  FAttachmentTransformRules::KeepRelativeTransform);
+
+	radial_force = CreateDefaultSubobject<URadialForceComponent>(FName("RadialForce"));
+	radial_force->bAutoActivate = false;
+	radial_force->AttachToComponent(projectile_mesh,
+									FAttachmentTransformRules::KeepRelativeTransform);
+};
 
 // Called when the game starts or when spawned
 void ATankProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	_set_mass(mass_toset);
+	projectile_mesh->OnComponentHit.AddDynamic(this, &ATankProjectile::_hit);
 }
 
 // Called every frame
@@ -37,11 +57,6 @@ void ATankProjectile::Tick(float DeltaTime)
 }
 
 // - GET -
-// //get ammo
-// uint8 ATankProjectile::_get_ammo_defaults()
-// {
-// 	return ammo_defaults;
-// }
 //get mass
 float ATankProjectile::_get_mass()
 {
@@ -86,11 +101,6 @@ void ATankProjectile::_set_mass(float mass_override)
 		root->SetMassOverrideInKg(NAME_None, mass_override, true);
 	}
 };
-// //set ammo
-// void ATankProjectile::_set_ammo_defaults(uint8 ammo_toset)
-// {
-// 	_set_ammo_defaults = ammo_toset;
-// };
 
 //Launch
 void ATankProjectile::_launch(float launch_force)
@@ -104,11 +114,71 @@ void ATankProjectile::_launch(float launch_force)
 	if (this->IsRootComponentMovable())
 	{
 		// UE_LOG(LogTemp,Error,TEXT("ForwardVector Component of %s is "),*(GetActorForwardVector().ToString()));
-		UE_LOG(LogTemp, Warning, TEXT("DONKEY :Projectile Add Impulse  %f ~! "), launch_force);
 		projectile->AddImpulse(GetActorForwardVector() * launch_force);
+
+		GetWorld()->GetTimerManager().SetTimer(destroy_timer, this,
+											   &ATankProjectile::_destroy,
+											   life_span, false);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Potential Error : 1/ Root Component of %s is not moveable. 2/ Root Component is Not a Primitive Component."), *(this->GetName()));
 	}
+};
+
+// - Hit -
+void ATankProjectile::_hit(UPrimitiveComponent *HitComponent,
+						   AActor *OtherActor,
+						   UPrimitiveComponent *OtherComponent,
+						   FVector NormalImpulse,
+						   const FHitResult &Hit)
+{
+	//Hit First - big blast
+	if (hit_count == 0)
+	{
+		if (impact_blast)
+			// UE_LOG(LogTemp, Error, TEXT("DONKEY : Impact Blast"));
+			impact_blast->Activate();
+		if (radial_force)
+		{
+			// UE_LOG(LogTemp, Error, TEXT("DONKEY : Radial Force"));
+			radial_force->FireImpulse();
+		}
+	}
+	//Hit Pawn - pawn blast
+	if (pawn_blast)
+	{
+		APawn *temp = Cast<APawn>(Hit.Actor);
+		if (temp && hit_count < max_hit_count)
+		{
+			if (launch_blast)
+				launch_blast->Deactivate();
+			// UE_LOG(LogTemp, Error, TEXT("DONKEY : Pawn Blast"));
+			pawn_blast->Activate();
+			hit_count = max_hit_count;
+		}
+	}
+	if (hit_count > max_hit_count)
+	{
+		// UE_LOG(LogTemp, Error, TEXT("DONKEY : Deactive"));
+		launch_blast->Deactivate();
+		impact_blast->Deactivate();
+		pawn_blast->Deactivate();
+	}
+	//count ++
+	hit_count++;
+	if (hit_count > max_life_hit)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(destroy_timer);
+		_destroy();
+	}
+	GetWorld()->GetTimerManager().SetTimer(destroy_timer, this,
+										   &ATankProjectile::_destroy,
+										   life_span, false);
+};
+
+// - Destroy -
+void ATankProjectile::_destroy()
+{
+	this->Destroy();
 };
