@@ -13,10 +13,11 @@ void UTankTrack::BeginPlay()
 {
     Super::BeginPlay();
     // ...
-    tank_mass = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent())->GetMass();
+    if (Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent()))
+        tank_mass = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent())->GetMass();
     OnComponentHit.AddDynamic(this, &UTankTrack::_grounded);
 }
-
+ 
 // - Force -
 //sockets
 bool UTankTrack::_refresh_force_sockets()
@@ -79,7 +80,6 @@ void UTankTrack::_apply_force()
                 sockets[i * 2 + 1]);
     }
 };
-
 
 // - Friction -
 void UTankTrack::_apply_side_friction()

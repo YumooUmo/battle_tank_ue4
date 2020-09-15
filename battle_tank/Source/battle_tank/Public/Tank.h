@@ -7,7 +7,7 @@
 //last generate
 #include "Tank.generated.h"
 
-class UWeaponComponent;
+class UStraightWeaponComponent;
 class UAimingComponent;
 class UForceNavMovementComponent;
 
@@ -38,7 +38,7 @@ protected:
 	UForceNavMovementComponent *move_component;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Component")
-	UWeaponComponent *weapon_component;
+	UStraightWeaponComponent *weapon_component;
 
 public:
 	// Sets default values for this pawn's properties
@@ -47,8 +47,7 @@ public:
 	// - SETUP -
 	// setup by BP -
 	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
-	virtual void _setup(UAimingComponent *aiming_component_toset,
-						UWeaponComponent *weapon_component_toset,
+	virtual void _setup_component(UStraightWeaponComponent *weapon_component_toset,
 						UForceNavMovementComponent *move_component_toset);
 	//setup - UI -
 	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
@@ -69,9 +68,9 @@ public:
 	void _lock(bool if_lock);
 	// - Weapon -
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _set_weapon(uint8 number);
+	void _set_projectile(uint8 number);
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _exchange_weapon();
+	void _exchange_projectile();
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _fire();
 	UFUNCTION(BlueprintCallable, Category = Weapon)

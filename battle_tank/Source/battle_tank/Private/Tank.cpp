@@ -4,7 +4,7 @@
 //FIRST include
 #include "AimingComponent.h"
 #include "ForceNavMovementComponent.h"
-#include "WeaponComponent.h"
+#include "StraightWeaponComponent.h"
 
 // Sets default values
 ATank::ATank()
@@ -20,7 +20,6 @@ void ATank::BeginPlay()
 {
 	// - BP -
 	Super::BeginPlay();
-	PrimaryActorTick.bCanEverTick = false;
 	//Cpp
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ BeginPlay "), *name);
@@ -42,13 +41,11 @@ void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 
 //----------------------------------		PUBLIC		----------------------------------------
 //	Set Up
-void ATank::_setup(UAimingComponent *aiming_component_toset,
-				   UWeaponComponent *weapon_component_toset,
-				   UForceNavMovementComponent *move_component_toset)
+void ATank::_setup_component(UStraightWeaponComponent *weapon_component_toset,
+							 UForceNavMovementComponent *move_component_toset)
 {
 	//runtime new component : Component* component = NewObject<Comoponent>(FName);
 	//-----------------------component->RegisterComponent();
-	aiming_component = aiming_component_toset;
 	weapon_component = weapon_component_toset;
 	move_component = move_component_toset;
 };
@@ -58,14 +55,10 @@ void ATank::_setup_ui()
 	// - UI -
 	if (IsPlayerControlled())
 	{
-		if (ensure(aiming_component))
-		{
-			aiming_component->_set_hud();
-			aiming_component->_set_widget();
-		}
 		if (ensure(weapon_component))
 		{
 			weapon_component->_set_hud();
+			weapon_component->_setup_widget();
 		}
 	}
 };
@@ -74,24 +67,24 @@ void ATank::_setup_ui()
 // is aiming on
 bool ATank::_is_aiming_on()
 {
-	if (aiming_component)
-		return aiming_component->_is_aiming_on();
+	if (weapon_component)
+		return weapon_component->_is_aiming_on();
 	return false;
 }
 
 // - Turning -
 void ATank::_turning_to(FVector aiming_normal)
 {
-	if (aiming_component)
+	if (weapon_component)
 	{
-		aiming_component->_turning_to(aiming_normal);
+		weapon_component->_turning_to(aiming_normal);
 	}
 }
 // - AI - aiming at location
 void ATank::_ai_turning(FVector location)
 {
-	if (aiming_component)
-		aiming_component->_ai_turning(location);
+	if (weapon_component)
+		weapon_component->_ai_turning(location);
 }
 
 // ## Bind Action ##
@@ -99,43 +92,39 @@ void ATank::_ai_turning(FVector location)
 // - Lock -
 void ATank::_lock(bool if_lock)
 {
-	if (!aiming_component || !weapon_component)
+	if (!weapon_component)
 	{
 		return;
 	}
-	aiming_component->_update_launch_speed(weapon_component->_get_launch_speed());
-	aiming_component->_lock(if_lock);
+	weapon_component->_lock(if_lock);
 }
-
 // - Weapon -	#### TODO : add new weapon
 //set projectile by number - (Initialize Weapon)
-void ATank::_set_weapon(uint8 number)
+void ATank::_set_projectile(uint8 number)
 {
 	if (!weapon_component)
 	{
 		return;
 	}
-	weapon_component->_set_weapon(number);
+	weapon_component->_set_projectile(number);
 };
 //exchange
-void ATank::_exchange_weapon()
+void ATank::_exchange_projectile()
 {
 	if (!weapon_component)
 	{
 		return;
 	}
-	weapon_component->_exchange_weapon();
+	weapon_component->_exchange_projectile();
 };
 //fire()
 void ATank::_fire()
 {
-	if (!weapon_component || !aiming_component || !aiming_component->_is_barrel())
+	if (!weapon_component)
 	{
 		return;
 	}
-	weapon_component->_fire(aiming_component->_get_launch_normal(),
-							aiming_component->_get_launch_location());
-	aiming_component->_lock(false);
+	weapon_component->_fire();
 };
 //reload
 void ATank::_reload()

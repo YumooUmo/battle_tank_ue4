@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "AimingState.h"
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
 //last generate
@@ -18,11 +17,10 @@ class BATTLE_TANK_API UAimingComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
-protected:
 	// - Turrent -
 	// UPROPERTY(BlueprintReadOnly, Category = "Mesh")
 	UTankBarrel *barrel = nullptr;
@@ -33,27 +31,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float ai_aiming_tolerance = 0.03f;
 	bool ai_aiming = false;
-
-	// - Lock -
-	/*OUT Dpendence - launch speed*/
-	float launch_speed = 0.f;
-
-	//property
-	UPROPERTY(BlueprintReadOnly, Category = "Lock")
-	AimingState aiming_state = AimingState::usable;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Lock")
-	float max_buffer = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category = "Lock")
-	float lock_buffer = max_buffer;
-	UPROPERTY(EditDefaultsOnly, Category = "Lock")
-	float cool_rate = 0.8f;
-	UPROPERTY(EditDefaultsOnly, Category = "Lock")
-	float recover_value = 2.f;
-	UPROPERTY(EditDefaultsOnly, Category = "Lock")
-	float overheat_lag = 2.f;
-
-	FTimerHandle lock_timer;
 
 	// - HUD -
 	ATankHUD *tank_hud = nullptr;
@@ -68,7 +45,7 @@ public:
 	void _setup(UTankTurrent *turrent_toset, UTankBarrel *barrel_toset);
 	// UI
 	void _set_hud();
-	void _set_widget();
+	void _setup_widget();
 
 	// - Break -
 	void _break_barrel();
@@ -92,13 +69,4 @@ public:
 	//ai aiming
 	virtual void _ai_turning(FVector aiming_location);
 
-	// - Lock -
-	//action
-	virtual void _lock(bool flag);
-	virtual void _should_lock();
-	/*OUT Dpendence - launch speed*/
-	void _update_launch_speed(float launch_speed_toset);
-
-	//CALL : Draw Projectile Path
-	void _draw_projectile_path();
 };

@@ -3,8 +3,6 @@
 #include "AimingComponent.h"
 //FIRST include
 #include "Config.h"
-#include "DrawDebugHelpers.h"
-#include "Kismet/GameplayStatics.h"
 #include "TankBarrel.h"
 #include "TankHUD.h"
 #include "TankTurrent.h"
@@ -17,15 +15,13 @@ UAimingComponent::UAimingComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	// ...
-	FString name = GetName();
-	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent %s C++ Construct "), *name);
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent C++ Construct "));
 }
 // Called when the game starts
 void UAimingComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	FString name = GetName();
-	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent %s C++ BeginPlay "), *name);
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : AimingComponent C++ BeginPlay "));
 	// ...
 }
 // Called every frame
@@ -63,7 +59,7 @@ void UAimingComponent::_set_hud()
 					->GetController())
 				->GetHUD());
 };
-void UAimingComponent::_set_widget()
+void UAimingComponent::_setup_widget()
 {
 	tank_hud->_setup_tank_widget();
 };
@@ -192,126 +188,3 @@ void UAimingComponent::_ai_turning(FVector aiming_location)
 		}
 	}
 };
-
-// - Lock Action -
-// - call in
-void UAimingComponent::_lock(bool flag)
-{
-	if (!(launch_speed > 0))
-	{
-		return;
-	}
-	//Draw_Path : Pressed
-	if (aiming_state != AimingState::overheat)
-	{
-		if (flag)
-		{
-			aiming_state = AimingState::locking;
-			if (lock_timer.IsValid())
-			{
-				return;
-			}
-			GetWorld()->GetTimerManager().SetTimer(lock_timer, this,
-												   &UAimingComponent::_should_lock,
-												   pace, true);
-			// - UI -
-			tank_hud->_do_lock_buffer();
-		}
-		//Draw_Path : Released
-		else
-		{
-			aiming_state = AimingState::usable;
-		}
-	}
-};
-// lock buffer counter
-void UAimingComponent::_should_lock()
-{
-	//Draw_Path : Pressed
-	if (aiming_state == AimingState::locking)
-	{
-		if (lock_buffer <= 0.f)
-		{
-			lock_buffer = -overheat_lag;
-			aiming_state = AimingState::overheat;
-		}
-		else
-		{
-			lock_buffer -= pace;
-			UAimingComponent::_draw_projectile_path();
-		}
-	}
-	//Draw_Path : Not Pressed
-	else
-	{
-		if (lock_buffer < max_buffer)
-		{
-			lock_buffer += pace * cool_rate;
-			if (aiming_state == AimingState::overheat && lock_buffer > recover_value)
-			{
-				aiming_state = AimingState::usable;
-			}
-			//limit
-			if (lock_buffer > max_buffer)
-			{
-				lock_buffer = max_buffer;
-				GetWorld()->GetTimerManager().ClearTimer(lock_timer);
-			}
-		}
-	}
-	// - UI -
-	tank_hud->_update_lock_buffer(FMath::GetRangePct(0.f, max_buffer, lock_buffer), aiming_state);
-};
-/*OUT Dpendence - launch speed*/
-void UAimingComponent::_update_launch_speed(float launch_speed_toset)
-{
-	launch_speed = launch_speed_toset;
-};
-
-// - Draw UI -
-void UAimingComponent::_draw_projectile_path()
-{
-	//Initiallize Parameters to _predict path method()
-	FVector launch_velocity = _get_launch_normal() * launch_speed;
-	FVector launch_location = _get_launch_location();
-
-	FPredictProjectilePathParams PredictParams{
-		10.f,			 //CollisionRadius
-		launch_location, //start location
-		launch_velocity,
-		3.0f, //MaxSimTime
-		ECollisionChannel::ECC_Visibility,
-		nullptr};
-
-	PredictParams.ActorsToIgnore.Add(GetOwner());
-
-	//Initiallize Result Struct to _predict path method()
-	FPredictProjectilePathResult PredictResult;
-
-	if (UGameplayStatics::PredictProjectilePath(
-			this,
-			PredictParams,
-			PredictResult))
-	{
-		//----####有效射程	in MaxSimTime
-		//获得第一个击中点
-		//---------------------------------------------------------Debug
-		DrawDebugSphere(
-			GetWorld(),
-			PredictResult.HitResult.Location,
-			100.f,
-			64.f,
-			FColor::Blue);
-	}
-	else
-	{
-		//-----####有效射程外 out of MaxSimTime
-		//---------------------------------------------------------Debug
-		DrawDebugSphere(
-			GetWorld(), //start location
-			PredictResult.LastTraceDestination.Location,
-			100.f,
-			64.f,
-			FColor::Blue);
-	}
-}

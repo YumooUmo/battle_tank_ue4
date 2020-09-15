@@ -23,16 +23,14 @@ private:
 	void Tick(float DeltaTime) override;
 
 	ATank *tank_controlled = nullptr;
-	ATank *tank_of_player = nullptr;
+	APawn *player_pawn = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "AI_Trace")
 	float AcceptanceRadius = 5000.f;
 	//						#### TODO : Defact below all method
 	//----------------------------------GET : SETUP-----------------------------------------
-	virtual ATank *
-	_get_controlled_tank() const;
-	virtual ATank *_get_player_tank() const;
+	virtual ATank *_get_controlled_tank() const;
+	virtual APawn *_get_player_tank() const;
 
 	//-----------------------------------------------ACTION-------------------------------------------------------
-
 };
