@@ -39,7 +39,7 @@ protected:
 	// float turn_rate = 1.5; //turning speed
 
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
-	float throttle_rate = 3.f; //Force increass time
+	float throttle_rate = 4.f; //Force increass time
 
 	FTimerHandle move_timer;
 

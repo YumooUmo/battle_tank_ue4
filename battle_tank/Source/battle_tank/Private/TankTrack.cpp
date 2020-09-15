@@ -90,11 +90,11 @@ void UTankTrack::_apply_side_friction()
         if (side_speed > 0)
         {
             //重力加速度/2 = 4.9
-            AddForce(-(GetRightVector() * tank_mass * friction_factor * 4.9f));
+            AddForce(-(GetRightVector() * tank_mass * friction_factor * 10.f));
         }
         else
         {
-            AddForce(GetRightVector() * tank_mass * friction_factor * 4.9f);
+            AddForce(GetRightVector() * tank_mass * friction_factor * 10.f);
         }
     }
 };
