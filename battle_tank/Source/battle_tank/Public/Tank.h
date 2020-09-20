@@ -8,13 +8,13 @@
 #include "Tank.generated.h"
 
 class UStraightWeaponComponent;
-class UAimingComponent;
-class UForceNavMovementComponent;
+class UTrackForceAdapterComponent;
+class UChildActorComponent;
+class UBodyMesh;
 
 // class UTankWidget;
 
-UCLASS()
-class BATTLE_TANK_API ATank : public APawn
+UCLASS() class BATTLE_TANK_API ATank : public APawn
 {
 	GENERATED_BODY()
 
@@ -29,15 +29,17 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//---------------------	Properties	------------------------
-	//	#### TODO : Template for Component create
-	UPROPERTY(BlueprintReadWrite, Category = "Component")
-	UAimingComponent *aiming_component;
+	UPROPERTY(EditAnywhere, Category = "RootComponent")
+	UBodyMesh *tank_body;
+	
+	UPROPERTY(EditAnywhere, Category = "ChildActor")
+	UChildActorComponent *turrent;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Component")
-	UForceNavMovementComponent *move_component;
+	// - Actor Component -
+	UPROPERTY(BlueprintReadWrite, Category = "ActorComponent")
+	UTrackForceAdapterComponent *move_component;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Component")
+	UPROPERTY(BlueprintReadWrite, Category = "ActorComponent")
 	UStraightWeaponComponent *weapon_component;
 
 public:
@@ -47,16 +49,12 @@ public:
 	// - SETUP -
 	// setup by BP -
 	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
-	virtual void _setup_component(UStraightWeaponComponent *weapon_component_toset,
-						UForceNavMovementComponent *move_component_toset);
-	//setup - UI -
-	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
-	virtual void _setup_ui();
+	virtual void _setup();
 
 	// - GET -
 	bool _is_aiming_on();
 
-	// - Bind Action -
+	/* - Bind Action - */
 	// - Aiming -
 	//player
 	virtual void _turning_to(FVector aiming_normal);
@@ -66,6 +64,7 @@ public:
 	// - Lock -
 	UFUNCTION(BlueprintCallable, Category = Aiming)
 	void _lock(bool if_lock);
+
 	// - Weapon -
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _set_projectile(uint8 number);
@@ -75,6 +74,9 @@ public:
 	void _fire();
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _reload();
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void _detach_weapon();
+
 	// - Move -
 	UFUNCTION(BlueprintCallable, Category = Move)
 	void _move_forward(bool if_move);

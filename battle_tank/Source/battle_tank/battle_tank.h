@@ -4,3 +4,4 @@
 
 #include "CoreMinimal.h"
 
+// #define ECC_InvisibleBody ECC_GameTraceChannel1

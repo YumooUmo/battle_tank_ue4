@@ -46,10 +46,16 @@ public:
 	// UI
 	void _set_hud();
 	void _setup_widget();
+	void _remove_widget();
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void _setup_ui();
 
 	// - Break -
 	void _break_barrel();
 	void _break();
+	// - detach -
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void _detach_weapon();
 
 	// - Get -
 	//vector
