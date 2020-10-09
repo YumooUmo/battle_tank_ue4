@@ -96,19 +96,29 @@ public:
 
 	// - LOCK -
 	virtual void _should_lock();
+	
 	//CALL : Draw Projectile Path
 	void _draw_projectile_path();
 
 	// - Bind Action -
 	//SET weapon by number
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	virtual bool _set_projectile(uint8 projectile_number);
+
 	//Exchange projectile
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	virtual bool _exchange_projectile();
+
 	//Fire	- return bool for UI
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	virtual void _fire();
+
 	//Reload - return float for UI - need timer handler set Ready
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	virtual void _reload();
 	virtual void _reload_ready();
+
 	//Lock - draw projectile path
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	virtual void _lock(bool flag);
 };

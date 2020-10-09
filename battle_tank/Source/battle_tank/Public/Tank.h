@@ -12,9 +12,11 @@ class UTrackForceAdapterComponent;
 class UChildActorComponent;
 class UBodyMesh;
 
+DECLARE_DELEGATE(FTankDelegate)
 // class UTankWidget;
 
-UCLASS() class BATTLE_TANK_API ATank : public APawn
+UCLASS()
+class BATTLE_TANK_API ATank : public APawn
 {
 	GENERATED_BODY()
 
@@ -29,9 +31,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = "RootComponent")
-	UBodyMesh *tank_body;
-	
+	UPROPERTY(EditAnywhere, Category = "Health")
+	int32 Health = 100;
+	int32 CurrentHealth = Health;
+
 	UPROPERTY(EditAnywhere, Category = "ChildActor")
 	UChildActorComponent *turrent;
 
@@ -46,48 +49,12 @@ public:
 	// Sets default values for this pawn's properties
 	ATank();
 
-	// - SETUP -
-	// setup by BP -
-	UFUNCTION(BlueprintCallable, Category = Tank_Setup)
-	virtual void _setup();
+	FTankDelegate OnDeath;
 
-	// - GET -
-	bool _is_aiming_on();
+	virtual float TakeDamage(
+		float Damage,
+		struct FDamageEvent const &DamageEvent,
+		AController *EventInstigator,
+		AActor *DamageCauser) override;
 
-	/* - Bind Action - */
-	// - Aiming -
-	//player
-	virtual void _turning_to(FVector aiming_normal);
-	//ai aiming
-	void _ai_turning(FVector location);
-
-	// - Lock -
-	UFUNCTION(BlueprintCallable, Category = Aiming)
-	void _lock(bool if_lock);
-
-	// - Weapon -
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _set_projectile(uint8 number);
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _exchange_projectile();
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _fire();
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _reload();
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void _detach_weapon();
-
-	// - Move -
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _move_forward(bool if_move);
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _move_backward(bool if_move);
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _move_left(bool if_move);
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _move_right(bool if_move);
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _burst(bool if_burst);
-	UFUNCTION(BlueprintCallable, Category = Move)
-	void _move_stick(float LT_X, float LT_Y);
 };

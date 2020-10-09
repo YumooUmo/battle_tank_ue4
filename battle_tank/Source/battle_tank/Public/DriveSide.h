@@ -21,6 +21,9 @@ public:
 	ADriveSide();
 
 protected:
+	//Called after the instance of Actor is Construct, and before BeginPlay.
+	virtual void OnConstruction(const FTransform &Transform) override;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -34,7 +37,7 @@ protected:
 	TArray<UChildActorComponent *> wheels_anchor;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "SetupDriveSide")
-	bool bConstraintJointComponentSimulatingPhysics = false;
+	bool bConstraintJointComponentSimulatingPhysics = true;
 
 	// - Move -
 	UPROPERTY(EditAnywhere, Category = "Accelerate")
@@ -47,12 +50,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/*  - Set Up - BeginPlay-  */
-	//bind constraint
-	void _bind_constraint(UPrimitiveComponent* ComponentToBind = nullptr);
 	/*  - Set Up - BP-  */
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void _initialize(UTankTrack *track_toset, UPhysicsConstraintComponent *constraint_toset, TArray<UChildActorComponent *> wheels_toset);
+	
+	/*  - Set Up - BeginPlay-  */
+	//bind constraint
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void _bind_constraint();
+
 	// /*  - detach -  */
 	// UFUNCTION(BlueprintCallable, Category = "detach")
 	// void _detach();

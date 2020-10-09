@@ -14,7 +14,15 @@ ADriveSide::ADriveSide()
 	PrimaryActorTick.bCanEverTick = false;
 	// _setup_anchors();	-  Set at BP Construct
 	// _setup_wheel_class()  -  Set at BP
-	UE_LOG(LogTemp, Warning, TEXT("DONKEY : Side C++ Construct "));
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : DriveSide C++ Construct "));
+}
+
+//Called after the instance of Actor is Construct, and before BeginPlay.
+void ADriveSide::OnConstruction(const FTransform &Transform)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : DriveSide C++ OnConstruction"));
+	//Bind Constraint to Parent RootComponent
+	/* BUG FIX*/
 }
 
 // Called when the game starts or when spawned
@@ -22,6 +30,7 @@ void ADriveSide::BeginPlay()
 {
 	Super::BeginPlay();
 	//Bind Constraint After Spawn Sub Actor
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : DriveSide C++ BeginPlay"));
 	_bind_constraint();
 }
 
@@ -71,38 +80,21 @@ void ADriveSide::_initialize(UTankTrack *track_toset, UPhysicsConstraintComponen
 };
 
 //bind constraint
-void ADriveSide::_bind_constraint(UPrimitiveComponent *ComponentToBind)
+void ADriveSide::_bind_constraint()
 {
-	//Bind Constraint to Parent RootComponent
-	if (!ComponentToBind)
-	{
-		if (!GetAttachParentActor())
-			return;
-		ComponentToBind = Cast<UPrimitiveComponent>(GetAttachParentActor()->GetRootComponent());
-	}
+	if (!GetAttachParentActor())
+		return;
+	UPrimitiveComponent *ComponentToBind = Cast<UPrimitiveComponent>(GetRootComponent()->GetAttachParent()->GetAttachParent());
+
 	if (ComponentToBind)
 	{
-		if (ComponentToBind->IsSimulatingPhysics())
-		{
-			bConstraintJointComponentSimulatingPhysics = true;
-		}
-		else
-		{
-			bConstraintJointComponentSimulatingPhysics = false;
-			UE_LOG(LogTemp, Warning, TEXT("DONKEY : Component for Track to Bind is not Simulating Physics."));
-		}
+		//Collision
+		track->SetCollisionProfileName(FName("VisibleBody"));
+
+		//Physics
 		//Simulate Physics before Bind Wheels - # will Dettach from parent,
 		track->SetSimulatePhysics(true);
-		track->SetCollisionProfileName(FName("VisibleBody"));
-		/* */
-		//Bind Wheels
-		for (AWheel *awheel : wheels)
-		{
-			if (awheel)
-			{
-				awheel->_bind_constraint(track);
-			}
-		}
+
 		//Bind Track
 		track_constraint->SetConstrainedComponents(ComponentToBind, NAME_None, track, NAME_None);
 		/* - BUG FIXED 1 - */

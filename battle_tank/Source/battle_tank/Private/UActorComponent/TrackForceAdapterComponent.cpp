@@ -60,14 +60,16 @@ bool UTrackForceAdapterComponent::_setup_left(UChildActorComponent *left_child_c
 };
 bool UTrackForceAdapterComponent::_setup_right(UChildActorComponent *right_child_component_toset)
 {
+    //Child Component Exist?
     if (!right_child_component_toset && !right_child_component)
         return false;
     if (right_child_component_toset)
         right_child_component = right_child_component_toset;
 
-    //Exists Already?
+    //DriveSide Exists Already?
     if (right_driveside)
         return false;
+
     //Is ChildActor a DriveSide ?
     ADriveSide *child_actor = Cast<ADriveSide>(right_child_component->GetChildActor());
     if (!child_actor)
@@ -84,9 +86,9 @@ bool UTrackForceAdapterComponent::_setup_right(UChildActorComponent *right_child
 //Attach
 bool UTrackForceAdapterComponent::_attach_left(AActor *child_actor)
 {
-    // //Already Bind ?
-    // if (left_driveside)
-    //     return false;
+    //Already Bind ?
+    if (left_driveside)
+        return false;
     //Child Component Exist ?
     if (!left_child_component)
         return false;
@@ -96,15 +98,21 @@ bool UTrackForceAdapterComponent::_attach_left(AActor *child_actor)
         return false;
 
     //                    #### TODO : Apply Instance Data
-    left_child_component->SetChildActorClass(child_actor->GetClass(), child_actor);
-    TArray<AActor *> children;
-    child_actor->GetAllChildActors(children);
-    for (AActor *child : children)
-    {
-        child->Destroy();
-    }
-    child_actor->Destroy();
-    left_child_component->CreateChildActor();
+    // left_child_component->SetChildActorClass(child_actor->GetClass(), child_actor);
+    // TArray<AActor *> children;
+    // child_actor->GetAllChildActors(children);
+    // for (AActor *child : children)
+    // {
+    //     child->Destroy();
+    // }
+    // child_actor->Destroy();
+    // left_child_component->CreateChildActor();
+    child_actor->AttachToComponent(
+        left_child_component,
+        FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
+                                  EAttachmentRule::SnapToTarget,
+                                  EAttachmentRule::KeepWorld,
+                                  true));
 
     _setup_left();
     //Set Transform : abs Location / abs Rotation / abs Scale
@@ -116,10 +124,10 @@ bool UTrackForceAdapterComponent::_attach_left(AActor *child_actor)
 };
 bool UTrackForceAdapterComponent::_attach_right(AActor *child_actor)
 {
-    // //Already Bind ?
-    // if (left_driveside)
-    //     return false;
-    //Child Component Exist ?
+    //Already Bind ?
+    if (left_driveside)
+        return false;
+    // Child Component Exist ?
     if (!right_child_component)
         return false;
 
@@ -128,16 +136,15 @@ bool UTrackForceAdapterComponent::_attach_right(AActor *child_actor)
         return false;
 
     //                           #### TODO : Apply Instance Data
-    right_child_component->SetChildActorClass(child_actor->GetClass(), child_actor);
-    TArray<AActor *> children;
-    child_actor->GetAllChildActors(children);
-    for (AActor *child : children)
-    {
-        child->Destroy();
-    }
-    child_actor->Destroy();
-    right_child_component->CreateChildActor();
+    // right_child_component->SetChildActorClass(child_actor->GetClass(), child_actor);
+    // right_child_component->CreateChildActor();
 
+    child_actor->AttachToComponent(
+        right_child_component,
+        FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
+                                  EAttachmentRule::SnapToTarget,
+                                  EAttachmentRule::KeepWorld,
+                                  true));
     _setup_right();
     //Set Transform : abs Location / abs Rotation / abs Scale
 
@@ -154,14 +161,8 @@ void UTrackForceAdapterComponent::_detach_left_driveside()
         return;
     FActorSpawnParameters parameters;
     parameters.Template = left_driveside;
-    //Destroy
-    TArray<AActor *> children;
-    left_child_component->GetChildActor()->GetAllChildActors(children);
-    for (AActor *child : children)
-    {
-        child->Destroy();
-    }
-    left_child_component->GetChildActor()->Destroy();
+    //Detach
+    left_child_component->GetChildActor()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
     //set nullptr
     left_driveside = nullptr;
 
@@ -178,14 +179,8 @@ void UTrackForceAdapterComponent::_detach_right_driveside()
         return;
     FActorSpawnParameters parameters;
     parameters.Template = right_driveside;
-    //Destroy
-    TArray<AActor *> children;
-    right_child_component->GetChildActor()->GetAllChildActors(children);
-    for (AActor *child : children)
-    {
-        child->Destroy();
-    }
-    right_child_component->GetChildActor()->Destroy();
+    //Detach
+    left_child_component->GetChildActor()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
     //set nullptr
     right_driveside = nullptr;
 
@@ -399,13 +394,12 @@ void UTrackForceAdapterComponent::_ai_direct(FVector intend_normal)
 {
     // GetOwner()
     FVector forward = GetOwner()->GetActorForwardVector();
-    // UE_LOG(LogTemp, Error, TEXT("DONKEY : Intend vector %s"), *(intend_normal.ToString()))
+    // Dot Get
     float dot = FVector::DotProduct(intend_normal, forward);
     float cross = FVector::CrossProduct(intend_normal, forward).Z;
     left_throttle = FMath::Clamp<float>(dot - cross, -1.f, 1.f);
     right_throttle = FMath::Clamp<float>(dot + cross, -1.f, 1.f);
-    // UE_LOG(LogTemp, Error, TEXT("DONKEY : Left %f"), left_throttle);
-    //when intend on right of forward, cross is +, we should turn right, so left_throttle work, left + cross
+
     if (dot > 0.9)
     {
         _burst(true);
@@ -414,6 +408,7 @@ void UTrackForceAdapterComponent::_ai_direct(FVector intend_normal)
     {
         _burst(false);
     }
+   
     _apply_force();
     GetWorld()->GetTimerManager().SetTimer(move_timer, this,
                                            &UTrackForceAdapterComponent::_stop_apply_force,

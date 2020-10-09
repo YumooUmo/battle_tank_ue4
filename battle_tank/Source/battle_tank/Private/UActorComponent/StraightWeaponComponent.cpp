@@ -245,11 +245,12 @@ void UStraightWeaponComponent::_fire()
 				tank_hud->_hide_projectile_image();
 				tank_hud->_set_ammo_amount(_get_ammo());
 			}
-			GetWorld()->SpawnActor<ATankProjectile>(
-						  _get_current_projectile(),
-						  _get_launch_location(),
-						  _get_launch_normal().Rotation())
-				->_launch(launch_force);
+			// - Fire -
+				GetWorld()->SpawnActor<ATankProjectile>(
+							  _get_current_projectile(),
+							  _get_launch_location(),
+							  _get_launch_normal().Rotation())
+					->_launch(launch_force);
 			_lock(false);
 			//Last Minus and (if null)delete current projectile
 			_minus_ammo(1);

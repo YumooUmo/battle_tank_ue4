@@ -19,6 +19,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	APlayerController *controller = nullptr;
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "StaticMesh")
 	UStaticMeshComponent *projectile_mesh = nullptr;
 
@@ -40,9 +42,9 @@ protected:
 	URadialForceComponent *radial_force = nullptr;
 
 	// - Hit -
-	uint8 hit_count = 0;
+	bool bHit = false;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Hit")
-	uint8 max_hit_count = 5;
+	float min_speed_for_damage = 10000.f;
 
 	UFUNCTION()
 	void _hit(UPrimitiveComponent *HitComponent,
@@ -94,10 +96,11 @@ public:
 	UTexture2D *_get_projectile_image();
 
 	// - Set -
+	UFUNCTION(BlueprintCallable, Category = UI)
+	void _set_controller(AController *InController);
 	//UI image
 	UFUNCTION(BlueprintCallable, Category = UI)
 	void _set_projectile_image(UTexture2D *projectile_image_toset);
-
 	//set Mass
 	UFUNCTION(BlueprintCallable, Category = Setup)
 	void _set_mass(float mass_override);
@@ -110,5 +113,5 @@ public:
 	virtual void _launch(float launch_force);
 
 	// - Destroy -
-	virtual void _destroy();
+	virtual void _take_damage();
 };

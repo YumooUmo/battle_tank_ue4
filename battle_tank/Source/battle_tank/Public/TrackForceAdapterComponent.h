@@ -72,9 +72,9 @@ public:
 	bool _attach_right(AActor *child_actor);
 
 	//Get
-	UFUNCTION(BlueprintCallable, Category = "Clear")
+	UFUNCTION(BlueprintCallable, Category = "Attach")
 	void _detach_left_driveside();
-	UFUNCTION(BlueprintCallable, Category = "Clear")
+	UFUNCTION(BlueprintCallable, Category = "Attach")
 	void _detach_right_driveside();
 
 	UFUNCTION(BlueprintCallable, Category = "Attach")
@@ -86,15 +86,23 @@ public:
 	//apply force
 	void _apply_force();
 	void _stop_apply_force();
+
+
 	// - BindAction input -
 	//keyboard
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _move_forward(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _move_backward(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _move_left(bool if_move);
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _move_right(bool if_move);
 	//stick
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _input_stick(float l_dest, float r_dest);
 	//Set Burst
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void _burst(bool if_burst);
 	//Brake
 	UFUNCTION(BlueprintCallable, Category = "Brake")

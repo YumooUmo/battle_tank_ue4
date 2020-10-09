@@ -23,6 +23,9 @@ protected:
 	virtual void
 	BeginPlay() override;
 
+	//Called after the instance of Actor is Construct, and before BeginPlay.
+	virtual void OnConstruction(const FTransform &Transform) override;
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "SetupDriveSide")
 	USphereComponent *wheel = nullptr;
 
@@ -35,10 +38,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "SetupDriveSide")
 	UPhysicsConstraintComponent *axle_constraint = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "SetupDriveSide")
-	bool bConstraintJointComponentSimulatingPhysics = false;
 
-
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "SetupDriveSide")
+	bool bConstraintJointComponentSimulatingPhysics = true;
 
 public:
 	// Sets default values for this actor's properties
@@ -54,10 +56,12 @@ public:
 	bool bGrounded = false;
 
 	// - Set Up -
-	void _initialize();
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void _initialize(USphereComponent *axle_toset, UPhysicsConstraintComponent *axle_constraint_toset, USphereComponent *wheel_toset, UPhysicsConstraintComponent *wheel_constraint_toset);
 
 	//bind constraint
-	void _bind_constraint(UPrimitiveComponent *ComponentToBind);
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void _bind_constraint();
 
 	// //Get axle location
 	// FVector _get_axle_location();

@@ -4,6 +4,7 @@
 //FIRST include
 #include "Config.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "TimerManager.h"
@@ -54,7 +55,7 @@ void ATankProjectile::BeginPlay()
 void ATankProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
+};
 
 // - GET -
 //get mass
@@ -63,7 +64,7 @@ float ATankProjectile::_get_mass()
 	if (mass_toset > 0.f)
 		return mass_toset;
 	return 1.f;
-}
+};
 //get reload time
 float ATankProjectile::_get_reload_time()
 {
@@ -87,6 +88,11 @@ float ATankProjectile::_get_launch_speed(float launch_force)
 };
 
 // - SET -
+//set controller that take this projectile
+void ATankProjectile::_set_controller(AController *InController)
+{
+	controller = Cast<APlayerController>(InController);
+};
 //set image
 void ATankProjectile::_set_projectile_image(UTexture2D *projectile_image_toset)
 {
@@ -115,9 +121,10 @@ void ATankProjectile::_launch(float launch_force)
 	{
 		// UE_LOG(LogTemp,Error,TEXT("ForwardVector Component of %s is "),*(GetActorForwardVector().ToString()));
 		projectile->AddImpulse(GetActorForwardVector() * launch_force);
+		radial_force->FireImpulse();
 
 		GetWorld()->GetTimerManager().SetTimer(destroy_timer, this,
-											   &ATankProjectile::_destroy,
+											   &ATankProjectile::_take_damage,
 											   life_span, false);
 	}
 	else
@@ -133,8 +140,8 @@ void ATankProjectile::_hit(UPrimitiveComponent *HitComponent,
 						   FVector NormalImpulse,
 						   const FHitResult &Hit)
 {
-	//Hit First - big blast
-	if (hit_count == 0)
+	//Blast
+	if (!bHit)
 	{
 		if (impact_blast)
 			// UE_LOG(LogTemp, Error, TEXT("DONKEY : Impact Blast"));
@@ -144,41 +151,35 @@ void ATankProjectile::_hit(UPrimitiveComponent *HitComponent,
 			// UE_LOG(LogTemp, Error, TEXT("DONKEY : Radial Force"));
 			radial_force->FireImpulse();
 		}
+		bHit = true;
 	}
-	//Hit Pawn - pawn blast
-	if (pawn_blast)
+	//Hit Damage
+	APawn *HitPawn = Cast<APawn>(Hit.Actor);
+	if (HitPawn)
 	{
-		APawn *temp = Cast<APawn>(Hit.Actor);
-		if (temp && hit_count < max_hit_count)
+		FVector CurrentVelocity = GetVelocity();
+		if (CurrentVelocity.Size() > min_speed_for_damage)
 		{
+			UGameplayStatics::ApplyDamage(HitPawn,
+										  FVector::DotProduct(Hit.Normal, CurrentVelocity) * mass_toset,
+										  nullptr,
+										  nullptr,
+										  UDamageType::StaticClass());
+
 			if (launch_blast)
 				launch_blast->Deactivate();
+		}
+	//Blast
+		if (pawn_blast)
+		{
 			// UE_LOG(LogTemp, Error, TEXT("DONKEY : Pawn Blast"));
 			pawn_blast->Activate();
-			hit_count = max_hit_count;
 		}
 	}
-	if (hit_count > max_hit_count)
-	{
-		// UE_LOG(LogTemp, Error, TEXT("DONKEY : Deactive"));
-		launch_blast->Deactivate();
-		impact_blast->Deactivate();
-		pawn_blast->Deactivate();
-	}
-	//count ++
-	hit_count++;
-	if (hit_count > max_life_hit)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(destroy_timer);
-		_destroy();
-	}
-	GetWorld()->GetTimerManager().SetTimer(destroy_timer, this,
-										   &ATankProjectile::_destroy,
-										   life_span, false);
 };
 
 // - Destroy -
-void ATankProjectile::_destroy()
+void ATankProjectile::_take_damage()
 {
 	this->Destroy();
 };

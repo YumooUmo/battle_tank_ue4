@@ -71,8 +71,9 @@ public:
 
 	// - Turing -
 	//_turning_to to aiming_direction
+	UFUNCTION(BlueprintCallable, Category = "Aiming")
 	virtual void _turning_to(FVector aiming_normal);
 	//ai aiming
+	UFUNCTION(BlueprintCallable, Category = "Aiming")
 	virtual void _ai_turning(FVector aiming_location);
-
 };

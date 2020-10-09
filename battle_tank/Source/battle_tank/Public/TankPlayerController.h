@@ -8,6 +8,7 @@
 #include "TankPlayerController.generated.h"
 
 class ATank;
+class UAimingComponent;
 
 /**
  * 
@@ -27,6 +28,7 @@ protected:
 
 	//Begin play initialize
 	ATank *tank_controlled = nullptr;
+	UAimingComponent *aiming_component;
 
 	// -Aiming -
 	FVector aiming_normal{0.f, 0.f, 0.f};
@@ -39,6 +41,9 @@ protected:
 	float crosshair_y = 0.35;
 
 public:
+	virtual void SetPawn(APawn *InPawn) override;
+	virtual void PossessBack();
+
 	// - aiming -
 	void _get_aiming_normal();
 

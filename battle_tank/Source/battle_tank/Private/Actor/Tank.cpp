@@ -2,11 +2,7 @@
 
 #include "Tank.h"
 //FIRST include
-#include "AimingComponent.h"
-#include "BodyMesh.h"
 #include "Components/ChildActorComponent.h"
-#include "StraightWeaponComponent.h"
-#include "TrackForceAdapterComponent.h"
 
 // Sets default values
 ATank::ATank()
@@ -15,18 +11,12 @@ ATank::ATank()
 	PrimaryActorTick.bCanEverTick = false;
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ Construct "), *name);
-
-	//Set Root
-	tank_body = CreateDefaultSubobject<UBodyMesh>(FName("TankBody"));
-	SetRootComponent(tank_body);
-	tank_body->SetCollisionProfileName(FName("VisibleBody"));
 }
 
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
-	_setup();
 	//test
 	FString name = GetName();
 	UE_LOG(LogTemp, Warning, TEXT("DONKEY : %s C++ BeginPlay "), *name);
@@ -47,136 +37,40 @@ void ATank::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 }
 
 //----------------------------------		PUBLIC		----------------------------------------
-//	Set Up
-void ATank::_setup()
+// - Take Damage -
+float ATank::TakeDamage(
+	float Damage,
+	struct FDamageEvent const &DamageEvent,
+	AController *EventInstigator,
+	AActor *DamageCauser)
 {
-	//runtime new component : Component* component = NewObject<Comoponent>(FName);
-	//-----------------------component->RegisterComponent();
-	move_component = FindComponentByClass<UTrackForceAdapterComponent>();
-	weapon_component = FindComponentByClass<UStraightWeaponComponent>();
+	int32 DamagePoints = FPlatformMath::RoundToInt(Damage);
+	if (DamagePoints >= CurrentHealth)
+	{
+		CurrentHealth = 0;
+		OnDeath.ExecuteIfBound();
+	}
+	else
+	{
+		CurrentHealth -= DamagePoints;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("DONKEY : Take Damage %i "), DamagePoints);
+	return DamagePoints;
 };
 
-// - Get -
-// is aiming on
-bool ATank::_is_aiming_on()
+TArray<int32> Arr{1, 1, 2, 2, 2, 3, 3, 4, 4};
+//去重条件是：数组Arr是有序的
+TArray<int32> RemoveDuplicates(TArray<int32> Arr)
 {
-	if (weapon_component)
-		return weapon_component->_is_aiming_on();
-	return false;
-}
-
-// - Turning -
-void ATank::_turning_to(FVector aiming_normal)
-{
-	if (weapon_component)
+	int32 index = 0;
+	for (int32 i : Arr)
 	{
-		weapon_component->_turning_to(aiming_normal);
+		if (i != Arr[index])
+		{
+			index++;
+			Arr[index] = i;
+		}
 	}
-}
-// - AI - aiming at location
-void ATank::_ai_turning(FVector location)
-{
-	if (weapon_component)
-		weapon_component->_ai_turning(location);
-}
-
-// ## Bind Action ##
-/*	with UI */
-// - Lock -
-void ATank::_lock(bool if_lock)
-{
-	if (!weapon_component)
-	{
-		return;
-	}
-	weapon_component->_lock(if_lock);
-}
-// - Weapon -	#### TODO : add new weapon
-//set projectile by number - (Initialize Weapon)
-void ATank::_set_projectile(uint8 number)
-{
-	if (!weapon_component)
-	{
-		return;
-	}
-	weapon_component->_set_projectile(number);
-};
-//exchange
-void ATank::_exchange_projectile()
-{
-	if (!weapon_component)
-	{
-		return;
-	}
-	weapon_component->_exchange_projectile();
-};
-//fire()
-void ATank::_fire()
-{
-	if (!weapon_component)
-	{
-		return;
-	}
-	weapon_component->_fire();
-};
-//reload
-void ATank::_reload()
-{
-	if (!weapon_component)
-	{
-		return;
-	}
-	weapon_component->_reload();
-};
-//detach
-void ATank::_detach_weapon()
-{
-	weapon_component->_detach_weapon();
-};
-/*	without UI */
-// - Move -
-void ATank::_move_forward(bool if_move)
-{
-	if (!move_component)
-	{
-		return;
-	}
-	move_component->_move_forward(if_move);
-};
-void ATank::_move_backward(bool if_move)
-{
-	if (!move_component)
-	{
-		return;
-	}
-	move_component->_move_backward(if_move);
-};
-void ATank::_move_left(bool if_move)
-{
-	if (!move_component)
-	{
-		return;
-	}
-	move_component->_move_left(if_move);
-};
-void ATank::_move_right(bool if_move)
-{
-	if (!move_component)
-	{
-		return;
-	}
-	move_component->_move_right(if_move);
-};
-void ATank::_burst(bool if_burst)
-{
-	if (!move_component)
-	{
-		return;
-	}
-	move_component->_burst(if_burst);
-};
-//move by stick
-void ATank::_move_stick(float LT_X, float LT_Y)
-{
-	move_component->_input_stick(LT_X, LT_Y);
+	Arr.SetNum(index + 1);
+	return Arr;
 }
